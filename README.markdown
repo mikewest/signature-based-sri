@@ -43,7 +43,7 @@ to support validating a resource's signature, as opposed to its content. That is
 specify one or more [Ed25519 public keys][Ed25519] in an integrity attribute:
  
 ```html
-<script src="https://my.cdn.com/whatever.js" integrity="ed25519-[base64-encoded public key]">
+<script src="https://my.cdn.com/whatever.js" integrity="ed25519-[base64-encoded public key]" crossorigin="anonymous">
 ```
  
 The developer can sign `whatever.js` when they deploy it, and teach their servers to transmit a
