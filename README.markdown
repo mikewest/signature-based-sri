@@ -65,8 +65,9 @@ console.log("Hello, world!");
 
 This mechanism has some interesting properties:
  
-*   It addresses many of the "evil CDN" concerns that drove interest in hash-based SRI. If a
-    developer's CDN is compromised, an attacker may be able to maliciously alter source files, but
+*   It addresses many of the "evil third party" concerns that drove interest in hash-based SRI. If 
+    some embedded third party content is compromised -- for example, a widget, or a JavaScript 
+    library included from offsite -- an attacker may be able to maliciously alter source files, but
     hopefully won't be able to generate a valid signature for the injected code. Developers will be
     able to ensure that _their_ code is executing, even when it's delivered from a server outside
     their control.
