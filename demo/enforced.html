@@ -1,0 +1,23 @@
+<meta http-equiv="Content-Security-Policy" content="script-src 'ed25519-g/xuu7DtvWFl+51Re1OQJZ1kqB6W02HN54f6IsbWA/M='">
+
+<h1>Enforced</h1>
+
+
+<p>
+  This page will load a script that is signed, and a script that is not
+  signed. Because the page is enforcing a policy which restricts execution
+  to scripts signed with a given key, the former will execute, the latter
+  won't. SO EXCITING, RIGHT?!?
+</p>
+
+<ul>
+  <li id="with-sig" style="color: red;">The signed script did not execute.</li>
+  <li id="without-sig" style="color: red;">The unsigned script did not execute.</li>
+</ul>
+
+<a href="/unenforced">Try it without enforcement!</a>
+
+<script src="/script-with-sig"
+        integrity="ed25519-g/xuu7DtvWFl+51Re1OQJZ1kqB6W02HN54f6IsbWA/M="></script>
+
+<script src="/script-without-sig"></script>
