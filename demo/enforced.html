@@ -10,6 +10,16 @@
   won't. SO EXCITING, RIGHT?!?
 </p>
 
+<pre>
+&lt;meta http-equiv="Content-Security-Policy"
+      <strong>content="script-src 'ed25519-g/xuu7DtvWFl+51Re1OQJZ1kqB6W02HN54f6IsbWA/M='"</strong>>
+
+&lt;script src="/script-with-sig"
+        <strong>integrity="ed25519-g/xuu7DtvWFl+51Re1OQJZ1kqB6W02HN54f6IsbWA/M="</strong>>&lt;/script>
+
+&lt;script src="/script-without-sig">&lt;/script>
+</pre>
+
 <ul>
   <li id="with-sig" style="color: red;">The signed script did not execute.</li>
   <li id="without-sig" style="color: red;">The unsigned script did not execute.</li>
