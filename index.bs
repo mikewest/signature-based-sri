@@ -1,0 +1,273 @@
+<pre class='metadata'>
+Title: Signature-based Integrity
+Shortname: signature-based-sri
+Level: none
+Status: w3c/UD
+Group: webappsec
+Repository: mikewest/signature-based-sri
+URL: https://mikewest.github.io/signature-based-sri/
+Editor: Mike West, Google LLC., mkwst@google.com
+Abstract: 
+    A monkey-patch spec that enhances SRI with signature-based
+    integrity checks. These are conceptually similar to the
+    content-based checks currently defined, but have different
+    properties that seem interesting to explore.
+Complain About: accidental-2119 yes, missing-example-ids yes
+Markup Shorthands: markdown yes, css no
+Toggle Diffs: true
+</pre>
+
+Introduction {#intro}
+=====================
+
+Subresource Integrity [[SRI]] defines a mechanism by which developers can
+ensure that script or stylesheet loaded into their pages' contexts are
+_exactly_ those scripts or stylesheets the developer expected. By specifying
+a SHA-256 hash of a resource's content, any malicious or accidental deviation
+will be blocked before being executed. This is an excellent defense, but its
+deployment turns out to be brittle. If the resource living at a specific URL
+is dynamic, then content-based integrity checks require pages and the
+resources they depend upon to update in lockstep.
+
+Particularly as the industry becomes more interested in supply-chain integrity,
+it seems reasonable to explore alternatives to static hashes that could allow
+wider deployment of these checks, and therefore better understanding of the
+application experiences that developers are _actually_ composing. 
+
+This document outlines the changes that would be necessary to HTML, Fetch, and
+SRI in order to support the simplest version of a signature-based check:
+
+<div class="example" id="basic-example">
+    Pages will embed an Ed25519 public key assertion into `integrity`
+    attributes:
+
+    <xmp highlight="html">
+      <script src="https://my.cdn/script.js"
+              crossorigin="anonymous"
+              integrity="ed25519-[base64-encoded-public-key]"></script>
+    </xmp>
+
+    Servers will deliver a signature using the corresponding private key along
+    with the resource as an HTTP response header:
+
+    <xmp highlight="http">
+        HTTP/1.1 200 OK
+        Accept-Ranges: none
+        Vary: Accept-Encoding
+        Content-Type: text/javascript; charset=UTF-8
+        Access-Control-Allow-Origin: *
+        Integrity: ed25519-[base64-encoded result of Ed25519(`console.log("Hello, world!");`)]
+
+        console.log("Hello, world!");
+    </xmp>
+
+    The user agent will validate the signature using the expected public key
+    before executing the response.
+
+    That's it!
+</div>
+
+The goal here is to flesh out the proposal for discussion, recognizing that it
+might be too simple to ship. Then again, it might be _just_ simple enough...
+
+Signatures are not Hashes {#signatures-vs-hashes}
+-------------------------------------------------
+
+Subresource Integrity's existing hash-based checks ensure that specific, known
+_content_ executes. It doesn't care who made the file or from which server it
+was retrieved: as long as the content matches the expectation, we're good to
+go. This gives developers the ability to ensure that a specific set of audited
+scripts are the only ones that can execute in their pages, providing a strong
+defense against some kinds of threats.
+
+The signature-based checks described briefly above are different. Rather than
+validating that a specific script or stylesheet is known-good, they instead
+act as a proof of _provenance_ which ensures that scripts will only execute if
+they're signed with a known private key. Assuming good key-management practices
+(easy, right?), this gives a guarantee which is different in kind, but
+similarly removes the necessity to trust intermediaries.
+
+With these properties in mind, signature-based integrity checks aim to protect
+against attackers who might be able to manipulate the content of resources that
+a site depends upon, but who cannot gain access to the signing key.
+
+Monkey Patches {#monkey-patches}
+================================
+
+Extending SRI to support signatures will require changes to three
+specifications, along with some additional infrastructure.
+
+Patches to SRI {#monkey-patch-sri}
+----------------------------------
+
+At a high level, we'll make the following changes to SRI:
+
+1.  We'll define the accepted algorithm values. Currently, these are left up to
+    user agents in order to allow for future flexibility: given that the years
+    since SRI's introduction have left the set of accepted algorithms and their
+    practical ordering unchanged, we should define that explicitly.
+
+2.  With known algorithms, we can adjust the prioritization model to return a
+    set of the strongest content-based and signature-based algorithms specified
+    in a given element. This would enable developers to specify both a hash and
+    signature expectation for a resource, ensuring both that known resources
+    load, _and_ that they're accepted by a trusted party.
+    
+    ISSUE: This might not be necessary. It allows us to explain things like
+    packaging constraints in ways that seem useful, but does introduce some
+    additional complexity in developers' mental model. So, consider it a
+    decision point.
+
+3.  Finally, we'll adjust the matching algorithm to correctly handle signatures
+    by passing the public key in to the comparison operation.
+
+The following sections adjust algorithms accordingly.
+
+<h3 id="parsing" algorithm>Parse |metadata|.</h3>
+
+<!--
+ORIGINAL
+
+  This algorithm accepts a string, and returns a set of hash expressions whose
+  hash functions are understood by the user agent.
+
+  1.  Let |result| be the empty set.
+  2.  For each |item| returned by <a lt="strictly split">splitting</a>
+      |metadata| on spaces:
+      1.  Let |hash-with-opt-token-list| be the result of
+          <a lt="strictly split">splitting</a> |item| on U+003F (?).
+      2.  Let |hash-expression| be |hash-with-opt-token-list|[0].
+      3.  Let |base64-value| be the empty string.
+      4.  Let |hash-expr-token-list| be the result of
+          <a lt="strictly split">splitting</a> |hash-expression| on U+002D (-).
+      5.  Let |algorithm| be |hash-expr-token-list|[0].
+      6.  If |hash-expr-token-list|[1] <a for=list>exists</a>, set
+          |base64-value| to |hash-expr-token-list|[1].
+      7.  If |algorithm| is not a hash function recognized by the user agent,
+           [=continue=].
+      8. Let |metadata| be the ordered map  «["alg" → |algorithm|,
+         "val" → |base64-value|]».
+
+         Note: Since no `options` are defined (see the
+         [[#integrity-metadata-description]]), a corresponding entry is not set
+         in |metadata|. If `options` are defined in a future version,
+         |hash-with-opt-token-list|[1] can be utilized as `options`.
+
+      9. <a for=list>Append</a> |metadata| to |result|.
+  3.  Return |result|.
+
+NEW
+
+  This algorithm accepts a string, and returns a map containing one set of hash
+  expressions whose hash functions are understood by the user agent, and one set
+  of signature expressions which are likewise understood:
+
+  1.  Let |result| be the [=ordered map=] «[ "`hashes`" → « », "`signatures`" → « » ]»..
+  2.  For each |item| returned by <a lt="strictly split">splitting</a>
+      |metadata| on spaces:
+      1.  Let |expression-and-options| be the result of
+          <a lt="strictly split">splitting</a> |item| on U+003F (?).
+      2.  Let |algorithm-and-value-token| be |expression-and-options|[0].
+      3.  Let |base64-value| be the empty string.
+      4.  Let |algorithm-and-value| be the result of
+          <a lt="strictly split">splitting</a> |algorithm-and-value-token| on
+          U+002D (-).
+      5.  Let |algorithm| be |algorithm-and-value|[0].
+      6.  If |algorithm-and-value|[1] <a for=list>exists</a>, set
+          |base64-value| to |algorithm-and-value|[1].
+      7.  Let |metadata| be the ordered map
+          «["`alg`" → |algorithm|, "`val`" → |base64-value|]».
+      7.  If |algorithm| is a [=valid SRI hashing algorithm token=], then
+          [=set/append=] |metadata| to |result|["`hashes`"].
+      8.  Otherwise, if |algorithm| is a [=valid SRI signature algorithm token=],
+          then [=set/append=] |metadata| to |result|["`signatures`"].
+  3.  Return |result|.
+
+-->
+
+First, we'll newly define two sets of algorithm tokens:
+
+*   <ins>A [=string=] |alg| is a <dfn>valid SRI hashing algorithm token</dfn>
+    if the [=ASCII lowercase=] of |alg| is [=set/contained=] within the set
+    « "sha256", "sha384", "sha512" ».</ins>
+
+*   <ins>A [=string=] |alg| is a <dfn>valid SRI signature algorithm token</dfn>
+    if the [=ASCII lowercase=] of |alg| is [=set/contained=] within the set
+    « "ed25519" ».</ins>
+
+Then, we'll adjust SRI's <dfn abstract-op>Parse |metadata|</dfn>. algorithm as
+follows:
+
+This algorithm accepts a string, and returns a map containing one set of hash
+expressions whose hash functions are understood by the user agent, and one set
+of signature expressions which are likewise understood:
+
+1.  Let |result| be <del>the empty set</del><ins>the [=ordered map=]
+      «[ "hashes" → « », "signatures" → « » ]».</ins>
+2.  For each |item| returned by <a lt="strictly split">splitting</a>
+    |metadata| on spaces:
+    1.  Let <del>|hash-with-opt-token-list|</del><ins>|expression-and-options|</ins> be the result of
+        <a lt="strictly split">splitting</a> |item| on U+003F (?).
+    2.  Let <del>|hash-expression|</del><ins>|algorithm-expression|</ins> be <del>|hash-with-opt-token-list|</del><ins>|expression-and-options|</ins>[0].
+    3.  Let |base64-value| be the empty string.
+    4.  Let
+        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>
+        be the result of
+        <a lt="strictly split">splitting</a>
+        <del>|hash-expression|</del><ins>|algorithm-expression|</ins>
+        on U+002D (-).
+    5.  Let |algorithm| be 
+        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[0].
+    6.  If
+        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[1]
+        <a for=list>exists</a>, set |base64-value| to
+        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[1].
+    7.  <del>If |algorithm| is not a hash function recognized by the user agent, [=continue=].</del>
+    8.  <del>Let |metadata| be the ordered map  «["alg" → |algorithm|, "val" → |base64-value|]».
+    9.  <del><a for=list>Append</a> |metadata| to |result|.</del>
+    10. <ins>Let |data| be the ordered map «["`alg`" → |algorithm|, "`val`" → |base64-value|]».</ins>
+    11. <ins>If |algorithm| is a [=valid SRI hashing algorithm token=], then [=set/append=] |data| to |result|["`hashes`"].</ins>
+    12.  <ins>Otherwise, if |data| is a [=valid SRI signature algorithm token=], then [=set/append=] |metadata| to |result|["`signatures`"].</ins>
+3.  Return |result|.
+
+
+<h3 id="matching" algorithm>Do |bytes| match |metadataList|?</h3>
+
+Since we adjusted the result of [[#parsing]] above, we need to adjust the
+matching algorithm to match.
+
+<!--
+  ORIGINAL
+
+  1.  Let |parsedMetadata| be the result of
+      <a href="#parse-metadata">parsing |metadataList|</a>.
+  2.  If |parsedMetadata| [=set/is empty=] set, return `true`.
+  3.  Let |metadata| be the result of <a href="#get-the-strongest-metadata">
+      getting the strongest metadata from |parsedMetadata|</a>.
+  4.  For each |item| in |metadata|:
+      1.  Let |algorithm| be the |item|["alg"].
+      2.  Let |expectedValue| be the |item|["val"].
+      3.  Let |actualValue| be the result of <a
+          href="#apply-algorithm-to-response">applying |algorithm| to |bytes|
+          </a>.
+      4.  If |actualValue| is a case-sensitive match for
+          |expectedValue|, return `true`.
+  5.  Return `false`.
+
+  NEW
+
+  1.  Let |parsedMetadata| be the result of
+      <a href="#parse-metadata">parsing |metadataList|</a>.
+  2.  If |parsedMetadata| [=set/is empty=] set, return `true`.
+  3.  Let |metadata| be the result of <a href="#get-the-strongest-metadata">
+      getting the strongest metadata from |parsedMetadata|</a>.
+  4.  For each |item| in |metadata|:
+      1.  Let |algorithm| be the |item|["alg"].
+      2.  Let |expectedValue| be the |item|["val"].
+      3.  Let |actualValue| be the result of <a
+          href="#apply-algorithm-to-response">applying |algorithm| to |bytes|
+          </a>.
+      4.  If |actualValue| is a case-sensitive match for
+          |expectedValue|, return `true`.
+  5.  Return `false`.
+-->
