@@ -16,6 +16,15 @@ Complain About: accidental-2119 yes, missing-example-ids yes
 Markup Shorthands: markdown yes, css no
 Toggle Diffs: true
 </pre>
+<pre class="anchors">
+# TODO: Make this RFC9651 once specref updates.
+urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC8941
+    text: structured header; url: #name-introduction
+    for: structured header
+        text: token; url: #name-tokens
+        text: list; url: #name-list
+
+</pre>
 
 Introduction {#intro}
 =====================
@@ -123,67 +132,8 @@ At a high level, we'll make the following changes to SRI:
 
 The following sections adjust algorithms accordingly.
 
+
 <h3 id="parsing" algorithm>Parse |metadata|.</h3>
-
-<!--
-ORIGINAL
-
-  This algorithm accepts a string, and returns a set of hash expressions whose
-  hash functions are understood by the user agent.
-
-  1.  Let |result| be the empty set.
-  2.  For each |item| returned by <a lt="strictly split">splitting</a>
-      |metadata| on spaces:
-      1.  Let |hash-with-opt-token-list| be the result of
-          <a lt="strictly split">splitting</a> |item| on U+003F (?).
-      2.  Let |hash-expression| be |hash-with-opt-token-list|[0].
-      3.  Let |base64-value| be the empty string.
-      4.  Let |hash-expr-token-list| be the result of
-          <a lt="strictly split">splitting</a> |hash-expression| on U+002D (-).
-      5.  Let |algorithm| be |hash-expr-token-list|[0].
-      6.  If |hash-expr-token-list|[1] <a for=list>exists</a>, set
-          |base64-value| to |hash-expr-token-list|[1].
-      7.  If |algorithm| is not a hash function recognized by the user agent,
-           [=continue=].
-      8. Let |metadata| be the ordered map  «["alg" → |algorithm|,
-         "val" → |base64-value|]».
-
-         Note: Since no `options` are defined (see the
-         [[#integrity-metadata-description]]), a corresponding entry is not set
-         in |metadata|. If `options` are defined in a future version,
-         |hash-with-opt-token-list|[1] can be utilized as `options`.
-
-      9. <a for=list>Append</a> |metadata| to |result|.
-  3.  Return |result|.
-
-NEW
-
-  This algorithm accepts a string, and returns a map containing one set of hash
-  expressions whose hash functions are understood by the user agent, and one set
-  of signature expressions which are likewise understood:
-
-  1.  Let |result| be the [=ordered map=] «[ "`hashes`" → « », "`signatures`" → « » ]»..
-  2.  For each |item| returned by <a lt="strictly split">splitting</a>
-      |metadata| on spaces:
-      1.  Let |expression-and-options| be the result of
-          <a lt="strictly split">splitting</a> |item| on U+003F (?).
-      2.  Let |algorithm-and-value-token| be |expression-and-options|[0].
-      3.  Let |base64-value| be the empty string.
-      4.  Let |algorithm-and-value| be the result of
-          <a lt="strictly split">splitting</a> |algorithm-and-value-token| on
-          U+002D (-).
-      5.  Let |algorithm| be |algorithm-and-value|[0].
-      6.  If |algorithm-and-value|[1] <a for=list>exists</a>, set
-          |base64-value| to |algorithm-and-value|[1].
-      7.  Let |metadata| be the ordered map
-          «["`alg`" → |algorithm|, "`val`" → |base64-value|]».
-      7.  If |algorithm| is a [=valid SRI hashing algorithm token=], then
-          [=set/append=] |metadata| to |result|["`hashes`"].
-      8.  Otherwise, if |algorithm| is a [=valid SRI signature algorithm token=],
-          then [=set/append=] |metadata| to |result|["`signatures`"].
-  3.  Return |result|.
-
--->
 
 First, we'll newly define two sets of algorithm tokens:
 
@@ -231,43 +181,107 @@ of signature expressions which are likewise understood:
 3.  Return |result|.
 
 
-<h3 id="matching" algorithm>Do |bytes| match |metadataList|?</h3>
+<h3 id="matching" algorithm>Do |bytes| and |header list| match |metadataList|?</h3>
 
 Since we adjusted the result of [[#parsing]] above, we need to adjust the
-matching algorithm to match.
+matching algorithm to match. The core change will be processing both hashing
+and signature algorithms: if only one kind is present, the story will be
+similar to today, and multiple strong algorithms can be present, allowing
+multiple distinct resources. If both hashing and signature algorithms are
+present, both will be required to match. This is conceptually similar to
+the [application of multiple Content Security Policies](https://w3c.github.io/webappsec-csp/#multiple-policies).
 
-<!--
-  ORIGINAL
+In order to validate signatures, we'll need to change Fetch to pass in the
+relevant HTTP response header. For the moment, let's simply pass in the
+entire [=response/header list=]:
 
-  1.  Let |parsedMetadata| be the result of
-      <a href="#parse-metadata">parsing |metadataList|</a>.
-  2.  If |parsedMetadata| [=set/is empty=] set, return `true`.
-  3.  Let |metadata| be the result of <a href="#get-the-strongest-metadata">
-      getting the strongest metadata from |parsedMetadata|</a>.
-  4.  For each |item| in |metadata|:
-      1.  Let |algorithm| be the |item|["alg"].
-      2.  Let |expectedValue| be the |item|["val"].
-      3.  Let |actualValue| be the result of <a
-          href="#apply-algorithm-to-response">applying |algorithm| to |bytes|
-          </a>.
-      4.  If |actualValue| is a case-sensitive match for
-          |expectedValue|, return `true`.
-  5.  Return `false`.
+1.  Let |parsedMetadata| be the result of executing [[SRI#parse-metadata]] on |metadataList|.
+2.  If both |parsedMetadata|<ins>["`hashes`"] and |parsedMetadata["`signatures`"]</ins> are [=set/empty=] set, return `true`.
+3.  Let <del>|metadata|</del><ins>|hash-metadata|</ins> be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|<ins>["`hashes`"]</ins>.</a>.
+4.  <ins>Let |signature-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`signatures`"].</ins>
+5.  <ins>Let |hash-match| be `true` if |hash-metadata| is [=list/empty=], and `false` otherwise.</ins>
+6.  <ins>Let |signature-match| be `true` if |signature-metadata| is [=list/empty=], and `false` otherwise.</ins>
+7.  For each |item| in <del>|metadata|</del><ins>|hash-metadata|</ins>:
+    1.  Let |algorithm| be the |item|["alg"].
+    2.  Let |expectedValue| be the |item|["val"].
+    3.  Let |actualValue| be the result of [[SRI#apply-algorithm-to-response]] on |algorithm| and |bytes|.
+    4.  If |actualValue| is a case-sensitive match for
+        |expectedValue|, <del>return `true`</del><ins>set |hash-match| to `true` and [=iteration/break=].</ins>
+8.  <ins>For each |item| in |signature-metadata|:</ins>
+    1.  <ins>Let |algorithm| be the |item|["alg"].</ins>
+    2.  <ins>Let |public key| be the |item|["val"].</ins>
+    3.  <ins>Let |result| be the result of [$validating a signature$]
+        using |algorithm| over |bytes| and |header list| with |public key|.</ins>
+    4.  <ins>If |result| is `true`, set |signature-match| to `true` and [=iteration/break=].</ins>
+9.  <del>Return `false`.</del><ins>Return `true` if both |hash-match| and |signature-match| are `true`. Otherwise return `false`.</ins>
 
-  NEW
+<h3 id="validation" algorithm>Validate a signature using |algorithm| over |bytes| and |header list| with |public key|</h3>
 
-  1.  Let |parsedMetadata| be the result of
-      <a href="#parse-metadata">parsing |metadataList|</a>.
-  2.  If |parsedMetadata| [=set/is empty=] set, return `true`.
-  3.  Let |metadata| be the result of <a href="#get-the-strongest-metadata">
-      getting the strongest metadata from |parsedMetadata|</a>.
-  4.  For each |item| in |metadata|:
-      1.  Let |algorithm| be the |item|["alg"].
-      2.  Let |expectedValue| be the |item|["val"].
-      3.  Let |actualValue| be the result of <a
-          href="#apply-algorithm-to-response">applying |algorithm| to |bytes|
-          </a>.
-      4.  If |actualValue| is a case-sensitive match for
-          |expectedValue|, return `true`.
-  5.  Return `false`.
--->
+The matching algorithm above calls into a new signature validation function.
+Let's write that down. At core, it will execute the Ed25519 validation steps
+from [[RFC8032]], using signatures extracted from an `Integrity` header that's
+defined in [[#integrity-header]].
+
+<ins>
+To <dfn abstract-op lt="validating a signature">validate a signature</dfn> using a [=string=] |algorithm| over
+a [=byte sequence=] |bytes|, a [=/header list=] |header list|, and [=string=] |public key|, execute the following
+steps. They return `valid` if the signature is valid, or `invalid` otherwise.
+
+1.  If |algorithm| is an [=ASCII case-insensitive match=] for "ed25519", then:
+    1.  Let |signatures| be the result of [=header list/getting, decoding, and splitting=] ``` `Integrity` ``` from |header list|.
+    2.  If |signatures| is `null`, return `invalid`.
+    3.  For each |signature| in |signatures|:
+        1.  Execute the "Verify" steps for Ed25519 as defined in
+            [Section 5.1.7](https://datatracker.ietf.org/doc/html/rfc8032#section-5.1.7)
+            of [[!RFC8032]], using |bytes| as the message M , |public key| as the
+            public key A, and |signature| as the signature.
+        2.  If the signature is valid, return `valid`.
+    4.  Return `invalid`.
+2.  Assert: We won't reach this step, because `ed25519` is the only valid
+    signature algorithm token.
+3.  Return `invalid`.
+
+</ins>
+
+
+### Integrity Header ### {#integrity-header}
+
+The <dfn http-header>`Integrity`</dfn> HTTP response header specifies a
+[=integrity metadata=] for a given [=/response=]. It is a [=Structured Header=]
+whose value MUST be a [=structured header/list=] of [=structured header/token=] [[!RFC8941]].
+
+ISSUE: Switch to RFC9651 once specref updates, both here and in the anchors block above.
+
+Valid list values match the <a grammar>`hash-expression`</a> grammar as defined in [[!SRI]].
+
+<div class="example" id="integrity-header-example">
+A resource might be delivered with an integrity header specifying a signature that can
+be used to validate the resource's provenance:
+
+<xmp highlight="http">
+HTTP/1.1 200 OK
+Accept-Ranges: none
+Vary: Accept-Encoding
+Content-Type: text/javascript; charset=UTF-8
+Access-Control-Allow-Origin: *
+Integrity: ed25519-[base64-encoded Ed25519 signature]
+</xmp>
+</div>
+
+ISSUE: Do we need a mechanism (another header?) allowing the server to specify the public
+key used to sign the resource? That might allow developers to discover keys for resources
+more easily, and could be used to reject the resource without validation if we can
+determine a priori that the keys don't match...
+
+ISSUE: Would it be useful to extend this header's behavior to include client-side
+content validation for hash algorithms? I think it's arguably outside SRI's threat model,
+but you could imagine an attacker could change content but not headers, which would make
+enforcement of an `Integrity: sha256-[...]` header on the client meaningful.
+
+
+TODO:
+
+Patches to Fetch {#monkey-patch-fetch}
+--------------------------------------
+
+Add the response headers to step 22.3.1 of Main Fetch.
