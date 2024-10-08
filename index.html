@@ -7,7 +7,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-UD" rel="stylesheet">
   <meta content="Bikeshed version 82ce88815, updated Thu Sep 7 16:33:55 2023 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="ff74c6ad20eb8b8f654447a7663c1ec1a110637e" name="document-revision">
+  <meta content="5ab9bc48ca090d4077c9dd4cd7717f3fa099dae6" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -1050,12 +1050,31 @@ be used to validate the resource’s provenance:
 key used to sign the resource? That might allow developers to discover keys for resources
 more easily, and could be used to reject the resource without validation if we can
 determine a priori that the keys don’t match...</p>
-   <p class="issue" id="issue-d26265cc"><a class="self-link" href="#issue-d26265cc"></a> Would it be useful to extend this header’s behavior to include client-side
-content validation for hash algorithms? I think it’s arguably outside SRI’s threat model,
-but you could imagine an attacker that could change content but not headers, which would
-make enforcement of an <code>Integrity: sha256-[...]</code> header on the client meaningful for a
-variety of resources (including top-level documents, which would help provide a
-web-accessible explanation for some packaging behavior).</p>
+   <div class="issue" id="issue-e791903e">
+    <a class="self-link" href="#issue-e791903e"></a> Would it be useful to extend this header’s behavior to include client-side
+    content validation for hash algorithms? I think it’s arguably outside SRI’s threat model,
+    but you could imagine an attacker that could change content but not headers, which would
+    make enforcement of an <code>Integrity</code> header on the client meaningful for a variety of
+    resources (including top-level documents, which would help provide a web-accessible
+    explanation for some packaging behavior). 
+    <p>That is, a resource delivered with:</p>
+<pre class="highlight">Integrity: sha256-[base64’d hash goes here]
+</pre>
+    <p>Could throw a network error in Fetch if the hash didn’t match the delivered content.
+    Likewise, a resource delivered with:</p>
+<pre class="highlight">Integrity: ed25519-[base64’d hash goes here];public-key=[base64’d hash goes here]
+</pre>
+    <p>Could throw a network error if the delivered signature and public key didn’t validate
+    against the resource’s content.</p>
+    <p>Or, sites could go crazy and deliver a header containing both:</p>
+<pre class="highlight">Integrity: sha256-[base64’d hash goes here],
+           ed25519-[base64’d hash goes here];public-key=[base64’d hash goes here]
+</pre>
+    <p>Which would enforce both constraints.</p>
+    <p>Not sure it’s a priority, but it might be an interesting primitive to extract from
+    this proposal (especially if we end up adding a streaming hash primitive like <a data-link-type="biblio" href="#biblio-rfc7693" title="The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)">[RFC7693]</a> as suggested in <a href="https://github.com/w3c/webappsec-subresource-integrity/issues/104">issue #104</a>,
+    or <a href="https://blake3.io/">its successor</a>, suggested <a href="https://github.com/w3c/webappsec/blob/main/meetings/2024/2024-09-23-TPAC-Minutes.md#:~:text=Ben%3A%20Working%20on%20really%20big%20files%20to%20IPFS%20for%20a%20while.%20Browser%20tabs%20can%20easily%20crash%20just%20hashing%20a%20large%20file%20(BLAKE3%2C%20merkle%20trees%2C%20etc).%20Would%20be%20ideal%20for%20SRI%20to%20support%20incrementally%2Dverifiable%20hashing%20algorithms%20(https%3A//github.com/BLAKE3%2Dteam/BLAKE3%2DIETF).">at TPAC in 2024</a> ).</p>
+   </div>
    <h3 class="heading settled" data-level="2.5" id="monkey-patch-fetch"><span class="secno">2.5. </span><span class="content">Patches to Fetch</span><a class="self-link" href="#monkey-patch-fetch"></a></h3>
    <p>The only change we need to make to Fetch is to pass additional information into the
 matching algorithm as redefined above.</p>
@@ -1225,6 +1244,8 @@ body or headers.</p>
   <dl>
    <dt id="biblio-pciv4-sri-gaps">[PCIv4-SRI-Gaps]
    <dd>Yoav Weiss; Ilya Grigorik. <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing"><cite>PCIv4: SRI gaps and opportunities</cite></a>. URL: <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing">https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing</a>
+   <dt id="biblio-rfc7693">[RFC7693]
+   <dd>M-J. Saarinen, Ed.; J-P. Aumasson. <a href="https://www.rfc-editor.org/rfc/rfc7693"><cite>The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)</cite></a>. November 2015. Informational. URL: <a href="https://www.rfc-editor.org/rfc/rfc7693">https://www.rfc-editor.org/rfc/rfc7693</a>
    <dt id="biblio-securing-web">[SECURING-WEB]
    <dd>Mark Nottingham. <a href="https://www.w3.org/2001/tag/doc/web-https"><cite>Securing the Web</cite></a>. TAG Finding. URL: <a href="https://www.w3.org/2001/tag/doc/web-https">https://www.w3.org/2001/tag/doc/web-https</a>
   </dl>
@@ -1238,12 +1259,32 @@ decision point. <a class="issue-return" href="#issue-779438ed" title="Jump to se
 key used to sign the resource? That might allow developers to discover keys for resources
 more easily, and could be used to reject the resource without validation if we can
 determine a priori that the keys don’t match... <a class="issue-return" href="#issue-0546bdd0" title="Jump to section">↵</a></div>
-   <div class="issue"> Would it be useful to extend this header’s behavior to include client-side
-content validation for hash algorithms? I think it’s arguably outside SRI’s threat model,
-but you could imagine an attacker that could change content but not headers, which would
-make enforcement of an <code>Integrity: sha256-[...]</code> header on the client meaningful for a
-variety of resources (including top-level documents, which would help provide a
-web-accessible explanation for some packaging behavior). <a class="issue-return" href="#issue-d26265cc" title="Jump to section">↵</a></div>
+   <div class="issue">
+     Would it be useful to extend this header’s behavior to include client-side
+    content validation for hash algorithms? I think it’s arguably outside SRI’s threat model,
+    but you could imagine an attacker that could change content but not headers, which would
+    make enforcement of an <code>Integrity</code> header on the client meaningful for a variety of
+    resources (including top-level documents, which would help provide a web-accessible
+    explanation for some packaging behavior). 
+    <p>That is, a resource delivered with:</p>
+<pre class="highlight">Integrity: sha256-[base64’d hash goes here]
+</pre>
+    <p>Could throw a network error in Fetch if the hash didn’t match the delivered content.
+    Likewise, a resource delivered with:</p>
+<pre class="highlight">Integrity: ed25519-[base64’d hash goes here];public-key=[base64’d hash goes here]
+</pre>
+    <p>Could throw a network error if the delivered signature and public key didn’t validate
+    against the resource’s content.</p>
+    <p>Or, sites could go crazy and deliver a header containing both:</p>
+<pre class="highlight">Integrity: sha256-[base64’d hash goes here],
+           ed25519-[base64’d hash goes here];public-key=[base64’d hash goes here]
+</pre>
+    <p>Which would enforce both constraints.</p>
+    <p>Not sure it’s a priority, but it might be an interesting primitive to extract from
+    this proposal (especially if we end up adding a streaming hash primitive like <a data-link-type="biblio" href="#biblio-rfc7693" title="The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)">[RFC7693]</a> as suggested in <a href="https://github.com/w3c/webappsec-subresource-integrity/issues/104">issue #104</a>,
+    or <a href="https://blake3.io/">its successor</a>, suggested <a href="https://github.com/w3c/webappsec/blob/main/meetings/2024/2024-09-23-TPAC-Minutes.md#:~:text=Ben%3A%20Working%20on%20really%20big%20files%20to%20IPFS%20for%20a%20while.%20Browser%20tabs%20can%20easily%20crash%20just%20hashing%20a%20large%20file%20(BLAKE3%2C%20merkle%20trees%2C%20etc).%20Would%20be%20ideal%20for%20SRI%20to%20support%20incrementally%2Dverifiable%20hashing%20algorithms%20(https%3A//github.com/BLAKE3%2Dteam/BLAKE3%2DIETF).">at TPAC in 2024</a> ).</p>
+     <a class="issue-return" href="#issue-e791903e" title="Jump to section">↵</a>
+   </div>
   </div>
 <script>/* Boilerplate: script-dfn-panel */
 "use strict";

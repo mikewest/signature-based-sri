@@ -282,12 +282,45 @@ key used to sign the resource? That might allow developers to discover keys for 
 more easily, and could be used to reject the resource without validation if we can
 determine a priori that the keys don't match...
 
-ISSUE: Would it be useful to extend this header's behavior to include client-side
-content validation for hash algorithms? I think it's arguably outside SRI's threat model,
-but you could imagine an attacker that could change content but not headers, which would
-make enforcement of an `Integrity: sha256-[...]` header on the client meaningful for a
-variety of resources (including top-level documents, which would help provide a
-web-accessible explanation for some packaging behavior).
+<div class="issue">
+    Would it be useful to extend this header's behavior to include client-side
+    content validation for hash algorithms? I think it's arguably outside SRI's threat model,
+    but you could imagine an attacker that could change content but not headers, which would
+    make enforcement of an `Integrity` header on the client meaningful for a variety of
+    resources (including top-level documents, which would help provide a web-accessible
+    explanation for some packaging behavior).
+
+    That is, a resource delivered with:
+
+    <xmp highlight="http">
+        Integrity: sha256-[base64'd hash goes here]
+    </xmp>
+
+    Could throw a network error in Fetch if the hash didn't match the delivered content.
+    Likewise, a resource delivered with:
+
+    <xmp highlight="http">
+        Integrity: ed25519-[base64'd hash goes here];public-key=[base64'd hash goes here]
+    </xmp>
+
+    Could throw a network error if the delivered signature and public key didn't validate
+    against the resource's content.
+
+    Or, sites could go crazy and deliver a header containing both:
+    <xmp highlight="http">
+        Integrity: sha256-[base64'd hash goes here],
+                   ed25519-[base64'd hash goes here];public-key=[base64'd hash goes here]
+    </xmp>
+
+    Which would enforce both constraints.
+
+    Not sure it's a priority, but it might be an interesting primitive to extract from
+    this proposal (especially if we end up adding a streaming hash primitive like
+    [[RFC7693]] as suggested in
+    [issue #104](https://github.com/w3c/webappsec-subresource-integrity/issues/104),
+    or [its successor](https://blake3.io/), suggested
+    [at TPAC in 2024](https://github.com/w3c/webappsec/blob/main/meetings/2024/2024-09-23-TPAC-Minutes.md#:~:text=Ben%3A%20Working%20on%20really%20big%20files%20to%20IPFS%20for%20a%20while.%20Browser%20tabs%20can%20easily%20crash%20just%20hashing%20a%20large%20file%20(BLAKE3%2C%20merkle%20trees%2C%20etc).%20Would%20be%20ideal%20for%20SRI%20to%20support%20incrementally%2Dverifiable%20hashing%20algorithms%20(https%3A//github.com/BLAKE3%2Dteam/BLAKE3%2DIETF).) ).
+</div>
 
 
 Patches to Fetch {#monkey-patch-fetch}
