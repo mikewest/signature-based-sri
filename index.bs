@@ -143,7 +143,7 @@ At a high level, we'll make the following changes to SRI:
 The following sections adjust algorithms accordingly.
 
 
-<h3 id="parsing" algorithm>Parse |metadata|.</h3>
+<h4 id="parsing" algorithm>Parse |metadata|.</h4>
 
 First, we'll newly define two sets of algorithm tokens:
 
@@ -191,7 +191,7 @@ of signature expressions which are likewise understood:
 3.  Return |result|.
 
 
-<h3 id="matching" algorithm>Do |bytes| and |header list| match |metadataList|?</h3>
+<h4 id="matching" algorithm>Do |bytes| and |header list| match |metadataList|?</h4>
 
 Since we adjusted the result of [[#parsing]] above, we need to adjust the
 matching algorithm to match. The core change will be processing both hashing
@@ -225,7 +225,7 @@ entire [=response/header list=]:
     4.  <ins>If |result| is `true`, set |signature-match| to `true` and [=iteration/break=].</ins>
 9.  <del>Return `false`.</del><ins>Return `true` if both |hash-match| and |signature-match| are `true`. Otherwise return `false`.</ins>
 
-<h3 id="validation" algorithm>Validate a signature using |algorithm| over |bytes| and |header list| with |public key|</h3>
+<h4 id="validation" algorithm>Validate a signature using |algorithm| over |bytes| and |header list| with |public key|</h4>
 
 The matching algorithm above calls into a new signature validation function.
 Let's write that down. At core, it will execute the Ed25519 validation steps

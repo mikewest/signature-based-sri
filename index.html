@@ -7,7 +7,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-UD" rel="stylesheet">
   <meta content="Bikeshed version 82ce88815, updated Thu Sep 7 16:33:55 2023 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="4d63c5788db19cc9b7905b6b6abb755b27c10036" name="document-revision">
+  <meta content="7a76a3c201613ef4c332351aad3c0a2c09578a64" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -718,15 +718,15 @@ var.selected6 { background-color: #FFBCF2; box-shadow: 0 0 0 2px #FFBCF2; }
     <li>
      <a href="#monkey-patches"><span class="secno">2</span> <span class="content">Monkey Patches</span></a>
      <ol class="toc">
-      <li><a href="#monkey-patch-sri"><span class="secno">2.1</span> <span class="content">Patches to SRI</span></a>
-      <li><a href="#parsing"><span class="secno">2.2</span> <span class="content">Parse <var>metadata</var>.</span></a>
-      <li><a href="#matching"><span class="secno">2.3</span> <span class="content">Do <var>bytes</var> and <var>header list</var> match <var>metadataList</var>?</span></a>
       <li>
-       <a href="#validation"><span class="secno">2.4</span> <span class="content">Validate a signature using <var>algorithm</var> over <var>bytes</var> and <var>header list</var> with <var>public key</var></span></a>
+       <a href="#monkey-patch-sri"><span class="secno">2.1</span> <span class="content">Patches to SRI</span></a>
        <ol class="toc">
-        <li><a href="#integrity-header"><span class="secno">2.4.1</span> <span class="content">Integrity Header</span></a>
+        <li><a href="#parsing"><span class="secno">2.1.1</span> <span class="content">Parse <var>metadata</var>.</span></a>
+        <li><a href="#matching"><span class="secno">2.1.2</span> <span class="content">Do <var>bytes</var> and <var>header list</var> match <var>metadataList</var>?</span></a>
+        <li><a href="#validation"><span class="secno">2.1.3</span> <span class="content">Validate a signature using <var>algorithm</var> over <var>bytes</var> and <var>header list</var> with <var>public key</var></span></a>
+        <li><a href="#integrity-header"><span class="secno">2.1.4</span> <span class="content">Integrity Header</span></a>
        </ol>
-      <li><a href="#monkey-patch-fetch"><span class="secno">2.5</span> <span class="content">Patches to Fetch</span></a>
+      <li><a href="#monkey-patch-fetch"><span class="secno">2.2</span> <span class="content">Patches to Fetch</span></a>
      </ol>
     <li>
      <a href="#deployment"><span class="secno">3</span> <span class="content">Deployment Considerations</span></a>
@@ -843,7 +843,7 @@ decision point.</p>
 by passing the public key in to the comparison operation.</p>
    </ol>
    <p>The following sections adjust algorithms accordingly.</p>
-   <h3 class="heading settled algorithm" data-algorithm="Parse metadata." data-level="2.2" id="parsing"><span class="secno">2.2. </span><span class="content">Parse <var>metadata</var>.</span><a class="self-link" href="#parsing"></a></h3>
+   <h4 class="heading settled algorithm" data-algorithm="Parse metadata." data-level="2.1.1" id="parsing"><span class="secno">2.1.1. </span><span class="content">Parse <var>metadata</var>.</span><a class="self-link" href="#parsing"></a></h4>
    <p>First, we’ll newly define two sets of algorithm tokens:</p>
    <ul>
     <li data-md>
@@ -924,8 +924,8 @@ of signature expressions which are likewise understood:</p>
     <li data-md>
      <p>Return <var>result</var>.</p>
    </ol>
-   <h3 class="heading settled algorithm" data-algorithm="Do bytes and header list match metadataList?" data-level="2.3" id="matching"><span class="secno">2.3. </span><span class="content">Do <var>bytes</var> and <var>header list</var> match <var>metadataList</var>?</span><a class="self-link" href="#matching"></a></h3>
-   <p>Since we adjusted the result of <a href="#parsing">§ 2.2 Parse metadata.</a> above, we need to adjust the
+   <h4 class="heading settled algorithm" data-algorithm="Do bytes and header list match metadataList?" data-level="2.1.2" id="matching"><span class="secno">2.1.2. </span><span class="content">Do <var>bytes</var> and <var>header list</var> match <var>metadataList</var>?</span><a class="self-link" href="#matching"></a></h4>
+   <p>Since we adjusted the result of <a href="#parsing">§ 2.1.1 Parse metadata.</a> above, we need to adjust the
 matching algorithm to match. The core change will be processing both hashing
 and signature algorithms: if only one kind is present, the story will be
 similar to today, and multiple strong algorithms can be present, allowing
@@ -996,11 +996,11 @@ entire <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-resp
      <del>Return <code>false</code>.</del>
      <ins>Return <code>true</code> if both <var>hash-match</var> and <var>signature-match</var> are <code>true</code>. Otherwise return <code>false</code>.</ins>
    </ol>
-   <h3 class="heading settled algorithm" data-algorithm="Validate a signature using algorithm over bytes and header list with public key" data-level="2.4" id="validation"><span class="secno">2.4. </span><span class="content">Validate a signature using <var>algorithm</var> over <var>bytes</var> and <var>header list</var> with <var>public key</var></span><a class="self-link" href="#validation"></a></h3>
+   <h4 class="heading settled algorithm" data-algorithm="Validate a signature using algorithm over bytes and header list with public key" data-level="2.1.3" id="validation"><span class="secno">2.1.3. </span><span class="content">Validate a signature using <var>algorithm</var> over <var>bytes</var> and <var>header list</var> with <var>public key</var></span><a class="self-link" href="#validation"></a></h4>
    <p>The matching algorithm above calls into a new signature validation function.
 Let’s write that down. At core, it will execute the Ed25519 validation steps
 from <a data-link-type="biblio" href="#biblio-rfc8032" title="Edwards-Curve Digital Signature Algorithm (EdDSA)">[RFC8032]</a>, using signatures extracted from an <code>Integrity</code> header that’s
-defined in <a href="#integrity-header">§ 2.4.1 Integrity Header</a>.</p>
+defined in <a href="#integrity-header">§ 2.1.4 Integrity Header</a>.</p>
    <ins>
      To <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export data-lt="validating a signature" id="abstract-opdef-validating-a-signature">validate a signature</dfn> using a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string②">string</a> <var>algorithm</var> over
 a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence">byte sequence</a> <var>bytes</var>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list" id="ref-for-concept-header-list">header list</a> <var>header list</var>, and <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string③">string</a> <var>public key</var>, execute the following
@@ -1032,7 +1032,7 @@ signature algorithm token.</p>
       <p>Return <code>invalid</code>.</p>
     </ol>
    </ins>
-   <h4 class="heading settled" data-level="2.4.1" id="integrity-header"><span class="secno">2.4.1. </span><span class="content">Integrity Header</span><a class="self-link" href="#integrity-header"></a></h4>
+   <h4 class="heading settled" data-level="2.1.4" id="integrity-header"><span class="secno">2.1.4. </span><span class="content">Integrity Header</span><a class="self-link" href="#integrity-header"></a></h4>
    <p class="issue" id="issue-5d823033"><a class="self-link" href="#issue-5d823033"></a> Rather than introducing this header, perhaps we could/should reuse <code>Content-Digest</code>? <a data-link-type="biblio" href="#biblio-rfc9530" title="Digest Fields">[RFC9530]</a> It’s unfortunate that SRI already introduced
 syntax distinct from what Structured Headers landed on, but that’s probably
 not reason enough to invent a new header... It’s not entirely clear to me
@@ -1080,7 +1080,7 @@ determine a priori that the keys don’t match...</p>
     this proposal (especially if we end up adding a streaming hash primitive like <a data-link-type="biblio" href="#biblio-rfc7693" title="The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)">[RFC7693]</a> as suggested in <a href="https://github.com/w3c/webappsec-subresource-integrity/issues/104">issue #104</a>,
     or <a href="https://blake3.io/">its successor</a>, suggested <a href="https://github.com/w3c/webappsec/blob/main/meetings/2024/2024-09-23-TPAC-Minutes.md#:~:text=Ben%3A%20Working%20on%20really%20big%20files%20to%20IPFS%20for%20a%20while.%20Browser%20tabs%20can%20easily%20crash%20just%20hashing%20a%20large%20file%20(BLAKE3%2C%20merkle%20trees%2C%20etc).%20Would%20be%20ideal%20for%20SRI%20to%20support%20incrementally%2Dverifiable%20hashing%20algorithms%20(https%3A//github.com/BLAKE3%2Dteam/BLAKE3%2DIETF).">at TPAC in 2024</a> ).</p>
    </div>
-   <h3 class="heading settled" data-level="2.5" id="monkey-patch-fetch"><span class="secno">2.5. </span><span class="content">Patches to Fetch</span><a class="self-link" href="#monkey-patch-fetch"></a></h3>
+   <h3 class="heading settled" data-level="2.2" id="monkey-patch-fetch"><span class="secno">2.2. </span><span class="content">Patches to Fetch</span><a class="self-link" href="#monkey-patch-fetch"></a></h3>
    <p>The only change we need to make to Fetch is to pass additional information into the
 matching algorithm as redefined above.</p>
    <p>Step 22.3.1 of <a href="https://fetch.spec.whatwg.org/#main-fetch"><cite>Fetch</cite> § 4.1 Main fetch</a> should be updated as follows:</p>
@@ -1175,11 +1175,11 @@ body or headers.</p>
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#http-headerdef-integrity">Integrity</a><span>, in § 2.4.1</span>
-   <li><a href="#abstract-opdef-parse-metadata">Parse metadata</a><span>, in § 2.2</span>
-   <li><a href="#abstract-opdef-validating-a-signature">validating a signature</a><span>, in § 2.4</span>
-   <li><a href="#valid-sri-hashing-algorithm-token">valid SRI hashing algorithm token</a><span>, in § 2.2</span>
-   <li><a href="#valid-sri-signature-algorithm-token">valid SRI signature algorithm token</a><span>, in § 2.2</span>
+   <li><a href="#http-headerdef-integrity">Integrity</a><span>, in § 2.1.4</span>
+   <li><a href="#abstract-opdef-parse-metadata">Parse metadata</a><span>, in § 2.1.1</span>
+   <li><a href="#abstract-opdef-validating-a-signature">validating a signature</a><span>, in § 2.1.3</span>
+   <li><a href="#valid-sri-hashing-algorithm-token">valid SRI hashing algorithm token</a><span>, in § 2.1.1</span>
+   <li><a href="#valid-sri-signature-algorithm-token">valid SRI signature algorithm token</a><span>, in § 2.1.1</span>
   </ul>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
@@ -1606,32 +1606,32 @@ determine a priori that the keys don’t match... <a class="issue-return" href="
 </script>
 <script>/* Boilerplate: script-dfn-panel-json */
 window.dfnpanelData = {};
-window.dfnpanelData['1d2192f2'] = {"dfnID": "1d2192f2", "url": "https://fetch.spec.whatwg.org/#concept-header-list-get-decode-split", "dfnText": "getting, decoding, and splitting", "refSections": [{"refs": [{"id": "ref-for-concept-header-list-get-decode-split"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
-window.dfnpanelData['d85a6c84'] = {"dfnID": "d85a6c84", "url": "https://fetch.spec.whatwg.org/#concept-header-list", "dfnText": "header list", "refSections": [{"refs": [{"id": "ref-for-concept-header-list"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
-window.dfnpanelData['f7b00a8b'] = {"dfnID": "f7b00a8b", "url": "https://fetch.spec.whatwg.org/#concept-response-header-list", "dfnText": "header list (for response)", "refSections": [{"refs": [{"id": "ref-for-concept-response-header-list"}], "title": "2.3. Do bytes and header list match metadataList?"}, {"refs": [{"id": "ref-for-concept-response-header-list\u2460"}], "title": "2.5. Patches to Fetch"}], "external": true};
-window.dfnpanelData['d79a826f'] = {"dfnID": "d79a826f", "url": "https://fetch.spec.whatwg.org/#concept-request-integrity-metadata", "dfnText": "integrity metadata", "refSections": [{"refs": [{"id": "ref-for-concept-request-integrity-metadata"}], "title": "2.4.1. Integrity Header"}, {"refs": [{"id": "ref-for-concept-request-integrity-metadata\u2460"}], "title": "2.5. Patches to Fetch"}], "external": true};
-window.dfnpanelData['ee7bba09'] = {"dfnID": "ee7bba09", "url": "https://fetch.spec.whatwg.org/#concept-response", "dfnText": "response", "refSections": [{"refs": [{"id": "ref-for-concept-response"}], "title": "2.4.1. Integrity Header"}], "external": true};
+window.dfnpanelData['1d2192f2'] = {"dfnID": "1d2192f2", "url": "https://fetch.spec.whatwg.org/#concept-header-list-get-decode-split", "dfnText": "getting, decoding, and splitting", "refSections": [{"refs": [{"id": "ref-for-concept-header-list-get-decode-split"}], "title": "2.1.3. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['d85a6c84'] = {"dfnID": "d85a6c84", "url": "https://fetch.spec.whatwg.org/#concept-header-list", "dfnText": "header list", "refSections": [{"refs": [{"id": "ref-for-concept-header-list"}], "title": "2.1.3. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['f7b00a8b'] = {"dfnID": "f7b00a8b", "url": "https://fetch.spec.whatwg.org/#concept-response-header-list", "dfnText": "header list (for response)", "refSections": [{"refs": [{"id": "ref-for-concept-response-header-list"}], "title": "2.1.2. Do bytes and header list match metadataList?"}, {"refs": [{"id": "ref-for-concept-response-header-list\u2460"}], "title": "2.2. Patches to Fetch"}], "external": true};
+window.dfnpanelData['d79a826f'] = {"dfnID": "d79a826f", "url": "https://fetch.spec.whatwg.org/#concept-request-integrity-metadata", "dfnText": "integrity metadata", "refSections": [{"refs": [{"id": "ref-for-concept-request-integrity-metadata"}], "title": "2.1.4. Integrity Header"}, {"refs": [{"id": "ref-for-concept-request-integrity-metadata\u2460"}], "title": "2.2. Patches to Fetch"}], "external": true};
+window.dfnpanelData['ee7bba09'] = {"dfnID": "ee7bba09", "url": "https://fetch.spec.whatwg.org/#concept-response", "dfnText": "response", "refSections": [{"refs": [{"id": "ref-for-concept-response"}], "title": "2.1.4. Integrity Header"}], "external": true};
 window.dfnpanelData['65181da8'] = {"dfnID": "65181da8", "url": "https://html.spec.whatwg.org/multipage/webappapis.html#secure-context", "dfnText": "secure context", "refSections": [{"refs": [{"id": "ref-for-secure-context"}], "title": "4.1. Secure Contexts"}], "external": true};
-window.dfnpanelData['53275e46'] = {"dfnID": "53275e46", "url": "https://infra.spec.whatwg.org/#list-append", "dfnText": "append (for list)", "refSections": [{"refs": [{"id": "ref-for-list-append"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['a3b18719'] = {"dfnID": "a3b18719", "url": "https://infra.spec.whatwg.org/#set-append", "dfnText": "append (for set)", "refSections": [{"refs": [{"id": "ref-for-set-append"}, {"id": "ref-for-set-append\u2460"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['7f9469b5'] = {"dfnID": "7f9469b5", "url": "https://infra.spec.whatwg.org/#ascii-case-insensitive", "dfnText": "ascii case-insensitive", "refSections": [{"refs": [{"id": "ref-for-ascii-case-insensitive"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
-window.dfnpanelData['6f2dfa22'] = {"dfnID": "6f2dfa22", "url": "https://infra.spec.whatwg.org/#ascii-lowercase", "dfnText": "ascii lowercase", "refSections": [{"refs": [{"id": "ref-for-ascii-lowercase"}, {"id": "ref-for-ascii-lowercase\u2460"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['7b0d918d'] = {"dfnID": "7b0d918d", "url": "https://infra.spec.whatwg.org/#iteration-break", "dfnText": "break", "refSections": [{"refs": [{"id": "ref-for-iteration-break"}, {"id": "ref-for-iteration-break\u2460"}], "title": "2.3. Do bytes and header list match metadataList?"}], "external": true};
-window.dfnpanelData['3de9e659'] = {"dfnID": "3de9e659", "url": "https://infra.spec.whatwg.org/#byte-sequence", "dfnText": "byte sequence", "refSections": [{"refs": [{"id": "ref-for-byte-sequence"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
-window.dfnpanelData['ae8def21'] = {"dfnID": "ae8def21", "url": "https://infra.spec.whatwg.org/#list-contain", "dfnText": "contain", "refSections": [{"refs": [{"id": "ref-for-list-contain"}, {"id": "ref-for-list-contain\u2460"}, {"id": "ref-for-list-contain\u2461"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['f937b7b6'] = {"dfnID": "f937b7b6", "url": "https://infra.spec.whatwg.org/#iteration-continue", "dfnText": "continue", "refSections": [{"refs": [{"id": "ref-for-iteration-continue"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['03afaf9c'] = {"dfnID": "03afaf9c", "url": "https://infra.spec.whatwg.org/#list-empty", "dfnText": "empty", "refSections": [{"refs": [{"id": "ref-for-list-empty"}, {"id": "ref-for-list-empty\u2460"}, {"id": "ref-for-list-empty\u2461"}], "title": "2.3. Do bytes and header list match metadataList?"}], "external": true};
-window.dfnpanelData['75393c04'] = {"dfnID": "75393c04", "url": "https://infra.spec.whatwg.org/#list-contain", "dfnText": "exist", "refSections": [{"refs": [{"id": "ref-for-list-contain"}, {"id": "ref-for-list-contain\u2460"}, {"id": "ref-for-list-contain\u2461"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['84b454ff'] = {"dfnID": "84b454ff", "url": "https://infra.spec.whatwg.org/#ordered-map", "dfnText": "ordered map", "refSections": [{"refs": [{"id": "ref-for-ordered-map"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['e5fc5b88'] = {"dfnID": "e5fc5b88", "url": "https://infra.spec.whatwg.org/#strictly-split", "dfnText": "strictly split", "refSections": [{"refs": [{"id": "ref-for-strictly-split"}, {"id": "ref-for-strictly-split\u2460"}, {"id": "ref-for-strictly-split\u2461"}], "title": "2.2. Parse metadata."}], "external": true};
-window.dfnpanelData['0698d556'] = {"dfnID": "0698d556", "url": "https://infra.spec.whatwg.org/#string", "dfnText": "string", "refSections": [{"refs": [{"id": "ref-for-string"}, {"id": "ref-for-string\u2460"}], "title": "2.2. Parse metadata."}, {"refs": [{"id": "ref-for-string\u2461"}, {"id": "ref-for-string\u2462"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
-window.dfnpanelData['a7b0745e'] = {"dfnID": "a7b0745e", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-list", "dfnText": "list", "refSections": [{"refs": [{"id": "ref-for-name-list"}], "title": "2.4.1. Integrity Header"}], "external": true};
-window.dfnpanelData['de2211fe'] = {"dfnID": "de2211fe", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-introduction", "dfnText": "structured header", "refSections": [{"refs": [{"id": "ref-for-name-introduction"}], "title": "2.4.1. Integrity Header"}], "external": true};
-window.dfnpanelData['4acd57ce'] = {"dfnID": "4acd57ce", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-tokens", "dfnText": "token", "refSections": [{"refs": [{"id": "ref-for-name-tokens"}], "title": "2.4.1. Integrity Header"}], "external": true};
-window.dfnpanelData['8e4ee48e'] = {"dfnID": "8e4ee48e", "url": "https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression", "dfnText": "hash-expression", "refSections": [{"refs": [{"id": "ref-for-grammardef-hash-expression"}], "title": "2.4.1. Integrity Header"}], "external": true};
-window.dfnpanelData['valid-sri-hashing-algorithm-token'] = {"dfnID": "valid-sri-hashing-algorithm-token", "url": "#valid-sri-hashing-algorithm-token", "dfnText": "valid SRI hashing algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-hashing-algorithm-token"}], "title": "2.2. Parse metadata."}], "external": false};
-window.dfnpanelData['valid-sri-signature-algorithm-token'] = {"dfnID": "valid-sri-signature-algorithm-token", "url": "#valid-sri-signature-algorithm-token", "dfnText": "valid SRI signature algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-signature-algorithm-token"}], "title": "2.2. Parse metadata."}], "external": false};
-window.dfnpanelData['abstract-opdef-validating-a-signature'] = {"dfnID": "abstract-opdef-validating-a-signature", "url": "#abstract-opdef-validating-a-signature", "dfnText": "validate a signature", "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-validating-a-signature"}], "title": "2.3. Do bytes and header list match metadataList?"}], "external": false};
+window.dfnpanelData['53275e46'] = {"dfnID": "53275e46", "url": "https://infra.spec.whatwg.org/#list-append", "dfnText": "append (for list)", "refSections": [{"refs": [{"id": "ref-for-list-append"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['a3b18719'] = {"dfnID": "a3b18719", "url": "https://infra.spec.whatwg.org/#set-append", "dfnText": "append (for set)", "refSections": [{"refs": [{"id": "ref-for-set-append"}, {"id": "ref-for-set-append\u2460"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['7f9469b5'] = {"dfnID": "7f9469b5", "url": "https://infra.spec.whatwg.org/#ascii-case-insensitive", "dfnText": "ascii case-insensitive", "refSections": [{"refs": [{"id": "ref-for-ascii-case-insensitive"}], "title": "2.1.3. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['6f2dfa22'] = {"dfnID": "6f2dfa22", "url": "https://infra.spec.whatwg.org/#ascii-lowercase", "dfnText": "ascii lowercase", "refSections": [{"refs": [{"id": "ref-for-ascii-lowercase"}, {"id": "ref-for-ascii-lowercase\u2460"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['7b0d918d'] = {"dfnID": "7b0d918d", "url": "https://infra.spec.whatwg.org/#iteration-break", "dfnText": "break", "refSections": [{"refs": [{"id": "ref-for-iteration-break"}, {"id": "ref-for-iteration-break\u2460"}], "title": "2.1.2. Do bytes and header list match metadataList?"}], "external": true};
+window.dfnpanelData['3de9e659'] = {"dfnID": "3de9e659", "url": "https://infra.spec.whatwg.org/#byte-sequence", "dfnText": "byte sequence", "refSections": [{"refs": [{"id": "ref-for-byte-sequence"}], "title": "2.1.3. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['ae8def21'] = {"dfnID": "ae8def21", "url": "https://infra.spec.whatwg.org/#list-contain", "dfnText": "contain", "refSections": [{"refs": [{"id": "ref-for-list-contain"}, {"id": "ref-for-list-contain\u2460"}, {"id": "ref-for-list-contain\u2461"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['f937b7b6'] = {"dfnID": "f937b7b6", "url": "https://infra.spec.whatwg.org/#iteration-continue", "dfnText": "continue", "refSections": [{"refs": [{"id": "ref-for-iteration-continue"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['03afaf9c'] = {"dfnID": "03afaf9c", "url": "https://infra.spec.whatwg.org/#list-empty", "dfnText": "empty", "refSections": [{"refs": [{"id": "ref-for-list-empty"}, {"id": "ref-for-list-empty\u2460"}, {"id": "ref-for-list-empty\u2461"}], "title": "2.1.2. Do bytes and header list match metadataList?"}], "external": true};
+window.dfnpanelData['75393c04'] = {"dfnID": "75393c04", "url": "https://infra.spec.whatwg.org/#list-contain", "dfnText": "exist", "refSections": [{"refs": [{"id": "ref-for-list-contain"}, {"id": "ref-for-list-contain\u2460"}, {"id": "ref-for-list-contain\u2461"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['84b454ff'] = {"dfnID": "84b454ff", "url": "https://infra.spec.whatwg.org/#ordered-map", "dfnText": "ordered map", "refSections": [{"refs": [{"id": "ref-for-ordered-map"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['e5fc5b88'] = {"dfnID": "e5fc5b88", "url": "https://infra.spec.whatwg.org/#strictly-split", "dfnText": "strictly split", "refSections": [{"refs": [{"id": "ref-for-strictly-split"}, {"id": "ref-for-strictly-split\u2460"}, {"id": "ref-for-strictly-split\u2461"}], "title": "2.1.1. Parse metadata."}], "external": true};
+window.dfnpanelData['0698d556'] = {"dfnID": "0698d556", "url": "https://infra.spec.whatwg.org/#string", "dfnText": "string", "refSections": [{"refs": [{"id": "ref-for-string"}, {"id": "ref-for-string\u2460"}], "title": "2.1.1. Parse metadata."}, {"refs": [{"id": "ref-for-string\u2461"}, {"id": "ref-for-string\u2462"}], "title": "2.1.3. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['a7b0745e'] = {"dfnID": "a7b0745e", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-list", "dfnText": "list", "refSections": [{"refs": [{"id": "ref-for-name-list"}], "title": "2.1.4. Integrity Header"}], "external": true};
+window.dfnpanelData['de2211fe'] = {"dfnID": "de2211fe", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-introduction", "dfnText": "structured header", "refSections": [{"refs": [{"id": "ref-for-name-introduction"}], "title": "2.1.4. Integrity Header"}], "external": true};
+window.dfnpanelData['4acd57ce'] = {"dfnID": "4acd57ce", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-tokens", "dfnText": "token", "refSections": [{"refs": [{"id": "ref-for-name-tokens"}], "title": "2.1.4. Integrity Header"}], "external": true};
+window.dfnpanelData['8e4ee48e'] = {"dfnID": "8e4ee48e", "url": "https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression", "dfnText": "hash-expression", "refSections": [{"refs": [{"id": "ref-for-grammardef-hash-expression"}], "title": "2.1.4. Integrity Header"}], "external": true};
+window.dfnpanelData['valid-sri-hashing-algorithm-token'] = {"dfnID": "valid-sri-hashing-algorithm-token", "url": "#valid-sri-hashing-algorithm-token", "dfnText": "valid SRI hashing algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-hashing-algorithm-token"}], "title": "2.1.1. Parse metadata."}], "external": false};
+window.dfnpanelData['valid-sri-signature-algorithm-token'] = {"dfnID": "valid-sri-signature-algorithm-token", "url": "#valid-sri-signature-algorithm-token", "dfnText": "valid SRI signature algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-signature-algorithm-token"}], "title": "2.1.1. Parse metadata."}], "external": false};
+window.dfnpanelData['abstract-opdef-validating-a-signature'] = {"dfnID": "abstract-opdef-validating-a-signature", "url": "#abstract-opdef-validating-a-signature", "dfnText": "validate a signature", "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-validating-a-signature"}], "title": "2.1.2. Do bytes and header list match metadataList?"}], "external": false};
 </script>
 <script>/* Boilerplate: script-dom-helper */
 function query(sel) { return document.querySelector(sel); }
