@@ -7,7 +7,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-UD" rel="stylesheet">
   <meta content="Bikeshed version 82ce88815, updated Thu Sep 7 16:33:55 2023 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="5ab9bc48ca090d4077c9dd4cd7717f3fa099dae6" name="document-revision">
+  <meta content="4d63c5788db19cc9b7905b6b6abb755b27c10036" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -1033,6 +1033,11 @@ signature algorithm token.</p>
     </ol>
    </ins>
    <h4 class="heading settled" data-level="2.4.1" id="integrity-header"><span class="secno">2.4.1. </span><span class="content">Integrity Header</span><a class="self-link" href="#integrity-header"></a></h4>
+   <p class="issue" id="issue-5d823033"><a class="self-link" href="#issue-5d823033"></a> Rather than introducing this header, perhaps we could/should reuse <code>Content-Digest</code>? <a data-link-type="biblio" href="#biblio-rfc9530" title="Digest Fields">[RFC9530]</a> It’s unfortunate that SRI already introduced
+syntax distinct from what Structured Headers landed on, but that’s probably
+not reason enough to invent a new header... It’s not entirely clear to me
+whether that header’s acting on the same content as SRI, though (e.g. does
+it perform the check prior to resolving content encoding?).</p>
    <p>The <dfn data-dfn-type="http-header" data-export id="http-headerdef-integrity"><code>Integrity</code><a class="self-link" href="#http-headerdef-integrity"></a></dfn> HTTP response header specifies a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata" id="ref-for-concept-request-integrity-metadata">integrity metadata</a> for a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a>. It is a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-introduction" id="ref-for-name-introduction">Structured Header</a> whose value MUST be a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-list" id="ref-for-name-list">list</a> of <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-tokens" id="ref-for-name-tokens">token</a> <a data-link-type="biblio" href="#biblio-rfc9651" title="Structured Field Values for HTTP">[RFC9651]</a>.</p>
    <p>Valid list values match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression" id="ref-for-grammardef-hash-expression"><code>hash-expression</code></a> grammar as defined in <a data-link-type="biblio" href="#biblio-sri" title="Subresource Integrity">[SRI]</a>.</p>
    <div class="example" id="integrity-header-example">
@@ -1246,6 +1251,8 @@ body or headers.</p>
    <dd>Yoav Weiss; Ilya Grigorik. <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing"><cite>PCIv4: SRI gaps and opportunities</cite></a>. URL: <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing">https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing</a>
    <dt id="biblio-rfc7693">[RFC7693]
    <dd>M-J. Saarinen, Ed.; J-P. Aumasson. <a href="https://www.rfc-editor.org/rfc/rfc7693"><cite>The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)</cite></a>. November 2015. Informational. URL: <a href="https://www.rfc-editor.org/rfc/rfc7693">https://www.rfc-editor.org/rfc/rfc7693</a>
+   <dt id="biblio-rfc9530">[RFC9530]
+   <dd>R. Polli; L. Pardue. <a href="https://www.rfc-editor.org/rfc/rfc9530"><cite>Digest Fields</cite></a>. February 2024. Proposed Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc9530">https://www.rfc-editor.org/rfc/rfc9530</a>
    <dt id="biblio-securing-web">[SECURING-WEB]
    <dd>Mark Nottingham. <a href="https://www.w3.org/2001/tag/doc/web-https"><cite>Securing the Web</cite></a>. TAG Finding. URL: <a href="https://www.w3.org/2001/tag/doc/web-https">https://www.w3.org/2001/tag/doc/web-https</a>
   </dl>
@@ -1255,6 +1262,11 @@ body or headers.</p>
 packaging constraints in ways that seem useful, but does introduce some
 additional complexity in developers' mental model. So, consider it a
 decision point. <a class="issue-return" href="#issue-779438ed" title="Jump to section">↵</a></div>
+   <div class="issue"> Rather than introducing this header, perhaps we could/should reuse <code>Content-Digest</code>? <a data-link-type="biblio" href="#biblio-rfc9530" title="Digest Fields">[RFC9530]</a> It’s unfortunate that SRI already introduced
+syntax distinct from what Structured Headers landed on, but that’s probably
+not reason enough to invent a new header... It’s not entirely clear to me
+whether that header’s acting on the same content as SRI, though (e.g. does
+it perform the check prior to resolving content encoding?). <a class="issue-return" href="#issue-5d823033" title="Jump to section">↵</a></div>
    <div class="issue"> Do we need a mechanism (another header?) allowing the server to specify the public
 key used to sign the resource? That might allow developers to discover keys for resources
 more easily, and could be used to reject the resource without validation if we can
