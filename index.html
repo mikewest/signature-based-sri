@@ -5,11 +5,9 @@
   <title>Signature-based Integrity</title>
   <meta content="w3c/UD" name="w3c-status">
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-UD" rel="stylesheet">
-  <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
+  <meta content="Bikeshed version 82ce88815, updated Thu Sep 7 16:33:55 2023 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="5fa93f250d1ae2825648afd8c96d92f05ceb6162" name="revision">
-  <meta content="dark light" name="color-scheme">
-  <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
+  <meta content="ff74c6ad20eb8b8f654447a7663c1ec1a110637e" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -81,6 +79,7 @@ pre .property::before, pre .property::after {
 }
 </style>
 <style>/* Boilerplate: style-colors */
+
 /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
 :root {
     color-scheme: light dark;
@@ -334,15 +333,11 @@ figcaption:not(.no-marker)::before {
 :root {
     --dfnpanel-bg: #ddd;
     --dfnpanel-text: var(--text);
-    --dfnpanel-target-bg: #ffc;
-    --dfnpanel-target-outline: orange;
 }
 @media (prefers-color-scheme: dark) {
     :root {
         --dfnpanel-bg: #222;
         --dfnpanel-text: var(--text);
-        --dfnpanel-target-bg: #333;
-        --dfnpanel-target-outline: silver;
     }
 }
 .dfn-panel {
@@ -365,13 +360,11 @@ figcaption:not(.no-marker)::before {
 .dfn-panel > b { display: block; }
 .dfn-panel a { color: var(--dfnpanel-text); }
 .dfn-panel a:not(:hover) { text-decoration: none !important; border-bottom: none !important; }
-.dfn-panel a:focus {
-    outline: 5px auto Highlight;
-    outline: 5px auto -webkit-focus-ring-color;
-}
 .dfn-panel > b + b { margin-top: 0.25em; }
 .dfn-panel ul { padding: 0 0 0 1em; list-style: none; }
 .dfn-panel li a {
+    white-space: pre;
+    display: inline-block;
     max-width: calc(300px - 1.5em - 1em);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -380,93 +373,74 @@ figcaption:not(.no-marker)::before {
 .dfn-panel.activated {
     display: inline-block;
     position: fixed;
-    left: 8px;
+    left: .5em;
     bottom: 2em;
     margin: 0 auto;
     max-width: calc(100vw - 1.5em - .4em - .5em);
     max-height: 30vh;
-    transition: left 1s ease-out, bottom 1s ease-out;
 }
 
-.dfn-panel .link-item:hover {
-    text-decoration: underline;
+.dfn-paneled[role="button"] { cursor: pointer; }
+</style>
+<style>/* Boilerplate: style-dfn-panel */
+:root {
+    --dfnpanel-bg: #ddd;
+    --dfnpanel-text: var(--text);
 }
-.dfn-panel .link-item .copy-icon {
-    opacity: 0;
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dfnpanel-bg: #222;
+        --dfnpanel-text: var(--text);
+    }
 }
-.dfn-panel .link-item:hover .copy-icon,
-.dfn-panel .link-item .copy-icon:focus {
-    opacity: 1;
-}
-
-.dfn-panel .copy-icon {
-    display: inline-block;
-    margin-right: 0.5em;
-    width: 0.85em;
-    height: 1em;
-    border-radius: 3px;
-    background-color: #ccc;
-    cursor: pointer;
-}
-
-.dfn-panel .copy-icon .icon {
-    width: 100%;
-    height: 100%;
-    background-color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-.dfn-panel .copy-icon .icon::before {
-    content: "";
+.dfn-panel {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 1px solid black;
-    background-color: #ccc;
-    opacity: 0.25;
-    transform: translate(3px, -3px);
+    z-index: 35;
+    width: 20em;
+    width: 300px;
+    height: auto;
+    max-height: 500px;
+    overflow: auto;
+    padding: 0.5em 0.75em;
+    font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
+    background: var(--dfnpanel-bg);
+    color: var(--dfnpanel-text);
+    border: outset 0.2em;
+    white-space: normal; /* in case it's moved into a pre */
+}
+.dfn-panel:not(.on) { display: none; }
+.dfn-panel * { margin: 0; padding: 0; text-indent: 0; }
+.dfn-panel > b { display: block; }
+.dfn-panel a { color: var(--dfnpanel-text); }
+.dfn-panel a:not(:hover) { text-decoration: none !important; border-bottom: none !important; }
+.dfn-panel > b + b { margin-top: 0.25em; }
+.dfn-panel ul { padding: 0 0 0 1em; list-style: none; }
+.dfn-panel li a {
+    white-space: pre;
+    display: inline-block;
+    max-width: calc(300px - 1.5em - 1em);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.dfn-panel .copy-icon:active .icon::before {
-    opacity: 1;
+.dfn-panel.activated {
+    display: inline-block;
+    position: fixed;
+    left: .5em;
+    bottom: 2em;
+    margin: 0 auto;
+    max-width: calc(100vw - 1.5em - .4em - .5em);
+    max-height: 30vh;
 }
 
-.dfn-paneled[role="button"] { cursor: help; }
-
-.highlighted {
-    animation: target-fade 3s;
-}
-
-@keyframes target-fade {
-    from {
-        background-color: var(--dfnpanel-target-bg);
-        outline: 5px solid var(--dfnpanel-target-outline);
-    }
-    to {
-        color: var(--a-normal-text);
-        background-color: transparent;
-        outline: transparent;
-    }
-}
+.dfn-paneled[role="button"] { cursor: pointer; }
 </style>
 <style>/* Boilerplate: style-hidedel */
-#hidedel:checked ~ del,
-#hidedel:checked ~ * del {
-    display:none;
-}
-#hidedel ~ #hidedel-label::before,
-#hidedel ~ * #hidedel-label::before {
-    content: "☐ ";
-}
-#hidedel:checked ~ #hidedel-label::before,
-#hidedel:checked ~ * #hidedel-label::before {
-    content: "☑ ";
-}
+
+            #hidedel:checked ~ del, #hidedel:checked ~ * del { display:none; }
+            #hidedel ~ #hidedel-label::before, #hidedel ~ * #hidedel-label::before { content: "☐ "; }
+            #hidedel:checked ~ #hidedel-label::before, #hidedel:checked ~ * #hidedel-label::before { content: "☑ "; }
+        
 </style>
 <style>/* Boilerplate: style-issues */
 a[href].issue-return {
@@ -487,40 +461,8 @@ a[href].issue-return {
     margin-bottom: 0;
 }
 </style>
-<style>/* Boilerplate: style-ref-hints */
-:root {
-    --ref-hint-bg: #ddd;
-    --ref-hint-text: var(--text);
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        --ref-hint-bg: #222;
-        --ref-hint-text: var(--text);
-    }
-}
-
-.ref-hint {
-    display: inline-block;
-    position: absolute;
-    z-index: 35;
-    width: 20em;
-    width: 300px;
-    height: auto;
-    max-height: 500px;
-    overflow: auto;
-    padding: 0.5em 0.5em;
-    font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
-    background: var(--ref-hint-bg);
-    color: var(--ref-hint-text);
-    border: outset 0.2em;
-    white-space: normal; /* in case it's moved into a pre */
-}
-
-.ref-hint * { margin: 0; padding: 0; text-indent: 0; }
-
-.ref-hint ul { padding: 0 0 0 1em; list-style: none; }
-</style>
 <style>/* Boilerplate: style-selflinks */
+
 :root {
     --selflink-text: white;
     --selflink-bg: gray;
@@ -580,6 +522,7 @@ a.self-link::before            { content: "¶"; }
 dfn > a.self-link::before      { content: "#"; }
 </style>
 <style>/* Boilerplate: style-syntax-highlighting */
+
 code.highlight { padding: .1em; border-radius: .3em; }
 pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em 0; overflow: auto; border-radius: 0; }
 
@@ -636,6 +579,7 @@ c-[vc] { color: #0077aa } /* Name.Variable.Class */
 c-[vg] { color: #0077aa } /* Name.Variable.Global */
 c-[vi] { color: #0077aa } /* Name.Variable.Instance */
 c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
+
 
 @media (prefers-color-scheme: dark) {
     .highlight:not(.idl) { background: rgba(255, 255, 255, .05); }
@@ -711,44 +655,22 @@ D50 2deg illuminant, L in [0,100], a and b in [-128, 128]
 4 = lab(85,5,15)
 5 = lab(85,-10,-50)
 6 = lab(85,35,-15)
-
-For darkmode:
-0 = oklab(50%   0%  108%)
-1 = oklab(50% -51%   51%)
-2 = oklab(50% -64%  -20%)
-3 = oklab(50%   6%   19%)
-4 = oklab(50% -12%  -64%)
-5 = oklab(50%  44%  -19%)  
-6 = oklab(50% 102%   38%)
 */
-
-[data-algorithm] var { cursor: pointer; }
-var[data-var-color] { background-color: var(--var-bg); box-shadow: 0 0 0 2px var(--var-bg); }
-
-var[data-var-color] { --var-bg: #F4D200; }
-var[data-var-color="1"] { --var-bg: #FF87A2; }
-var[data-var-color="2"] { --var-bg: #96E885; }
-var[data-var-color="3"] { --var-bg: #3EEED2; }
-var[data-var-color="4"] { --var-bg: #EACFB6; }
-var[data-var-color="5"] { --var-bg: #82DDFF; }
-var[data-var-color="6"] { --var-vg: #FFBCF2; }
-
-@media (prefers-color-scheme: dark) {
-	var[data-var-color] { --var-bg: #bc1a00; }
-	var[data-var-color="1"] { --var-bg: #007f00; }
-	var[data-var-color="2"] { --var-bg: #008698; }
-	var[data-var-color="3"] { --var-bg: #7f5b2b; }
-	var[data-var-color="4"] { --var-bg: #004df3; }
-	var[data-var-color="5"] { --var-bg: #a1248a; }
-	var[data-var-color="6"] { --var-vg: #ff0000; }
-}
+var { cursor: pointer; }
+var.selected0 { background-color: #F4D200; box-shadow: 0 0 0 2px #F4D200; }
+var.selected1 { background-color: #FF87A2; box-shadow: 0 0 0 2px #FF87A2; }
+var.selected2 { background-color: #96E885; box-shadow: 0 0 0 2px #96E885; }
+var.selected3 { background-color: #3EEED2; box-shadow: 0 0 0 2px #3EEED2; }
+var.selected4 { background-color: #EACFB6; box-shadow: 0 0 0 2px #EACFB6; }
+var.selected5 { background-color: #82DDFF; box-shadow: 0 0 0 2px #82DDFF; }
+var.selected6 { background-color: #FFBCF2; box-shadow: 0 0 0 2px #FFBCF2; }
 </style>
  <body class="h-entry">
   <input id="hidedel" style="display:none" type="checkbox">
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Signature-based Integrity</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#UD">Unofficial Proposal Draft</a>, <time class="dt-updated" datetime="2024-10-07">7 October 2024</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#UD">Unofficial Proposal Draft</a>, <time class="dt-updated" datetime="2024-10-08">8 October 2024</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -775,9 +697,10 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
    <p>A monkey-patch spec that enhances SRI with signature-based
-integrity checks. These are conceptually similar to the
-content-based checks currently defined, but have different
-properties that seem interesting to explore.</p>
+
+    integrity checks. These are conceptually similar to the
+    content-based checks currently defined, but have different
+    properties that seem interesting to explore.</p>
   </div>
   <h2 class="no-num no-toc no-ref heading settled" id="sotd"><span class="content">Status of this document</span></h2>
   <div data-fill-with="status">
@@ -806,6 +729,19 @@ properties that seem interesting to explore.</p>
       <li><a href="#monkey-patch-fetch"><span class="secno">2.5</span> <span class="content">Patches to Fetch</span></a>
      </ol>
     <li>
+     <a href="#deployment"><span class="secno">3</span> <span class="content">Deployment Considerations</span></a>
+     <ol class="toc">
+      <li><a href="#deployment-key-management"><span class="secno">3.1</span> <span class="content">Key Management</span></a>
+     </ol>
+    <li>
+     <a href="#security"><span class="secno">4</span> <span class="content">Security Considerations</span></a>
+     <ol class="toc">
+      <li><a href="#security-secure-context"><span class="secno">4.1</span> <span class="content">Secure Contexts</span></a>
+      <li><a href="#security-provenance-not-content"><span class="secno">4.2</span> <span class="content">Provenance, not Content</span></a>
+      <li><a href="#security-rollback"><span class="secno">4.3</span> <span class="content">Rollback Attacks</span></a>
+     </ol>
+    <li><a href="#privacy"><span class="secno">5</span> <span class="content">Privacy Considerations</span></a>
+    <li>
      <a href="#w3c-conformance"><span class="secno"></span> <span class="content">Conformance</span></a>
      <ol class="toc">
       <li><a href="#w3c-conventions"><span class="secno"></span> <span class="content">Document conventions</span></a>
@@ -820,6 +756,7 @@ properties that seem interesting to explore.</p>
      <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
      <ol class="toc">
       <li><a href="#normative"><span class="secno"></span> <span class="content">Normative References</span></a>
+      <li><a href="#informative"><span class="secno"></span> <span class="content">Informative References</span></a>
      </ol>
     <li><a href="#issues-index"><span class="secno"></span> <span class="content">Issues Index</span></a>
    </ol>
@@ -833,13 +770,14 @@ a SHA-256 hash of a resource’s content, any malicious or accidental deviation
 will be blocked before being executed. This is an excellent defense, but its
 deployment turns out to be brittle. If the resource living at a specific URL
 is dynamic, then content-based integrity checks require pages and the
-resources they depend upon to update in lockstep.</p>
-   <p>Particularly as the industry becomes more interested in supply-chain integrity,
-it seems reasonable to explore alternatives to static hashes that could allow
-wider deployment of these checks, and therefore better understanding of the
-application experiences that developers are _actually_ composing.</p>
-   <p>This document outlines the changes that would be necessary to HTML, Fetch, and
-SRI in order to support the simplest version of a signature-based check:</p>
+resources they depend upon to update in lockstep. This turns out to be
+~impossible in practice, which makes SRI less usable than it could be.</p>
+   <p>Particularly as the industry becomes more interested in supply-chain integrity
+(see Shopify’s <a data-link-type="biblio" href="#biblio-pciv4-sri-gaps" title="PCIv4: SRI gaps and opportunities">[PCIv4-SRI-Gaps]</a>, for instance), it seems reasonable to explore
+alternatives to static hashes that could allow wider deployment of these checks,
+and therefore better understanding of the application experiences that
+developers are _actually_ composing.</p>
+   <p>This document outlines the changes that would be necessary to <a data-link-type="biblio" href="#biblio-fetch" title="Fetch Standard">[Fetch]</a>, and <a data-link-type="biblio" href="#biblio-sri" title="Subresource Integrity">[SRI]</a> in order to support the simplest version of a signature-based check:</p>
    <div class="example" id="basic-example">
     <a class="self-link" href="#basic-example"></a> Pages will embed an Ed25519 public key assertion into <code>integrity</code> attributes: 
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>src</c-><c- o>=</c-><c- s>"https://my.cdn/script.js"</c->
@@ -915,7 +853,7 @@ by passing the public key in to the comparison operation.</p>
      <ins>A <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">string</a> <var>alg</var> is a <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="valid-sri-signature-algorithm-token">valid SRI signature algorithm token</dfn> if the <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-lowercase" id="ref-for-ascii-lowercase①">ASCII lowercase</a> of <var>alg</var> is <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain①">contained</a> within the set
 « "ed25519" ».</ins>
    </ul>
-   <p>Then, we’ll adjust SRI’s <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export id="abstract-opdef-parse-metadata">Parse <var>metadata</var></dfn>. algorithm as
+   <p>Then, we’ll adjust SRI’s <dfn data-dfn-type="abstract-op" data-export id="abstract-opdef-parse-metadata">Parse <var>metadata</var><a class="self-link" href="#abstract-opdef-parse-metadata"></a></dfn>. algorithm as
 follows:</p>
    <p>This algorithm accepts a string, and returns a map containing one set of hash
 expressions whose hash functions are understood by the user agent, and one set
@@ -1069,7 +1007,7 @@ a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id
 steps. They return <code>valid</code> if the signature is valid, or <code>invalid</code> otherwise. 
     <ol>
      <li data-md>
-      <p>If <var>algorithm</var> is an <a data-link-type="dfn" href="https://w3c.github.io/i18n-glossary/#dfn-ascii-case-insensitive" id="ref-for-dfn-ascii-case-insensitive">ASCII case-insensitive match</a> for "ed25519", then:</p>
+      <p>If <var>algorithm</var> is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive">ASCII case-insensitive</a> match for "ed25519", then:</p>
       <ol>
        <li data-md>
         <p>Let <var>signatures</var> be the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list-get-decode-split" id="ref-for-concept-header-list-get-decode-split">getting, decoding, and splitting</a> <code>`Integrity`</code> from <var>header list</var>.</p>
@@ -1095,8 +1033,7 @@ signature algorithm token.</p>
     </ol>
    </ins>
    <h4 class="heading settled" data-level="2.4.1" id="integrity-header"><span class="secno">2.4.1. </span><span class="content">Integrity Header</span><a class="self-link" href="#integrity-header"></a></h4>
-   <p>The <dfn class="dfn-paneled" data-dfn-type="http-header" data-export id="http-headerdef-integrity"><code>Integrity</code></dfn> HTTP response header specifies a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata" id="ref-for-concept-request-integrity-metadata">integrity metadata</a> for a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a>. It is a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-introduction" id="ref-for-name-introduction">Structured Header</a> whose value MUST be a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-list" id="ref-for-name-list">list</a> of <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-tokens" id="ref-for-name-tokens">token</a> <a data-link-type="biblio" href="#biblio-rfc8941" title="Structured Field Values for HTTP">[RFC8941]</a>.</p>
-   <p class="issue" id="issue-4f9c6521"><a class="self-link" href="#issue-4f9c6521"></a> Switch to RFC9651 once specref updates, both here and in the anchors block above.</p>
+   <p>The <dfn data-dfn-type="http-header" data-export id="http-headerdef-integrity"><code>Integrity</code><a class="self-link" href="#http-headerdef-integrity"></a></dfn> HTTP response header specifies a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata" id="ref-for-concept-request-integrity-metadata">integrity metadata</a> for a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a>. It is a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-introduction" id="ref-for-name-introduction">Structured Header</a> whose value MUST be a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-list" id="ref-for-name-list">list</a> of <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-tokens" id="ref-for-name-tokens">token</a> <a data-link-type="biblio" href="#biblio-rfc9651" title="Structured Field Values for HTTP">[RFC9651]</a>.</p>
    <p>Valid list values match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression" id="ref-for-grammardef-hash-expression"><code>hash-expression</code></a> grammar as defined in <a data-link-type="biblio" href="#biblio-sri" title="Subresource Integrity">[SRI]</a>.</p>
    <div class="example" id="integrity-header-example">
     <a class="self-link" href="#integrity-header-example"></a> A resource might be delivered with an integrity header specifying a signature that can
@@ -1113,13 +1050,75 @@ be used to validate the resource’s provenance:
 key used to sign the resource? That might allow developers to discover keys for resources
 more easily, and could be used to reject the resource without validation if we can
 determine a priori that the keys don’t match...</p>
-   <p class="issue" id="issue-02da7e4b"><a class="self-link" href="#issue-02da7e4b"></a> Would it be useful to extend this header’s behavior to include client-side
+   <p class="issue" id="issue-d26265cc"><a class="self-link" href="#issue-d26265cc"></a> Would it be useful to extend this header’s behavior to include client-side
 content validation for hash algorithms? I think it’s arguably outside SRI’s threat model,
-but you could imagine an attacker could change content but not headers, which would make
-enforcement of an <code>Integrity: sha256-[...]</code> header on the client meaningful.</p>
-   <p>TODO:</p>
+but you could imagine an attacker that could change content but not headers, which would
+make enforcement of an <code>Integrity: sha256-[...]</code> header on the client meaningful for a
+variety of resources (including top-level documents, which would help provide a
+web-accessible explanation for some packaging behavior).</p>
    <h3 class="heading settled" data-level="2.5" id="monkey-patch-fetch"><span class="secno">2.5. </span><span class="content">Patches to Fetch</span><a class="self-link" href="#monkey-patch-fetch"></a></h3>
-   <p>Add the response headers to step 22.3.1 of Main Fetch.</p>
+   <p>The only change we need to make to Fetch is to pass additional information into the
+matching algorithm as redefined above.</p>
+   <p>Step 22.3.1 of <a href="https://fetch.spec.whatwg.org/#main-fetch"><cite>Fetch</cite> § 4.1 Main fetch</a> should be updated as follows:</p>
+   <ol>
+    <li data-md>
+     <p>
+      If <var>bytes</var> do not match <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata" id="ref-for-concept-request-integrity-metadata①">integrity metadata</a>
+      <ins> and <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list" id="ref-for-concept-response-header-list①">header list</a></ins>
+      , then run processBodyError and
+abort these steps. <a data-link-type="biblio" href="#biblio-sri" title="Subresource Integrity">[SRI]</a>
+     </p>
+   </ol>
+   <h2 class="heading settled" data-level="3" id="deployment"><span class="secno">3. </span><span class="content">Deployment Considerations</span><a class="self-link" href="#deployment"></a></h2>
+   <h3 class="heading settled" data-level="3.1" id="deployment-key-management"><span class="secno">3.1. </span><span class="content">Key Management</span><a class="self-link" href="#deployment-key-management"></a></h3>
+   <p>Key management is hard. This proposal doesn’t change that.</p>
+   <p>It aims instead to be very lightweight. Perhaps it errs in that direction, but
+the goal is to be the simplest possible mechanimsm that supports known
+use-cases.</p>
+   <p>A different take on this proposal could be arbitrarily complex, replicating
+aspects of the web PKI to chain trust, allow delegation, etc. That seems like
+more than we need today, and substantially more work. Perhaps something small
+is good enough?</p>
+   <h2 class="heading settled" data-level="4" id="security"><span class="secno">4. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
+   <h3 class="heading settled" data-level="4.1" id="security-secure-context"><span class="secno">4.1. </span><span class="content">Secure Contexts</span><a class="self-link" href="#security-secure-context"></a></h3>
+   <p>SRI does not require a secure context, nor does it apply only to resources
+delivered via encrypted and authenticated channels. That means that it’s
+entirely possible to believe that SRI offers a level of protection that it
+simply cannot aspire to. Signatures do not change that calculus.</p>
+   <p>Thus, it remains recommended that developers rely on integrity metadata only
+within <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context" id="ref-for-secure-context">secure contexts</a>. See also <a data-link-type="biblio" href="#biblio-securing-web" title="Securing the Web">[SECURING-WEB]</a>.</p>
+   <h3 class="heading settled" data-level="4.2" id="security-provenance-not-content"><span class="secno">4.2. </span><span class="content">Provenance, not Content</span><a class="self-link" href="#security-provenance-not-content"></a></h3>
+   <p>Signatures do not provide any assurance that the content delivered is the
+content a developer expected. They ensure only that the content was signed
+by the expected entity. This could allow resources signed by the same
+entity to be substituted for one another in ways that could violate developer
+expectations.</p>
+   <p>In some cases, developers can defend against this confusion by using hashes
+instead of signatures (or, as discussed above, both hashes <em>and</em> signatures).
+Servers can likewise defend against this risk by minting fresh keys for each
+interesting resource. This, of course, creates more key-management problems,
+but it might be a reasonable tradeoff.</p>
+   <h3 class="heading settled" data-level="4.3" id="security-rollback"><span class="secno">4.3. </span><span class="content">Rollback Attacks</span><a class="self-link" href="#security-rollback"></a></h3>
+   <p>The simple signature checks described in this document <em>only</em> provide proof of
+provenance, ensuring that a given resource was at one point signed by someone
+in posession of the relevant private key. It does not say anything about whether
+that entity intended to deliver a given resource to you <em>now</em>. In other words,
+these checks do not prevent rollback/downgrade attacks in which old, known-bad
+versions of a resource might be delivered, along with their known signatures.</p>
+   <p>This might not be a problem, depending on developers' use cases. If it becomes
+a problem, it seems possible to add mitigations in the future. These could take
+various forms, ranging from enforcing freshness by signing additional timestamps
+through to sending a random challenge along with requests that would be included
+in the signature.</p>
+   <p>We’d want to evaluate the tradeoffs in these approaches (the latter, for example,
+makes offline signing difficult), and might wish to offer serveral options.</p>
+   <h2 class="heading settled" data-level="5" id="privacy"><span class="secno">5. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
+   <p>Given that the validation of a response’s signature continues to require the
+response to opt-into legibility via CORS, this mechanism does not seem to add
+any new data channels from the server to the client. The choice of private
+key used to sign the resource is potentially interesting, but doesn’t seem to
+offer any capability that isn’t possible more directly by altering the resource
+body or headers.</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="w3c-conformance"><span class="content">Conformance</span><a class="self-link" href="#w3c-conformance"></a></h2>
@@ -1148,7 +1147,7 @@ enforcement of an <code>Integrity: sha256-[...]</code> header on the client mean
     like this: </p>
    <p class="note" role="note">Note, this is an informative note.</p>
   </div>
-  <script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
+<script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
@@ -1161,7 +1160,7 @@ enforcement of an <code>Integrity: sha256-[...]</code> header on the client mean
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
-    <a data-link-type="biblio">[FETCH]</a> defines the following terms:
+    <a data-link-type="biblio">[Fetch]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="1d2192f2">getting, decoding, and splitting</span>
      <li><span class="dfn-paneled" id="d85a6c84">header list</span>
@@ -1170,15 +1169,16 @@ enforcement of an <code>Integrity: sha256-[...]</code> header on the client mean
      <li><span class="dfn-paneled" id="ee7bba09">response</span>
     </ul>
    <li>
-    <a data-link-type="biblio">[I18N-GLOSSARY]</a> defines the following terms:
+    <a data-link-type="biblio">[HTML]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="931da62a">ascii case-insensitive matching</span>
+     <li><span class="dfn-paneled" id="65181da8">secure context</span>
     </ul>
    <li>
     <a data-link-type="biblio">[INFRA]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="53275e46">append <small>(for list)</small></span>
      <li><span class="dfn-paneled" id="a3b18719">append <small>(for set)</small></span>
+     <li><span class="dfn-paneled" id="7f9469b5">ascii case-insensitive</span>
      <li><span class="dfn-paneled" id="6f2dfa22">ascii lowercase</span>
      <li><span class="dfn-paneled" id="7b0d918d">break</span>
      <li><span class="dfn-paneled" id="3de9e659">byte sequence</span>
@@ -1191,7 +1191,7 @@ enforcement of an <code>Integrity: sha256-[...]</code> header on the client mean
      <li><span class="dfn-paneled" id="0698d556">string</span>
     </ul>
    <li>
-    <a data-link-type="biblio">[RFC8941]</a> defines the following terms:
+    <a data-link-type="biblio">[RFC9651]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="a7b0745e">list</span>
      <li><span class="dfn-paneled" id="de2211fe">structured header</span>
@@ -1206,20 +1206,27 @@ enforcement of an <code>Integrity: sha256-[...]</code> header on the client mean
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
-   <dt id="biblio-fetch">[FETCH]
+   <dt id="biblio-fetch">[Fetch]
    <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/"><cite>Fetch Standard</cite></a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
-   <dt id="biblio-i18n-glossary">[I18N-GLOSSARY]
-   <dd>Richard Ishida; Addison Phillips. <a href="https://w3c.github.io/i18n-glossary/"><cite>Internationalization Glossary</cite></a>. URL: <a href="https://w3c.github.io/i18n-glossary/">https://w3c.github.io/i18n-glossary/</a>
+   <dt id="biblio-html">[HTML]
+   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/"><cite>HTML Standard</cite></a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-infra">[INFRA]
    <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/"><cite>Infra Standard</cite></a>. Living Standard. URL: <a href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-rfc8032">[RFC8032]
    <dd>S. Josefsson; I. Liusvaara. <a href="https://www.rfc-editor.org/rfc/rfc8032"><cite>Edwards-Curve Digital Signature Algorithm (EdDSA)</cite></a>. January 2017. Informational. URL: <a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a>
-   <dt id="biblio-rfc8941">[RFC8941]
-   <dd>M. Nottingham; P-H. Kamp. <a href="https://httpwg.org/specs/rfc8941.html"><cite>Structured Field Values for HTTP</cite></a>. February 2021. Proposed Standard. URL: <a href="https://httpwg.org/specs/rfc8941.html">https://httpwg.org/specs/rfc8941.html</a>
+   <dt id="biblio-rfc9651">[RFC9651]
+   <dd>M. Nottingham; P-H. Kamp. <a href="https://www.rfc-editor.org/rfc/rfc9651"><cite>Structured Field Values for HTTP</cite></a>. September 2024. Proposed Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc9651">https://www.rfc-editor.org/rfc/rfc9651</a>
    <dt id="biblio-sri">[SRI]
    <dd>Devdatta Akhawe; et al. <a href="https://w3c.github.io/webappsec-subresource-integrity/"><cite>Subresource Integrity</cite></a>. URL: <a href="https://w3c.github.io/webappsec-subresource-integrity/">https://w3c.github.io/webappsec-subresource-integrity/</a>
+  </dl>
+  <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
+  <dl>
+   <dt id="biblio-pciv4-sri-gaps">[PCIv4-SRI-Gaps]
+   <dd>Yoav Weiss; Ilya Grigorik. <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing"><cite>PCIv4: SRI gaps and opportunities</cite></a>. URL: <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing">https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing</a>
+   <dt id="biblio-securing-web">[SECURING-WEB]
+   <dd>Mark Nottingham. <a href="https://www.w3.org/2001/tag/doc/web-https"><cite>Securing the Web</cite></a>. TAG Finding. URL: <a href="https://www.w3.org/2001/tag/doc/web-https">https://www.w3.org/2001/tag/doc/web-https</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
@@ -1227,18 +1234,353 @@ enforcement of an <code>Integrity: sha256-[...]</code> header on the client mean
 packaging constraints in ways that seem useful, but does introduce some
 additional complexity in developers' mental model. So, consider it a
 decision point. <a class="issue-return" href="#issue-779438ed" title="Jump to section">↵</a></div>
-   <div class="issue"> Switch to RFC9651 once specref updates, both here and in the anchors block above. <a class="issue-return" href="#issue-4f9c6521" title="Jump to section">↵</a></div>
    <div class="issue"> Do we need a mechanism (another header?) allowing the server to specify the public
 key used to sign the resource? That might allow developers to discover keys for resources
 more easily, and could be used to reject the resource without validation if we can
 determine a priori that the keys don’t match... <a class="issue-return" href="#issue-0546bdd0" title="Jump to section">↵</a></div>
    <div class="issue"> Would it be useful to extend this header’s behavior to include client-side
 content validation for hash algorithms? I think it’s arguably outside SRI’s threat model,
-but you could imagine an attacker could change content but not headers, which would make
-enforcement of an <code>Integrity: sha256-[...]</code> header on the client meaningful. <a class="issue-return" href="#issue-02da7e4b" title="Jump to section">↵</a></div>
+but you could imagine an attacker that could change content but not headers, which would
+make enforcement of an <code>Integrity: sha256-[...]</code> header on the client meaningful for a
+variety of resources (including top-level documents, which would help provide a
+web-accessible explanation for some packaging behavior). <a class="issue-return" href="#issue-d26265cc" title="Jump to section">↵</a></div>
   </div>
-<script>/* Boilerplate: script-dom-helper */
+<script>/* Boilerplate: script-dfn-panel */
 "use strict";
+{
+    const dfnsJson = window.dfnsJson || {};
+
+    function genDfnPanel({dfnID, url, dfnText, refSections, external}) {
+        return mk.aside({
+            class: "dfn-panel",
+            id: `infopanel-for-${dfnID}`,
+            "data-for": dfnID,
+            "aria-labelled-by":`infopaneltitle-for-${dfnID}`,
+            },
+            mk.span({id:`infopaneltitle-for-${dfnID}`, style:"display:none"},
+                `Info about the '${dfnText}' ${external?"external":""} reference.`),
+            mk.a({href:url}, url),
+            mk.b({}, "Referenced in:"),
+            mk.ul({},
+                ...refSections.map(section=>
+                    mk.li({},
+                        ...section.refs.map((ref, refI)=>
+                            [
+                                mk.a({
+                                    href: `#${ref.id}`
+                                    },
+                                    (refI == 0) ? section.title : `(${refI + 1})`
+                                ),
+                                " ",
+                            ]
+                        ),
+                    ),
+                ),
+            ),
+        );
+    }
+
+    function genAllDfnPanels() {
+        for(const panelData of Object.values(window.dfnpanelData)) {
+            const dfnID = panelData.dfnID;
+            const dfn = document.getElementById(dfnID);
+            if(!dfn) {
+                console.log(`Can't find dfn#${dfnID}.`, panelData);
+            } else {
+                const panel = genDfnPanel(panelData);
+                append(document.body, panel);
+                insertDfnPopupAction(dfn, panel)
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", ()=>{
+        genAllDfnPanels();
+
+        // Add popup behavior to all dfns to show the corresponding dfn-panel.
+        var dfns = queryAll('.dfn-paneled');
+        for(let dfn of dfns) { ; }
+
+        document.body.addEventListener("click", (e) => {
+            // If not handled already, just hide all dfn panels.
+            hideAllDfnPanels();
+        });
+    })
+
+
+    function hideAllDfnPanels() {
+        // Turn off any currently "on" or "activated" panels.
+        queryAll(".dfn-panel.on, .dfn-panel.activated").forEach(el=>hideDfnPanel(el));
+    }
+
+    function showDfnPanel(dfnPanel, dfn) {
+        hideAllDfnPanels(); // Only display one at this time.
+        dfn.setAttribute("aria-expanded", "true");
+        dfnPanel.classList.add("on");
+        dfnPanel.style.left = "5px";
+        dfnPanel.style.top = "0px";
+        const panelRect = dfnPanel.getBoundingClientRect();
+        const panelWidth = panelRect.right - panelRect.left;
+        if (panelRect.right > document.body.scrollWidth) {
+            // Panel's overflowing the screen.
+            // Just drop it below the dfn and flip it rightward instead.
+            // This still wont' fix things if the screen is *really* wide,
+            // but fixing that's a lot harder without 'anchor()'.
+            dfnPanel.style.top = "1.5em";
+            dfnPanel.style.left = "auto";
+            dfnPanel.style.right = "0px";
+        }
+    }
+
+    function pinDfnPanel(dfnPanel) {
+        // Switch it to "activated" state, which pins it.
+        dfnPanel.classList.add("activated");
+        dfnPanel.style.left = null;
+        dfnPanel.style.top = null;
+    }
+
+    function hideDfnPanel(dfnPanel, dfn) {
+        if(!dfn) {
+            dfn = document.getElementById(dfnPanel.getAttribute("data-for"));
+        }
+        dfn.setAttribute("aria-expanded", "false")
+        dfnPanel.classList.remove("on");
+        dfnPanel.classList.remove("activated");
+    }
+
+    function toggleDfnPanel(dfnPanel, dfn) {
+        if(dfnPanel.classList.contains("on")) {
+            hideDfnPanel(dfnPanel, dfn);
+        } else {
+            showDfnPanel(dfnPanel, dfn);
+        }
+    }
+
+    function insertDfnPopupAction(dfn, dfnPanel) {
+        // Find dfn panel
+        const panelWrapper = document.createElement('span');
+        panelWrapper.appendChild(dfnPanel);
+        panelWrapper.style.position = "relative";
+        panelWrapper.style.height = "0px";
+        dfn.insertAdjacentElement("afterend", panelWrapper);
+        dfn.setAttribute('role', 'button');
+        dfn.setAttribute('aria-expanded', 'false')
+        dfn.tabIndex = 0;
+        dfn.classList.add('has-dfn-panel');
+        dfn.addEventListener('click', (event) => {
+            showDfnPanel(dfnPanel, dfn);
+            event.stopPropagation();
+        });
+        dfn.addEventListener('keypress', (event) => {
+            const kc = event.keyCode;
+            // 32->Space, 13->Enter
+            if(kc == 32 || kc == 13) {
+                toggleDfnPanel(dfnPanel, dfn);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        });
+
+        dfnPanel.addEventListener('click', (event) => {
+            if (event.target.nodeName == 'A') {
+                pinDfnPanel(dfnPanel);
+            }
+            event.stopPropagation();
+        });
+
+        dfnPanel.addEventListener('keydown', (event) => {
+            if(event.keyCode == 27) { // Escape key
+                hideDfnPanel(dfnPanel, dfn);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        })
+    }
+}
+</script>
+<script>/* Boilerplate: script-dfn-panel */
+"use strict";
+{
+    const dfnsJson = window.dfnsJson || {};
+
+    function genDfnPanel({dfnID, url, dfnText, refSections, external}) {
+        return mk.aside({
+            class: "dfn-panel",
+            id: `infopanel-for-${dfnID}`,
+            "data-for": dfnID,
+            "aria-labelled-by":`infopaneltitle-for-${dfnID}`,
+            },
+            mk.span({id:`infopaneltitle-for-${dfnID}`, style:"display:none"},
+                `Info about the '${dfnText}' ${external?"external":""} reference.`),
+            mk.a({href:url}, url),
+            mk.b({}, "Referenced in:"),
+            mk.ul({},
+                ...refSections.map(section=>
+                    mk.li({},
+                        ...section.refs.map((ref, refI)=>
+                            [
+                                mk.a({
+                                    href: `#${ref.id}`
+                                    },
+                                    (refI == 0) ? section.title : `(${refI + 1})`
+                                ),
+                                " ",
+                            ]
+                        ),
+                    ),
+                ),
+            ),
+        );
+    }
+
+    function genAllDfnPanels() {
+        for(const panelData of Object.values(window.dfnpanelData)) {
+            const dfnID = panelData.dfnID;
+            const dfn = document.getElementById(dfnID);
+            if(!dfn) {
+                console.log(`Can't find dfn#${dfnID}.`, panelData);
+            } else {
+                const panel = genDfnPanel(panelData);
+                append(document.body, panel);
+                insertDfnPopupAction(dfn, panel)
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", ()=>{
+        genAllDfnPanels();
+
+        // Add popup behavior to all dfns to show the corresponding dfn-panel.
+        var dfns = queryAll('.dfn-paneled');
+        for(let dfn of dfns) { ; }
+
+        document.body.addEventListener("click", (e) => {
+            // If not handled already, just hide all dfn panels.
+            hideAllDfnPanels();
+        });
+    })
+
+
+    function hideAllDfnPanels() {
+        // Turn off any currently "on" or "activated" panels.
+        queryAll(".dfn-panel.on, .dfn-panel.activated").forEach(el=>hideDfnPanel(el));
+    }
+
+    function showDfnPanel(dfnPanel, dfn) {
+        hideAllDfnPanels(); // Only display one at this time.
+        dfn.setAttribute("aria-expanded", "true");
+        dfnPanel.classList.add("on");
+        dfnPanel.style.left = "5px";
+        dfnPanel.style.top = "0px";
+        const panelRect = dfnPanel.getBoundingClientRect();
+        const panelWidth = panelRect.right - panelRect.left;
+        if (panelRect.right > document.body.scrollWidth) {
+            // Panel's overflowing the screen.
+            // Just drop it below the dfn and flip it rightward instead.
+            // This still wont' fix things if the screen is *really* wide,
+            // but fixing that's a lot harder without 'anchor()'.
+            dfnPanel.style.top = "1.5em";
+            dfnPanel.style.left = "auto";
+            dfnPanel.style.right = "0px";
+        }
+    }
+
+    function pinDfnPanel(dfnPanel) {
+        // Switch it to "activated" state, which pins it.
+        dfnPanel.classList.add("activated");
+        dfnPanel.style.left = null;
+        dfnPanel.style.top = null;
+    }
+
+    function hideDfnPanel(dfnPanel, dfn) {
+        if(!dfn) {
+            dfn = document.getElementById(dfnPanel.getAttribute("data-for"));
+        }
+        dfn.setAttribute("aria-expanded", "false")
+        dfnPanel.classList.remove("on");
+        dfnPanel.classList.remove("activated");
+    }
+
+    function toggleDfnPanel(dfnPanel, dfn) {
+        if(dfnPanel.classList.contains("on")) {
+            hideDfnPanel(dfnPanel, dfn);
+        } else {
+            showDfnPanel(dfnPanel, dfn);
+        }
+    }
+
+    function insertDfnPopupAction(dfn, dfnPanel) {
+        // Find dfn panel
+        const panelWrapper = document.createElement('span');
+        panelWrapper.appendChild(dfnPanel);
+        panelWrapper.style.position = "relative";
+        panelWrapper.style.height = "0px";
+        dfn.insertAdjacentElement("afterend", panelWrapper);
+        dfn.setAttribute('role', 'button');
+        dfn.setAttribute('aria-expanded', 'false')
+        dfn.tabIndex = 0;
+        dfn.classList.add('has-dfn-panel');
+        dfn.addEventListener('click', (event) => {
+            showDfnPanel(dfnPanel, dfn);
+            event.stopPropagation();
+        });
+        dfn.addEventListener('keypress', (event) => {
+            const kc = event.keyCode;
+            // 32->Space, 13->Enter
+            if(kc == 32 || kc == 13) {
+                toggleDfnPanel(dfnPanel, dfn);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        });
+
+        dfnPanel.addEventListener('click', (event) => {
+            if (event.target.nodeName == 'A') {
+                pinDfnPanel(dfnPanel);
+            }
+            event.stopPropagation();
+        });
+
+        dfnPanel.addEventListener('keydown', (event) => {
+            if(event.keyCode == 27) { // Escape key
+                hideDfnPanel(dfnPanel, dfn);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        })
+    }
+}
+</script>
+<script>/* Boilerplate: script-dfn-panel-json */
+window.dfnpanelData = {};
+window.dfnpanelData['1d2192f2'] = {"dfnID": "1d2192f2", "url": "https://fetch.spec.whatwg.org/#concept-header-list-get-decode-split", "dfnText": "getting, decoding, and splitting", "refSections": [{"refs": [{"id": "ref-for-concept-header-list-get-decode-split"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['d85a6c84'] = {"dfnID": "d85a6c84", "url": "https://fetch.spec.whatwg.org/#concept-header-list", "dfnText": "header list", "refSections": [{"refs": [{"id": "ref-for-concept-header-list"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['f7b00a8b'] = {"dfnID": "f7b00a8b", "url": "https://fetch.spec.whatwg.org/#concept-response-header-list", "dfnText": "header list (for response)", "refSections": [{"refs": [{"id": "ref-for-concept-response-header-list"}], "title": "2.3. Do bytes and header list match metadataList?"}, {"refs": [{"id": "ref-for-concept-response-header-list\u2460"}], "title": "2.5. Patches to Fetch"}], "external": true};
+window.dfnpanelData['d79a826f'] = {"dfnID": "d79a826f", "url": "https://fetch.spec.whatwg.org/#concept-request-integrity-metadata", "dfnText": "integrity metadata", "refSections": [{"refs": [{"id": "ref-for-concept-request-integrity-metadata"}], "title": "2.4.1. Integrity Header"}, {"refs": [{"id": "ref-for-concept-request-integrity-metadata\u2460"}], "title": "2.5. Patches to Fetch"}], "external": true};
+window.dfnpanelData['ee7bba09'] = {"dfnID": "ee7bba09", "url": "https://fetch.spec.whatwg.org/#concept-response", "dfnText": "response", "refSections": [{"refs": [{"id": "ref-for-concept-response"}], "title": "2.4.1. Integrity Header"}], "external": true};
+window.dfnpanelData['65181da8'] = {"dfnID": "65181da8", "url": "https://html.spec.whatwg.org/multipage/webappapis.html#secure-context", "dfnText": "secure context", "refSections": [{"refs": [{"id": "ref-for-secure-context"}], "title": "4.1. Secure Contexts"}], "external": true};
+window.dfnpanelData['53275e46'] = {"dfnID": "53275e46", "url": "https://infra.spec.whatwg.org/#list-append", "dfnText": "append (for list)", "refSections": [{"refs": [{"id": "ref-for-list-append"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['a3b18719'] = {"dfnID": "a3b18719", "url": "https://infra.spec.whatwg.org/#set-append", "dfnText": "append (for set)", "refSections": [{"refs": [{"id": "ref-for-set-append"}, {"id": "ref-for-set-append\u2460"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['7f9469b5'] = {"dfnID": "7f9469b5", "url": "https://infra.spec.whatwg.org/#ascii-case-insensitive", "dfnText": "ascii case-insensitive", "refSections": [{"refs": [{"id": "ref-for-ascii-case-insensitive"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['6f2dfa22'] = {"dfnID": "6f2dfa22", "url": "https://infra.spec.whatwg.org/#ascii-lowercase", "dfnText": "ascii lowercase", "refSections": [{"refs": [{"id": "ref-for-ascii-lowercase"}, {"id": "ref-for-ascii-lowercase\u2460"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['7b0d918d'] = {"dfnID": "7b0d918d", "url": "https://infra.spec.whatwg.org/#iteration-break", "dfnText": "break", "refSections": [{"refs": [{"id": "ref-for-iteration-break"}, {"id": "ref-for-iteration-break\u2460"}], "title": "2.3. Do bytes and header list match metadataList?"}], "external": true};
+window.dfnpanelData['3de9e659'] = {"dfnID": "3de9e659", "url": "https://infra.spec.whatwg.org/#byte-sequence", "dfnText": "byte sequence", "refSections": [{"refs": [{"id": "ref-for-byte-sequence"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['ae8def21'] = {"dfnID": "ae8def21", "url": "https://infra.spec.whatwg.org/#list-contain", "dfnText": "contain", "refSections": [{"refs": [{"id": "ref-for-list-contain"}, {"id": "ref-for-list-contain\u2460"}, {"id": "ref-for-list-contain\u2461"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['f937b7b6'] = {"dfnID": "f937b7b6", "url": "https://infra.spec.whatwg.org/#iteration-continue", "dfnText": "continue", "refSections": [{"refs": [{"id": "ref-for-iteration-continue"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['03afaf9c'] = {"dfnID": "03afaf9c", "url": "https://infra.spec.whatwg.org/#list-empty", "dfnText": "empty", "refSections": [{"refs": [{"id": "ref-for-list-empty"}, {"id": "ref-for-list-empty\u2460"}, {"id": "ref-for-list-empty\u2461"}], "title": "2.3. Do bytes and header list match metadataList?"}], "external": true};
+window.dfnpanelData['75393c04'] = {"dfnID": "75393c04", "url": "https://infra.spec.whatwg.org/#list-contain", "dfnText": "exist", "refSections": [{"refs": [{"id": "ref-for-list-contain"}, {"id": "ref-for-list-contain\u2460"}, {"id": "ref-for-list-contain\u2461"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['84b454ff'] = {"dfnID": "84b454ff", "url": "https://infra.spec.whatwg.org/#ordered-map", "dfnText": "ordered map", "refSections": [{"refs": [{"id": "ref-for-ordered-map"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['e5fc5b88'] = {"dfnID": "e5fc5b88", "url": "https://infra.spec.whatwg.org/#strictly-split", "dfnText": "strictly split", "refSections": [{"refs": [{"id": "ref-for-strictly-split"}, {"id": "ref-for-strictly-split\u2460"}, {"id": "ref-for-strictly-split\u2461"}], "title": "2.2. Parse metadata."}], "external": true};
+window.dfnpanelData['0698d556'] = {"dfnID": "0698d556", "url": "https://infra.spec.whatwg.org/#string", "dfnText": "string", "refSections": [{"refs": [{"id": "ref-for-string"}, {"id": "ref-for-string\u2460"}], "title": "2.2. Parse metadata."}, {"refs": [{"id": "ref-for-string\u2461"}, {"id": "ref-for-string\u2462"}], "title": "2.4. Validate a signature using algorithm over bytes and header list with public key"}], "external": true};
+window.dfnpanelData['a7b0745e'] = {"dfnID": "a7b0745e", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-list", "dfnText": "list", "refSections": [{"refs": [{"id": "ref-for-name-list"}], "title": "2.4.1. Integrity Header"}], "external": true};
+window.dfnpanelData['de2211fe'] = {"dfnID": "de2211fe", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-introduction", "dfnText": "structured header", "refSections": [{"refs": [{"id": "ref-for-name-introduction"}], "title": "2.4.1. Integrity Header"}], "external": true};
+window.dfnpanelData['4acd57ce'] = {"dfnID": "4acd57ce", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-tokens", "dfnText": "token", "refSections": [{"refs": [{"id": "ref-for-name-tokens"}], "title": "2.4.1. Integrity Header"}], "external": true};
+window.dfnpanelData['8e4ee48e'] = {"dfnID": "8e4ee48e", "url": "https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression", "dfnText": "hash-expression", "refSections": [{"refs": [{"id": "ref-for-grammardef-hash-expression"}], "title": "2.4.1. Integrity Header"}], "external": true};
+window.dfnpanelData['valid-sri-hashing-algorithm-token'] = {"dfnID": "valid-sri-hashing-algorithm-token", "url": "#valid-sri-hashing-algorithm-token", "dfnText": "valid SRI hashing algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-hashing-algorithm-token"}], "title": "2.2. Parse metadata."}], "external": false};
+window.dfnpanelData['valid-sri-signature-algorithm-token'] = {"dfnID": "valid-sri-signature-algorithm-token", "url": "#valid-sri-signature-algorithm-token", "dfnText": "valid SRI signature algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-signature-algorithm-token"}], "title": "2.2. Parse metadata."}], "external": false};
+window.dfnpanelData['abstract-opdef-validating-a-signature'] = {"dfnID": "abstract-opdef-validating-a-signature", "url": "#abstract-opdef-validating-a-signature", "dfnText": "validate a signature", "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-validating-a-signature"}], "title": "2.3. Do bytes and header list match metadataList?"}], "external": false};
+</script>
+<script>/* Boilerplate: script-dom-helper */
 function query(sel) { return document.querySelector(sel); }
 
 function queryAll(sel) { return [...document.querySelectorAll(sel)]; }
@@ -1432,730 +1774,103 @@ function parseHTML(markup) {
 		el.innerHTML = markup;
 		return el.content;
 	}
-}</script>
-<script>/* Boilerplate: script-dfn-panel */
-"use strict";
-{
-let dfnPanelData = {
-"03afaf9c": {"dfnID":"03afaf9c","dfnText":"empty","external":true,"refSections":[{"refs":[{"id":"ref-for-list-empty"},{"id":"ref-for-list-empty\u2460"},{"id":"ref-for-list-empty\u2461"}],"title":"2.3. Do bytes and header list match metadataList?"}],"url":"https://infra.spec.whatwg.org/#list-empty"},
-"0698d556": {"dfnID":"0698d556","dfnText":"string","external":true,"refSections":[{"refs":[{"id":"ref-for-string"},{"id":"ref-for-string\u2460"}],"title":"2.2. Parse metadata."},{"refs":[{"id":"ref-for-string\u2461"},{"id":"ref-for-string\u2462"}],"title":"2.4. Validate a signature using algorithm over bytes and header list with public key"}],"url":"https://infra.spec.whatwg.org/#string"},
-"1d2192f2": {"dfnID":"1d2192f2","dfnText":"getting, decoding, and splitting","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-list-get-decode-split"}],"title":"2.4. Validate a signature using algorithm over bytes and header list with public key"}],"url":"https://fetch.spec.whatwg.org/#concept-header-list-get-decode-split"},
-"3de9e659": {"dfnID":"3de9e659","dfnText":"byte sequence","external":true,"refSections":[{"refs":[{"id":"ref-for-byte-sequence"}],"title":"2.4. Validate a signature using algorithm over bytes and header list with public key"}],"url":"https://infra.spec.whatwg.org/#byte-sequence"},
-"4acd57ce": {"dfnID":"4acd57ce","dfnText":"token","external":true,"refSections":[{"refs":[{"id":"ref-for-name-tokens"}],"title":"2.4.1. Integrity Header"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-tokens"},
-"53275e46": {"dfnID":"53275e46","dfnText":"append (for list)","external":true,"refSections":[{"refs":[{"id":"ref-for-list-append"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#list-append"},
-"6f2dfa22": {"dfnID":"6f2dfa22","dfnText":"ascii lowercase","external":true,"refSections":[{"refs":[{"id":"ref-for-ascii-lowercase"},{"id":"ref-for-ascii-lowercase\u2460"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ascii-lowercase"},
-"75393c04": {"dfnID":"75393c04","dfnText":"exist","external":true,"refSections":[{"refs":[{"id":"ref-for-list-contain"},{"id":"ref-for-list-contain\u2460"},{"id":"ref-for-list-contain\u2461"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#list-contain"},
-"7b0d918d": {"dfnID":"7b0d918d","dfnText":"break","external":true,"refSections":[{"refs":[{"id":"ref-for-iteration-break"},{"id":"ref-for-iteration-break\u2460"}],"title":"2.3. Do bytes and header list match metadataList?"}],"url":"https://infra.spec.whatwg.org/#iteration-break"},
-"84b454ff": {"dfnID":"84b454ff","dfnText":"ordered map","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-map"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ordered-map"},
-"8e4ee48e": {"dfnID":"8e4ee48e","dfnText":"hash-expression","external":true,"refSections":[{"refs":[{"id":"ref-for-grammardef-hash-expression"}],"title":"2.4.1. Integrity Header"}],"url":"https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression"},
-"931da62a": {"dfnID":"931da62a","dfnText":"ascii case-insensitive matching","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-ascii-case-insensitive"}],"title":"2.4. Validate a signature using algorithm over bytes and header list with public key"}],"url":"https://w3c.github.io/i18n-glossary/#dfn-ascii-case-insensitive"},
-"a3b18719": {"dfnID":"a3b18719","dfnText":"append (for set)","external":true,"refSections":[{"refs":[{"id":"ref-for-set-append"},{"id":"ref-for-set-append\u2460"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#set-append"},
-"a7b0745e": {"dfnID":"a7b0745e","dfnText":"list","external":true,"refSections":[{"refs":[{"id":"ref-for-name-list"}],"title":"2.4.1. Integrity Header"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-list"},
-"abstract-opdef-parse-metadata": {"dfnID":"abstract-opdef-parse-metadata","dfnText":"Parse metadata","external":false,"refSections":[],"url":"#abstract-opdef-parse-metadata"},
-"abstract-opdef-validating-a-signature": {"dfnID":"abstract-opdef-validating-a-signature","dfnText":"validate a signature","external":false,"refSections":[{"refs":[{"id":"ref-for-abstract-opdef-validating-a-signature"}],"title":"2.3. Do bytes and header list match metadataList?"}],"url":"#abstract-opdef-validating-a-signature"},
-"ae8def21": {"dfnID":"ae8def21","dfnText":"contain","external":true,"refSections":[{"refs":[{"id":"ref-for-list-contain"},{"id":"ref-for-list-contain\u2460"},{"id":"ref-for-list-contain\u2461"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#list-contain"},
-"d79a826f": {"dfnID":"d79a826f","dfnText":"integrity metadata","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-request-integrity-metadata"}],"title":"2.4.1. Integrity Header"}],"url":"https://fetch.spec.whatwg.org/#concept-request-integrity-metadata"},
-"d85a6c84": {"dfnID":"d85a6c84","dfnText":"header list","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-list"}],"title":"2.4. Validate a signature using algorithm over bytes and header list with public key"}],"url":"https://fetch.spec.whatwg.org/#concept-header-list"},
-"de2211fe": {"dfnID":"de2211fe","dfnText":"structured header","external":true,"refSections":[{"refs":[{"id":"ref-for-name-introduction"}],"title":"2.4.1. Integrity Header"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-introduction"},
-"e5fc5b88": {"dfnID":"e5fc5b88","dfnText":"strictly split","external":true,"refSections":[{"refs":[{"id":"ref-for-strictly-split"},{"id":"ref-for-strictly-split\u2460"},{"id":"ref-for-strictly-split\u2461"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#strictly-split"},
-"ee7bba09": {"dfnID":"ee7bba09","dfnText":"response","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-response"}],"title":"2.4.1. Integrity Header"}],"url":"https://fetch.spec.whatwg.org/#concept-response"},
-"f7b00a8b": {"dfnID":"f7b00a8b","dfnText":"header list (for response)","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-response-header-list"}],"title":"2.3. Do bytes and header list match metadataList?"}],"url":"https://fetch.spec.whatwg.org/#concept-response-header-list"},
-"f937b7b6": {"dfnID":"f937b7b6","dfnText":"continue","external":true,"refSections":[{"refs":[{"id":"ref-for-iteration-continue"}],"title":"2.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#iteration-continue"},
-"http-headerdef-integrity": {"dfnID":"http-headerdef-integrity","dfnText":"Integrity","external":false,"refSections":[],"url":"#http-headerdef-integrity"},
-"valid-sri-hashing-algorithm-token": {"dfnID":"valid-sri-hashing-algorithm-token","dfnText":"valid SRI hashing algorithm token","external":false,"refSections":[{"refs":[{"id":"ref-for-valid-sri-hashing-algorithm-token"}],"title":"2.2. Parse metadata."}],"url":"#valid-sri-hashing-algorithm-token"},
-"valid-sri-signature-algorithm-token": {"dfnID":"valid-sri-signature-algorithm-token","dfnText":"valid SRI signature algorithm token","external":false,"refSections":[{"refs":[{"id":"ref-for-valid-sri-signature-algorithm-token"}],"title":"2.2. Parse metadata."}],"url":"#valid-sri-signature-algorithm-token"},
-};
-
-document.addEventListener("DOMContentLoaded", ()=>{
-    genAllDfnPanels();
-
-    document.body.addEventListener("click", (e) => {
-        // If not handled already, just hide all dfn panels.
-        hideAllDfnPanels();
-    });
-});
-
-window.addEventListener("resize", () => {
-    // Pin any visible dfn panel
-    queryAll(".dfn-panel.on, .dfn-panel.activated").forEach(el=>positionDfnPanel(el));
-});
-
-function genAllDfnPanels() {
-    for(const panelData of Object.values(dfnPanelData)) {
-        const dfnID = panelData.dfnID;
-        const dfn = document.getElementById(dfnID);
-        if(!dfn) {
-            console.log(`Can't find dfn#${dfnID}.`, panelData);
-            continue;
-        }
-        dfn.panelData = panelData;
-        insertDfnPopupAction(dfn);
-    }
-}
-
-function genDfnPanel(dfn, { dfnID, url, dfnText, refSections, external }) {
-    const dfnPanel = mk.aside({
-        class: "dfn-panel on",
-        id: `infopanel-for-${dfnID}`,
-        "data-for": dfnID,
-        "aria-labelled-by":`infopaneltitle-for-${dfnID}`,
-        },
-        mk.span({id:`infopaneltitle-for-${dfnID}`, style:"display:none"},
-            `Info about the '${dfnText}' ${external?"external":""} reference.`),
-        mk.a({href:url, class:"dfn-link"}, url),
-        refSections.length == 0 ? [] :
-            mk.b({}, "Referenced in:"),
-            mk.ul({},
-                ...refSections.map(section=>
-                    mk.li({},
-                        ...section.refs.map((ref, refI)=>
-                            [
-                                mk.a({ href: `#${ref.id}` },
-                                    (refI == 0) ? section.title : `(${refI + 1})`
-                                ),
-                                " ",
-                            ]
-                        ),
-                    ),
-                ),
-            ),
-        genLinkingSyntaxes(dfn),
-    );
-
-    dfnPanel.addEventListener('click', (event) => {
-        if (event.target.nodeName == 'A') {
-            scrollToTargetAndHighlight(event);
-            pinDfnPanel(dfnPanel);
-        }
-        event.stopPropagation();
-        refocusOnTarget(event);
-    });
-    dfnPanel.addEventListener('keydown', (event) => {
-        if(event.keyCode == 27) { // Escape key
-            hideDfnPanel({dfnPanel});
-            event.stopPropagation();
-            event.preventDefault();
-        }
-    });
-
-    dfnPanel.dfn = dfn;
-    dfn.dfnPanel = dfnPanel;
-    return dfnPanel;
-}
-
-
-
-function hideAllDfnPanels() {
-    // Delete the currently-active dfn panel.
-    queryAll(".dfn-panel").forEach(dfnPanel=>hideDfnPanel({dfnPanel}));
-}
-
-function showDfnPanel(dfn) {
-    hideAllDfnPanels(); // Only display one at a time.
-
-    dfn.setAttribute("aria-expanded", "true");
-
-    const dfnPanel = genDfnPanel(dfn, dfn.panelData);
-
-    // Give the dfn a unique tabindex, and then
-    // give all the tabbable panel bits successive indexes.
-    let tabIndex = 100;
-    dfn.tabIndex = tabIndex++;
-    const tabbable = dfnPanel.querySelectorAll(":is(a, button)");
-    for (const el of tabbable) {
-        el.tabIndex = tabIndex++;
-    }
-
-    append(document.body, dfnPanel);
-    positionDfnPanel(dfnPanel);
-}
-
-function positionDfnPanel(dfnPanel) {
-    const dfn = dfnPanel.dfn;
-    const dfnPos = getBounds(dfn);
-    dfnPanel.style.top = dfnPos.bottom + "px";
-    dfnPanel.style.left = dfnPos.left + "px";
-
-    const panelPos = dfnPanel.getBoundingClientRect();
-    const panelMargin = 8;
-    const maxRight = document.body.parentNode.clientWidth - panelMargin;
-    if (panelPos.right > maxRight) {
-        const overflowAmount = panelPos.right - maxRight;
-        const newLeft = Math.max(panelMargin, dfnPos.left - overflowAmount);
-        dfnPanel.style.left = newLeft + "px";
-    }
-}
-
-function pinDfnPanel(dfnPanel) {
-    // Switch it to "activated" state, which pins it.
-    dfnPanel.classList.add("activated");
-    dfnPanel.style.position = "fixed";
-    dfnPanel.style.left = null;
-    dfnPanel.style.top = null;
-}
-
-function hideDfnPanel({dfn, dfnPanel}) {
-    if(!dfnPanel) dfnPanel = dfn.dfnPanel;
-    if(!dfn) dfn = dfnPanel.dfn;
-    dfn.dfnPanel = undefined;
-    dfnPanel.dfn = undefined;
-    dfn.setAttribute("aria-expanded", "false");
-    dfn.tabIndex = undefined;
-    dfnPanel.remove()
-}
-
-function toggleDfnPanel(dfn) {
-    if(dfn.dfnPanel) {
-        hideDfnPanel(dfn);
-    } else {
-        showDfnPanel(dfn);
-    }
-}
-
-function insertDfnPopupAction(dfn) {
-    dfn.setAttribute('role', 'button');
-    dfn.setAttribute('aria-expanded', 'false')
-    dfn.tabIndex = 0;
-    dfn.classList.add('has-dfn-panel');
-    dfn.addEventListener('click', (event) => {
-        toggleDfnPanel(dfn);
-        event.stopPropagation();
-    });
-    dfn.addEventListener('keypress', (event) => {
-        const kc = event.keyCode;
-        // 32->Space, 13->Enter
-        if(kc == 32 || kc == 13) {
-            toggleDfnPanel(dfn);
-            event.stopPropagation();
-            event.preventDefault();
-        }
-    });
-}
-
-function refocusOnTarget(event) {
-    const target = event.target;
-    setTimeout(() => {
-        // Refocus on the event.target element.
-        // This is needed after browser scrolls to the destination.
-        target.focus();
-    });
-}
-
-// TODO: shared util
-// Returns the root-level absolute position {left and top} of element.
-function getBounds(el, relativeTo=document.body) {
-    const relativeRect = relativeTo.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    const top = elRect.top - relativeRect.top;
-    const left = elRect.left - relativeRect.left;
-    return {
-        top,
-        left,
-        bottom: top + elRect.height,
-        right: left + elRect.width,
-    }
-}
-
-function scrollToTargetAndHighlight(event) {
-    let hash = event.target.hash;
-    if (hash) {
-        hash = decodeURIComponent(hash.substring(1));
-        const dest = document.getElementById(hash);
-        if (dest) {
-            dest.classList.add('highlighted');
-            setTimeout(() => dest.classList.remove('highlighted'), 1000);
-        }
-    }
-}
-
-// Functions, divided by link type, that wrap an autolink's
-// contents with the appropriate outer syntax.
-// Alternately, a string naming another type they format
-// the same as.
-function needsFor(type) {
-    switch(type) {
-        case "descriptor":
-        case "value":
-        case "element-attr":
-        case "attr-value":
-        case "element-state":
-        case "method":
-        case "constructor":
-        case "argument":
-        case "attribute":
-        case "const":
-        case "dict-member":
-        case "event":
-        case "enum-value":
-        case "stringifier":
-        case "serializer":
-        case "iterator":
-        case "maplike":
-        case "setlike":
-        case "state":
-        case "mode":
-        case "context":
-        case "facet": return true;
-
-        default: return false;
-    }
-}
-function refusesFor(type) {
-    switch(type) {
-        case "property":
-        case "element":
-        case "interface":
-        case "namespace":
-        case "callback":
-        case "dictionary":
-        case "enum":
-        case "exception":
-        case "typedef":
-        case "http-header":
-        case "permission": return true;
-
-        default: return false;
-    }
-}
-function linkFormatterFromType(type) {
-    switch(type) {
-        case 'scheme':
-        case 'permission':
-        case 'dfn': return (text) => `[=${text}=]`;
-
-        case 'abstract-op': return (text) => `[\$${text}\$]`;
-
-        case 'function':
-        case 'at-rule':
-        case 'selector':
-        case 'value': return (text) => `''${text}''`;
-
-        case 'http-header': return (text) => `[:${text}:]`;
-
-        case 'interface':
-        case 'constructor':
-        case 'method':
-        case 'argument':
-        case 'attribute':
-        case 'callback':
-        case 'dictionary':
-        case 'dict-member':
-        case 'enum':
-        case 'enum-value':
-        case 'exception':
-        case 'const':
-        case 'typedef':
-        case 'stringifier':
-        case 'serializer':
-        case 'iterator':
-        case 'maplike':
-        case 'setlike':
-        case 'extended-attribute':
-        case 'event':
-        case 'idl': return (text) => `{{${text}}}`;
-
-        case 'element-state':
-        case 'element-attr':
-        case 'attr-value':
-        case 'element': return (element) => `<{${element}}>`;
-
-        case 'grammar': return (text) => `${text} (within a <pre class=prod>)`;
-
-        case 'type': return (text)=> `<<${text}>>`;
-
-        case 'descriptor':
-        case 'property': return (text) => `'${text}'`;
-
-        default: return;
-    };
-};
-
-function genLinkingSyntaxes(dfn) {
-    if(dfn.tagName != "DFN") return;
-
-    const type = dfn.getAttribute('data-dfn-type');
-    if(!type) {
-        console.log(`<dfn> doesn't have a data-dfn-type:`, dfn);
-        return [];
-    }
-
-    // Return a function that wraps link text based on the type
-    const linkFormatter = linkFormatterFromType(type);
-    if(!linkFormatter) {
-        console.log(`<dfn> has an unknown data-dfn-type:`, dfn);
-        return [];
-    }
-
-    let ltAlts;
-    if(dfn.hasAttribute('data-lt')) {
-        ltAlts = dfn.getAttribute('data-lt')
-            .split("|")
-            .map(x=>x.trim());
-    } else {
-        ltAlts = [dfn.textContent.trim()];
-    }
-    if(type == "type") {
-        // lt of "<foo>", but "foo" is the interior;
-        // <<foo/bar>> is how you write it with a for,
-        // not <foo/<bar>> or whatever.
-        for(var i = 0; i < ltAlts.length; i++) {
-            const lt = ltAlts[i];
-            const match = /<(.*)>/.exec(lt);
-            if(match) { ltAlts[i] = match[1]; }
-        }
-    }
-
-    let forAlts;
-    if(dfn.hasAttribute('data-dfn-for')) {
-        forAlts = dfn.getAttribute('data-dfn-for')
-            .split(",")
-            .map(x=>x.trim());
-    } else {
-        forAlts = [''];
-    }
-
-    let linkingSyntaxes = [];
-    if(!needsFor(type)) {
-        for(const lt of ltAlts) {
-            linkingSyntaxes.push(linkFormatter(lt));
-        }
-    }
-    if(!refusesFor(type)) {
-        for(const f of forAlts) {
-            linkingSyntaxes.push(linkFormatter(`${f}/${ltAlts[0]}`))
-        }
-    }
-    return [
-        mk.b({}, 'Possible linking syntaxes:'),
-        mk.ul({},
-            ...linkingSyntaxes.map(link => {
-                const copyLink = async () =>
-                    await navigator.clipboard.writeText(link);
-                return mk.li({},
-                    mk.div({ class: 'link-item' },
-                        mk.button({
-                            class: 'copy-icon', title: 'Copy',
-                            type: 'button',
-                            _onclick: copyLink,
-                            tabindex: 0,
-                        }, mk.span({ class: 'icon' }) ),
-                        mk.span({}, link)
-                    )
-                );
-            })
-        )
-    ];
-}
-}
-</script>
-<script>/* Boilerplate: script-ref-hints */
-"use strict";
-{
-let refsData = {
-"#abstract-opdef-validating-a-signature": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"validating a signature","type":"abstract-op","url":"#abstract-opdef-validating-a-signature"},
-"#valid-sri-hashing-algorithm-token": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"valid sri hashing algorithm token","type":"dfn","url":"#valid-sri-hashing-algorithm-token"},
-"#valid-sri-signature-algorithm-token": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"valid sri signature algorithm token","type":"dfn","url":"#valid-sri-signature-algorithm-token"},
-"https://fetch.spec.whatwg.org/#concept-header-list": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"header list","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-header-list"},
-"https://fetch.spec.whatwg.org/#concept-header-list-get-decode-split": {"export":true,"for_":["header list"],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"getting, decoding, and splitting","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-header-list-get-decode-split"},
-"https://fetch.spec.whatwg.org/#concept-request-integrity-metadata": {"export":true,"for_":["request"],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"integrity metadata","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-request-integrity-metadata"},
-"https://fetch.spec.whatwg.org/#concept-response": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"response","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-response"},
-"https://fetch.spec.whatwg.org/#concept-response-header-list": {"export":true,"for_":["response"],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"header list","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-response-header-list"},
-"https://infra.spec.whatwg.org/#ascii-lowercase": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"ascii lowercase","type":"dfn","url":"https://infra.spec.whatwg.org/#ascii-lowercase"},
-"https://infra.spec.whatwg.org/#byte-sequence": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"byte sequence","type":"dfn","url":"https://infra.spec.whatwg.org/#byte-sequence"},
-"https://infra.spec.whatwg.org/#iteration-break": {"export":true,"for_":["iteration"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"break","type":"dfn","url":"https://infra.spec.whatwg.org/#iteration-break"},
-"https://infra.spec.whatwg.org/#iteration-continue": {"export":true,"for_":["iteration"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"continue","type":"dfn","url":"https://infra.spec.whatwg.org/#iteration-continue"},
-"https://infra.spec.whatwg.org/#list-append": {"export":true,"for_":["list"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"append","type":"dfn","url":"https://infra.spec.whatwg.org/#list-append"},
-"https://infra.spec.whatwg.org/#list-contain": {"export":true,"for_":["list","stack","queue","set"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"contain","type":"dfn","url":"https://infra.spec.whatwg.org/#list-contain"},
-"https://infra.spec.whatwg.org/#list-empty": {"export":true,"for_":["list","stack","queue","set"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"empty","type":"dfn","url":"https://infra.spec.whatwg.org/#list-empty"},
-"https://infra.spec.whatwg.org/#ordered-map": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"ordered map","type":"dfn","url":"https://infra.spec.whatwg.org/#ordered-map"},
-"https://infra.spec.whatwg.org/#set-append": {"export":true,"for_":["set"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"append","type":"dfn","url":"https://infra.spec.whatwg.org/#set-append"},
-"https://infra.spec.whatwg.org/#strictly-split": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"strictly split","type":"dfn","url":"https://infra.spec.whatwg.org/#strictly-split"},
-"https://infra.spec.whatwg.org/#string": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"string","type":"dfn","url":"https://infra.spec.whatwg.org/#string"},
-"https://w3c.github.io/i18n-glossary/#dfn-ascii-case-insensitive": {"export":true,"for_":[],"level":"1","normative":false,"shortname":"i18n-glossary","spec":"i18n-glossary","status":"current","text":"ascii case-insensitive matching","type":"dfn","url":"https://w3c.github.io/i18n-glossary/#dfn-ascii-case-insensitive"},
-"https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"sri","spec":"sri","status":"current","text":"hash-expression","type":"grammar","url":"https://w3c.github.io/webappsec-subresource-integrity/#grammardef-hash-expression"},
-"https://www.rfc-editor.org/rfc/rfc9651#name-introduction": {"export":true,"for_":[],"level":"","normative":true,"shortname":"rfc8941","spec":"rfc8941","status":"anchor-block","text":"structured header","type":"dfn","url":"https://www.rfc-editor.org/rfc/rfc9651#name-introduction"},
-"https://www.rfc-editor.org/rfc/rfc9651#name-list": {"export":true,"for_":["structured header"],"level":"","normative":true,"shortname":"rfc8941","spec":"rfc8941","status":"anchor-block","text":"list","type":"dfn","url":"https://www.rfc-editor.org/rfc/rfc9651#name-list"},
-"https://www.rfc-editor.org/rfc/rfc9651#name-tokens": {"export":true,"for_":["structured header"],"level":"","normative":true,"shortname":"rfc8941","spec":"rfc8941","status":"anchor-block","text":"token","type":"dfn","url":"https://www.rfc-editor.org/rfc/rfc9651#name-tokens"},
-};
-
-function mkRefHint(link, ref) {
-    const linkText = link.textContent;
-    let dfnTextElements = '';
-    if (ref.text != linkText) {
-        dfnTextElements =
-            mk.li({},
-                mk.b({}, "Term: "),
-                mk.span({}, ref.text)
-            );
-    }
-    const forList = ref.for_;
-    let forListElements;
-    if(forList.length == 0) {
-        forListElements = [];
-    } else if(forList.length == 1) {
-        forListElements = mk.li({},
-            mk.b({}, "For: "),
-            mk.span({}, forList[0]),
-        );
-    } else {
-        forListElements = mk.li({},
-            mk.b({}, "For: "),
-            mk.ul({},
-                ...forList.map(forItem =>
-                    mk.li({},
-                        mk.span({}, forItem)
-                    ),
-                ),
-            ),
-        );
-    }
-    const url = ref.url;
-    const safeUrl = encodeURIComponent(url);
-    const hintPanel = mk.aside({
-        class: "ref-hint",
-        id: `ref-hint-for-${safeUrl}`,
-        "data-for": url,
-        "aria-labelled-by": `ref-hint-for-${safeUrl}`,
-    },
-        mk.ul({},
-            dfnTextElements,
-            mk.li({},
-                mk.b({}, "URL: "),
-                mk.a({ href: url, class: "ref" }, url),
-            ),
-            mk.li({},
-                mk.b({}, "Type: "),
-                mk.span({}, `${ref.type}`),
-            ),
-            mk.li({},
-                mk.b({}, "Spec: "),
-                mk.span({}, `${ref.spec ? ref.spec : ''}`),
-            ),
-            forListElements
-        ),
-    );
-    hintPanel.forLink = link;
-    setupRefHintEventListeners(link, hintPanel);
-    return hintPanel;
-}
-
-function hideAllRefHints() {
-    queryAll(".ref-hint").forEach(el=>hideRefHint(el));
-}
-
-function hideRefHint(refHint) {
-    const link = refHint.forLink;
-    link.setAttribute("aria-expanded", "false");
-    if(refHint.teardownEventListeners) {
-        refHint.teardownEventListeners();
-    }
-    refHint.remove();
-}
-
-function showRefHint(link) {
-    if(link.classList.contains("dfn-link")) return;
-    const url = link.getAttribute("href");
-    const ref = refsData[url];
-    if(!ref) return;
-
-    hideAllRefHints(); // Only display one at this time.
-
-    const refHint = mkRefHint(link, ref);
-    append(document.body, refHint);
-    link.setAttribute("aria-expanded", "true");
-    positionRefHint(refHint);
-}
-
-function setupRefHintEventListeners(link, refHint) {
-    if (refHint.teardownEventListeners) return;
-    // Add event handlers to hide the refHint after the user moves away
-    // from both the link and refHint, if not hovering either within one second.
-    let timeout = null;
-    const startHidingRefHint = (event) => {
-        if (timeout) {
-            clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => {
-            hideRefHint(refHint);
-        }, 1000);
-    }
-    const resetHidingRefHint = (event) => {
-        if (timeout) clearTimeout(timeout);
-        timeout = null;
-    };
-    link.addEventListener("mouseleave", startHidingRefHint);
-    link.addEventListener("mouseenter", resetHidingRefHint);
-    link.addEventListener("blur", startHidingRefHint);
-    link.addEventListener("focus", resetHidingRefHint);
-    refHint.addEventListener("mouseleave", startHidingRefHint);
-    refHint.addEventListener("mouseenter", resetHidingRefHint);
-    refHint.addEventListener("blur", startHidingRefHint);
-    refHint.addEventListener("focus", resetHidingRefHint);
-
-    refHint.teardownEventListeners = () => {
-        // remove event listeners
-        resetHidingRefHint();
-        link.removeEventListener("mouseleave", startHidingRefHint);
-        link.removeEventListener("mouseenter", resetHidingRefHint);
-        link.removeEventListener("blur", startHidingRefHint);
-        link.removeEventListener("focus", resetHidingRefHint);
-        refHint.removeEventListener("mouseleave", startHidingRefHint);
-        refHint.removeEventListener("mouseenter", resetHidingRefHint);
-        refHint.removeEventListener("blur", startHidingRefHint);
-        refHint.removeEventListener("focus", resetHidingRefHint);
-    };
-}
-
-function positionRefHint(refHint) {
-    const link = refHint.forLink;
-    const linkPos = getBounds(link);
-    refHint.style.top = linkPos.bottom + "px";
-    refHint.style.left = linkPos.left + "px";
-
-    const panelPos = refHint.getBoundingClientRect();
-    const panelMargin = 8;
-    const maxRight = document.body.parentNode.clientWidth - panelMargin;
-    if (panelPos.right > maxRight) {
-        const overflowAmount = panelPos.right - maxRight;
-        const newLeft = Math.max(panelMargin, linkPos.left - overflowAmount);
-        refHint.style.left = newLeft + "px";
-    }
-}
-
-// TODO: shared util
-// Returns the root-level absolute position {left and top} of element.
-function getBounds(el, relativeTo=document.body) {
-    const relativeRect = relativeTo.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    const top = elRect.top - relativeRect.top;
-    const left = elRect.left - relativeRect.left;
-    return {
-        top,
-        left,
-        bottom: top + elRect.height,
-        right: left + elRect.width,
-    }
-}
-
-function showRefHintListener(e) {
-    // If the target isn't in a link (or is a link),
-    // just ignore it.
-    let link = e.target.closest("a");
-    if(!link) return;
-
-    // If the target is in a ref-hint panel
-    // (aka a link in the already-open one),
-    // also just ignore it.
-    if(link.closest(".ref-hint")) return;
-
-    // Otherwise, show the panel for the link.
-    showRefHint(link);
-}
-
-function hideAllHintsListener(e) {
-    // If the click is inside a ref-hint panel, ignore it.
-    if(e.target.closest(".ref-hint")) return;
-    // Otherwise, close all the current panels.
-    hideAllRefHints();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    document.body.addEventListener("mousedown", showRefHintListener);
-    document.body.addEventListener("focus", showRefHintListener);
-
-    document.body.addEventListener("click", hideAllHintsListener);
-});
-
-window.addEventListener("resize", () => {
-    // Hide any open ref hint.
-    hideAllRefHints();
-});
 }
 </script>
 <script>/* Boilerplate: script-var-click-highlighting */
-"use strict";
-{
 /*
 Color-choosing design:
 
-* Colors are ordered by goodness.
-* On clicking a var, give it the earliest color
-    with the lowest usage in the algorithm.
-* On re-clicking, re-use the var's most recent color
-    if that's not currently being used elsewhere.
+Colors are ordered by goodness.
+Each color has a usage count (initially zero).
+Each variable has a last-used color.
+
+* If the var has a last-used color, and that color's usage is 0,
+    return that color.
+* Otherwise, return the lowest-indexed color with the lowest usage.
+    Increment the color's usage and set it as the last-used color
+    for that var.
+* On unclicking, decrement usage of the color.
 */
-
-const COLOR_COUNT = 7;
-
-document.addEventListener("click", e=>{
-    if(e.target.nodeName == "VAR") {
-        highlightSameAlgoVars(e.target);
-    }
-});
-
-function highlightSameAlgoVars(v) {
-    // Find the algorithm container.
-    let algoContainer = findAlgoContainer(v);
-
-    // Not highlighting document-global vars,
-    // too likely to be unrelated.
-    if(algoContainer == null) return;
-
-    const varName = nameFromVar(v);
-    if(!v.hasAttribute("data-var-color")) {
-        const newColor = chooseHighlightColor(algoContainer, v);
-        for(const el of algoContainer.querySelectorAll("var")) {
-            if(nameFromVar(el) == varName) {
-                el.setAttribute("data-var-color", newColor);
-                el.setAttribute("data-var-last-color", newColor);
+"use strict";
+{
+    document.addEventListener("click", e=>{
+        if(e.target.nodeName == "VAR") {
+            highlightSameAlgoVars(e.target);
+        }
+    });
+    const indexCounts = new Map();
+    const indexNames = new Map();
+    function highlightSameAlgoVars(v) {
+        // Find the algorithm container.
+        let algoContainer = null;
+        let searchEl = v;
+        while(algoContainer == null && searchEl != document.body) {
+            searchEl = searchEl.parentNode;
+            if(searchEl.hasAttribute("data-algorithm")) {
+                algoContainer = searchEl;
             }
         }
-    } else {
+
+        // Not highlighting document-global vars,
+        // too likely to be unrelated.
+        if(algoContainer == null) return;
+
+        const algoName = algoContainer.getAttribute("data-algorithm");
+        const varName = getVarName(v);
+        const addClass = !v.classList.contains("selected");
+        let highlightClass = null;
+        if(addClass) {
+            const index = chooseHighlightIndex(algoName, varName);
+            indexCounts.get(algoName)[index] += 1;
+            indexNames.set(algoName+"///"+varName, index);
+            highlightClass = nameFromIndex(index);
+        } else {
+            const index = previousHighlightIndex(algoName, varName);
+            indexCounts.get(algoName)[index] -= 1;
+            highlightClass = nameFromIndex(index);
+        }
+
+        // Find all same-name vars, and toggle their class appropriately.
         for(const el of algoContainer.querySelectorAll("var")) {
-            if(nameFromVar(el) == varName) {
-                el.removeAttribute("data-var-color");
+            if(getVarName(el) == varName) {
+                el.classList.toggle("selected", addClass);
+                el.classList.toggle(highlightClass, addClass);
             }
         }
     }
-}
-function findAlgoContainer(el) {
-    while(el != document.body) {
-        if(el.hasAttribute("data-algorithm")) return el;
-        el = el.parentNode;
+    function getVarName(el) {
+        return el.textContent.replace(/(\s|\xa0)+/, " ").trim();
     }
-    return null;
-}
-function nameFromVar(el) {
-    return el.textContent.replace(/(\s|\xa0)+/g, " ").trim();
-}
-function colorCountsFromContainer(container) {
-    const namesFromColor = Array.from({length:COLOR_COUNT}, x=>new Set());
-    for(let v of container.querySelectorAll("var[data-var-color]")) {
-        let color = +v.getAttribute("data-var-color");
-        namesFromColor[color].add(nameFromVar(v));
-    }
+    function chooseHighlightIndex(algoName, varName) {
+        let indexes = null;
+        if(indexCounts.has(algoName)) {
+            indexes = indexCounts.get(algoName);
+        } else {
+            // 7 classes right now
+            indexes = [0,0,0,0,0,0,0];
+            indexCounts.set(algoName, indexes);
+        }
 
-    return namesFromColor.map(x=>x.size);
-}
-function leastUsedColor(colors) {
-    // Find the earliest color with the lowest count.
-    let minCount = Infinity;
-    let minColor = null;
-    for(var i = 0; i < colors.length; i++) {
-        if(colors[i] < minCount) {
-            minColor = i;
-            minCount = colors[i];
+        // If the element was recently unclicked,
+        // *and* that color is still unclaimed,
+        // give it back the same color.
+        const lastIndex = previousHighlightIndex(algoName, varName);
+        if(indexes[lastIndex] === 0) return lastIndex;
+
+        // Find the earliest index with the lowest count.
+        const minCount = Math.min.apply(null, indexes);
+        let index = null;
+        for(var i = 0; i < indexes.length; i++) {
+            if(indexes[i] == minCount) {
+                return i;
+            }
         }
     }
-    return minColor;
-}
-function chooseHighlightColor(container, v) {
-    const colorCounts = colorCountsFromContainer(container);
-    if(v.hasAttribute("data-var-last-color")) {
-        let color = +v.getAttribute("data-var-last-color");
-        if(colorCounts[color] == 0) return color;
+    function previousHighlightIndex(algoName, varName) {
+        return indexNames.get(algoName+"///"+varName);
     }
-    return leastUsedColor(colorCounts);
-}
+    function nameFromIndex(index) {
+        return "selected" + index;
+    }
 }
 </script>

@@ -17,13 +17,21 @@ Markup Shorthands: markdown yes, css no
 Toggle Diffs: true
 </pre>
 <pre class="anchors">
-# TODO: Make this RFC9651 once specref updates.
-urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC8941
+urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC9651
     text: structured header; url: #name-introduction
     for: structured header
         text: token; url: #name-tokens
         text: list; url: #name-list
 
+</pre>
+<pre class="biblio">
+{
+  "PCIv4-SRI-Gaps": {
+    "authors": [ "Yoav Weiss", "Ilya Grigorik" ],
+    "href": "https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing",
+    "title": "PCIv4: SRI gaps and opportunities"
+  }
+}
 </pre>
 
 Introduction {#intro}
@@ -36,15 +44,17 @@ a SHA-256 hash of a resource's content, any malicious or accidental deviation
 will be blocked before being executed. This is an excellent defense, but its
 deployment turns out to be brittle. If the resource living at a specific URL
 is dynamic, then content-based integrity checks require pages and the
-resources they depend upon to update in lockstep.
+resources they depend upon to update in lockstep. This turns out to be
+~impossible in practice, which makes SRI less usable than it could be.
 
-Particularly as the industry becomes more interested in supply-chain integrity,
-it seems reasonable to explore alternatives to static hashes that could allow
-wider deployment of these checks, and therefore better understanding of the
-application experiences that developers are _actually_ composing. 
+Particularly as the industry becomes more interested in supply-chain integrity
+(see Shopify's [[PCIv4-SRI-Gaps]], for instance), it seems reasonable to explore
+alternatives to static hashes that could allow wider deployment of these checks,
+and therefore better understanding of the application experiences that
+developers are _actually_ composing. 
 
-This document outlines the changes that would be necessary to HTML, Fetch, and
-SRI in order to support the simplest version of a signature-based check:
+This document outlines the changes that would be necessary to [[Fetch]], and
+[[SRI]] in order to support the simplest version of a signature-based check:
 
 <div class="example" id="basic-example">
     Pages will embed an Ed25519 public key assertion into `integrity`
@@ -227,7 +237,7 @@ To <dfn abstract-op lt="validating a signature">validate a signature</dfn> using
 a [=byte sequence=] |bytes|, a [=/header list=] |header list|, and [=string=] |public key|, execute the following
 steps. They return `valid` if the signature is valid, or `invalid` otherwise.
 
-1.  If |algorithm| is an [=ASCII case-insensitive match=] for "ed25519", then:
+1.  If |algorithm| is an [=ASCII case-insensitive=] match for "ed25519", then:
     1.  Let |signatures| be the result of [=header list/getting, decoding, and splitting=] ``` `Integrity` ``` from |header list|.
     2.  If |signatures| is `null`, return `invalid`.
     3.  For each |signature| in |signatures|:
@@ -248,9 +258,8 @@ steps. They return `valid` if the signature is valid, or `invalid` otherwise.
 
 The <dfn http-header>`Integrity`</dfn> HTTP response header specifies a
 [=integrity metadata=] for a given [=/response=]. It is a [=Structured Header=]
-whose value MUST be a [=structured header/list=] of [=structured header/token=] [[!RFC8941]].
+whose value MUST be a [=structured header/list=] of [=structured header/token=] [[!RFC9651]].
 
-ISSUE: Switch to RFC9651 once specref updates, both here and in the anchors block above.
 
 Valid list values match the <a grammar>`hash-expression`</a> grammar as defined in [[!SRI]].
 
@@ -275,13 +284,101 @@ determine a priori that the keys don't match...
 
 ISSUE: Would it be useful to extend this header's behavior to include client-side
 content validation for hash algorithms? I think it's arguably outside SRI's threat model,
-but you could imagine an attacker could change content but not headers, which would make
-enforcement of an `Integrity: sha256-[...]` header on the client meaningful.
+but you could imagine an attacker that could change content but not headers, which would
+make enforcement of an `Integrity: sha256-[...]` header on the client meaningful for a
+variety of resources (including top-level documents, which would help provide a
+web-accessible explanation for some packaging behavior).
 
-
-TODO:
 
 Patches to Fetch {#monkey-patch-fetch}
 --------------------------------------
 
-Add the response headers to step 22.3.1 of Main Fetch.
+The only change we need to make to Fetch is to pass additional information into the
+matching algorithm as redefined above.
+
+Step 22.3.1 of [[Fetch#main-fetch]] should be updated as follows:
+
+1.  If <var ignore>bytes</var> do not match <var ignore>request</var>’s
+    [=request/integrity metadata=]<ins> and <var ignore>response</var>'s
+    [=response/header list=]</ins>, then run processBodyError and
+    abort these steps. [[!SRI]]
+
+
+Deployment Considerations {#deployment}
+=======================================
+
+Key Management {#deployment-key-management}
+-------------------------------------------
+
+Key management is hard. This proposal doesn't change that.
+
+It aims instead to be very lightweight. Perhaps it errs in that direction, but
+the goal is to be the simplest possible mechanimsm that supports known
+use-cases.
+
+A different take on this proposal could be arbitrarily complex, replicating
+aspects of the web PKI to chain trust, allow delegation, etc. That seems like
+more than we need today, and substantially more work. Perhaps something small
+is good enough?
+
+
+Security Considerations {#security}
+===================================
+
+Secure Contexts {#security-secure-context}
+------------------------------------------
+
+SRI does not require a secure context, nor does it apply only to resources
+delivered via encrypted and authenticated channels. That means that it's
+entirely possible to believe that SRI offers a level of protection that it
+simply cannot aspire to. Signatures do not change that calculus.
+
+Thus, it remains recommended that developers rely on integrity metadata only
+within [=secure contexts=]. See also [[SECURING-WEB]].
+
+
+Provenance, not Content {#security-provenance-not-content}
+----------------------------------------------------------
+
+Signatures do not provide any assurance that the content delivered is the
+content a developer expected. They ensure only that the content was signed
+by the expected entity. This could allow resources signed by the same
+entity to be substituted for one another in ways that could violate developer
+expectations.
+
+In some cases, developers can defend against this confusion by using hashes
+instead of signatures (or, as discussed above, both hashes *and* signatures).
+Servers can likewise defend against this risk by minting fresh keys for each
+interesting resource. This, of course, creates more key-management problems,
+but it might be a reasonable tradeoff.
+
+
+Rollback Attacks {#security-rollback}
+-------------------------------------
+
+The simple signature checks described in this document *only* provide proof of
+provenance, ensuring that a given resource was at one point signed by someone
+in posession of the relevant private key. It does not say anything about whether
+that entity intended to deliver a given resource to you *now*. In other words,
+these checks do not prevent rollback/downgrade attacks in which old, known-bad
+versions of a resource might be delivered, along with their known signatures.
+
+This might not be a problem, depending on developers' use cases. If it becomes
+a problem, it seems possible to add mitigations in the future. These could take
+various forms, ranging from enforcing freshness by signing additional timestamps
+through to sending a random challenge along with requests that would be included
+in the signature.
+
+We'd want to evaluate the tradeoffs in these approaches (the latter, for example,
+makes offline signing difficult), and might wish to offer serveral options.
+
+
+Privacy Considerations {#privacy}
+=================================
+
+Given that the validation of a response's signature continues to require the
+response to opt-into legibility via CORS, this mechanism does not seem to add
+any new data channels from the server to the client. The choice of private
+key used to sign the resource is potentially interesting, but doesn't seem to
+offer any capability that isn't possible more directly by altering the resource
+body or headers.
