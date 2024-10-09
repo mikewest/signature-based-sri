@@ -15,12 +15,6 @@ the moment:
     if it contains known-good content. For example, the user agent ensures that script loaded via
     "`<script src='whatever.js' integrity='sha256-...'>`" will only execute when a SHA256 hash of
     the script's content matches the specified integrity attribute.
-
-*   Content Security Policy can layer on top of Subresource Integrity to ensure that [integrity
-    checks are required][require-sri-for] for script execution, and [specifying a list of acceptable
-    hashes][external]. For example, the policy "`script-src 'sha256-abc' 'sha256-zyx';
-    require-sri-for script`" would ensure that script executes only when it matches one of the
-    specified hashes, regardless of the server that delivered it.
  
 These existing mechanisms are effective, but they also turn out to be somewhat onerous for both
 development and deployment. Policies that restrict sources of content need to be quite granular in
