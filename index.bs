@@ -361,6 +361,28 @@ more than we need today, and substantially more work. Perhaps something small
 is good enough?
 
 
+Key Rotation {#deployment-key-rotation}
+---------------------------------------
+
+Since this design relies on websites pinning a specific public key in the
+`integrity` attribute, this design does not easily support key rotation. If a
+signing key is compromised, there is no easy way to rotate the key and ensure
+that reliant websites check signatures against an updated public key.
+
+For now, we think this is probably enough. If the key is compromised, the
+security model falls back to the status quo web security model, meaning that
+the impact of a compromised key is limited. In the future if this does turn
+out to be a significant issue, we could also explore alternate designs that
+do support key rotation. One simple proposal could be adding support for the
+client to signal the requested public key in request headers, allowing
+different parties to specify different public keys. A more complex proposal
+could support automated key rotation.
+
+Note: This proposal does support pinning multiple keys for a single
+resource, so it will be possible to support rotation in a coordinated way
+without requiring each entity to move in lockstep.
+
+
 Security Considerations {#security}
 ===================================
 
