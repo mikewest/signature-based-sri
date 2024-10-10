@@ -31,6 +31,11 @@ urlPrefix: https://w3c.github.io/webappsec-subresource-integrity/; type: dfn; sp
     "authors": [ "Yoav Weiss", "Ilya Grigorik" ],
     "href": "https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing",
     "title": "PCIv4: SRI gaps and opportunities"
+  },
+  "ID.pardue-http-identity-digest": {
+    "authors": [ "Lucas Pardue" ],
+    "href": "https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html",
+    "title": "HTTP Identity Digest"
   }
 }
 </pre>
@@ -248,12 +253,10 @@ steps. They return `valid` if the signature is valid, or `invalid` otherwise.
 
 ### Integrity Header ### {#integrity-header}
 
-ISSUE: Rather than introducing this header, perhaps we could/should reuse
-`Content-Digest`? [[RFC9530]] It's unfortunate that SRI already introduced
-syntax distinct from what Structured Headers landed on, but that's probably
-not reason enough to invent a new header... It's not entirely clear to me
-whether that header's acting on the same content as SRI, though (e.g. does
-it perform the check prior to resolving content encoding?).
+ISSUE(16): Rather than introducing this header, perhaps we could/should reuse
+the `Identity-Digest` proposal [[ID.pardue-http-identity-digest]], along with
+the `Signature` and `Signature-Input` headers from [[RFC9421]]. That would
+avoid reinventing the wheel, and seems pretty reasonable.
 
 The <dfn http-header>`Integrity`</dfn> HTTP response header specifies a
 [=integrity metadata=] for a given [=/response=]. It is a [=Structured Header=]
