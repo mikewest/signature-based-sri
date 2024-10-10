@@ -22,7 +22,8 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC9651
     for: structured header
         text: token; url: #name-tokens
         text: list; url: #name-list
-
+urlPrefix: https://w3c.github.io/webappsec-subresource-integrity/; type: dfn; spec: SRI
+    text: valid SRI hash algorithm token
 </pre>
 <pre class="biblio">
 {
@@ -145,15 +146,14 @@ The following sections adjust algorithms accordingly.
 
 <h4 id="parsing" algorithm>Parse |metadata|.</h4>
 
-First, we'll newly define two sets of algorithm tokens:
+First, we'll define valid signature algorithms:
 
-*   <ins>A [=string=] |alg| is a <dfn>valid SRI hashing algorithm token</dfn>
-    if the [=ASCII lowercase=] of |alg| is [=set/contained=] within the set
-    « "sha256", "sha384", "sha512" ».</ins>
+*   <ins>The <dfn>valid SRI signature algorithm token set</dfn> is the
+    [=ordered set=] « "`ed25519`" » (corresponding to Ed25519 [[!RFC8032]]).</ins>
 
-*   <ins>A [=string=] |alg| is a <dfn>valid SRI signature algorithm token</dfn>
-    if the [=ASCII lowercase=] of |alg| is [=set/contained=] within the set
-    « "ed25519" ».</ins>
+*   <ins>A string is a <dfn>valid SRI signature algorithm token</dfn> if its
+    [=ASCII lowercase=] is [=set/contained=] in the
+    [=valid SRI signature algorithm token set=].
 
 Then, we'll adjust SRI's <dfn abstract-op>Parse |metadata|</dfn>. algorithm as
 follows:
@@ -166,28 +166,20 @@ of signature expressions which are likewise understood:
       «[ "hashes" → « », "signatures" → « » ]».</ins>
 2.  For each |item| returned by <a lt="strictly split">splitting</a>
     |metadata| on spaces:
-    1.  Let <del>|hash-with-opt-token-list|</del><ins>|expression-and-options|</ins> be the result of
+    1.  Let |expression-and-options| be the result of
         <a lt="strictly split">splitting</a> |item| on U+003F (?).
-    2.  Let <del>|hash-expression|</del><ins>|algorithm-expression|</ins> be <del>|hash-with-opt-token-list|</del><ins>|expression-and-options|</ins>[0].
+    2.  Let |algorithm-expression| be |expression-and-options|[0].
     3.  Let |base64-value| be the empty string.
-    4.  Let
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>
-        be the result of
-        <a lt="strictly split">splitting</a>
-        <del>|hash-expression|</del><ins>|algorithm-expression|</ins>
-        on U+002D (-).
-    5.  Let |algorithm| be 
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[0].
-    6.  If
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[1]
-        <a for=list>exists</a>, set |base64-value| to
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[1].
-    7.  <del>If |algorithm| is not a hash function recognized by the user agent, [=continue=].</del>
-    8.  <del>Let |metadata| be the ordered map  «["alg" → |algorithm|, "val" → |base64-value|]».
+    4.  Let |algorithm-and-value| be the result of
+        <a lt="strictly split">splitting</a> |algorithm-expression| on U+002D (-).
+    5.  Let |algorithm| be |algorithm-and-value|[0].
+    6.  If |algorithm-and-value|[1] <a for=list>exists</a>, set
+        |base64-value| to |algorithm-and-value|[1].
+    7.  <del>If |algorithm| is not a [=valid SRI hash algorithm token=], then [=iteration/continue=].</del>
+    8.  Let <del>|metadata|</del><ins>|data|</ins> be the ordered map  «["alg" → |algorithm|, "val" → |base64-value|]».</del>
     9.  <del><a for=list>Append</a> |metadata| to |result|.</del>
-    10. <ins>Let |data| be the ordered map «["`alg`" → |algorithm|, "`val`" → |base64-value|]».</ins>
-    11. <ins>If |algorithm| is a [=valid SRI hashing algorithm token=], then [=set/append=] |data| to |result|["`hashes`"].</ins>
-    12.  <ins>Otherwise, if |data| is a [=valid SRI signature algorithm token=], then [=set/append=] |metadata| to |result|["`signatures`"].</ins>
+    11. <ins>If |algorithm| is a [=valid SRI hash algorithm token=], then [=set/append=] |data| to |result|["`hashes`"].</ins>
+    12. <ins>Otherwise, if |algorithm| is a [=valid SRI signature algorithm token=], then [=set/append=] |data| to |result|["`signatures`"].</ins>
 3.  Return |result|.
 
 
