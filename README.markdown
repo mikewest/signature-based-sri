@@ -108,9 +108,12 @@ This mechanism has some interesting properties:
 *   **Key management is hard. Periodic key pinning suicides show that HPKP is a risky thing to
     deploy; doesn't this just replicate that problem in a different way?**
 
-    The key difference between HPKP and the mechanism proposed here is that HPKP has origin-wide
-    effect, and is irrevocable (as it kills a connection before the server is able to assert a new
-    key). This mechanism, on the other hand, is resource-specific. If a developer loses their key,
+    The key differences between HPKP and the mechanism proposed here are that HPKP (a) has
+    origin-wide effect, (b) is irrevocable (as it kills a connection before the server is able to
+    assert a new key), and (c) relies upon complex and unpredictable platform-/browser-specific
+    behavior (e.g., a website can pin to an intermediate CA that might not be used by all relevant
+    certificate verifiers). Signature-based SRI, on the other hand, is resource-specific,
+    non-persistent, and not based on PKI and chain-building. If a developer loses their key,
     they can generate a new key pair, use the new private key to generate new signature for their
     resources, and deliver the new public key along with the next response. Suicide seems unlikely
     because there's no built-in persistence.
