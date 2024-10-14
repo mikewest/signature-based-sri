@@ -2,8 +2,8 @@
 Title: Signature-based Integrity
 Shortname: signature-based-sri
 Level: none
-Status: w3c/UD
-Group: webappsec
+Status: w3c/CG-DRAFT
+Group: wicg
 Repository: mikewest/signature-based-sri
 URL: https://mikewest.github.io/signature-based-sri/
 Editor: Mike West, Google LLC., mkwst@google.com

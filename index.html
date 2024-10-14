@@ -1,13 +1,12 @@
 <!doctype html><html lang="en">
  <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <title>Signature-based Integrity</title>
-  <meta content="w3c/UD" name="w3c-status">
-  <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-UD" rel="stylesheet">
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+  <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="4e972252df9e657416f248ff8613ef34e12ada5c" name="revision">
+  <meta content="c3eb2819dca3240ed69f89ff09478b02c4f3d20f" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -748,28 +747,24 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Signature-based Integrity</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#UD">Unofficial Proposal Draft</a>, <time class="dt-updated" datetime="2024-10-14">14 October 2024</time></p>
-   <details open>
-    <summary>More details about this document</summary>
-    <div data-fill-with="spec-metadata">
-     <dl>
-      <dt>This version:
-      <dd><a class="u-url" href="https://mikewest.github.io/signature-based-sri/">https://mikewest.github.io/signature-based-sri/</a>
-      <dt>Feedback:
-      <dd><span><a href="mailto:public-webappsec@w3.org?subject=%5Bsignature-based-sri%5D%20YOUR%20TOPIC%20HERE">public-webappsec@w3.org</a> with subject line “<kbd>[signature-based-sri] <i data-lt>… message topic …</i></kbd>” (<a href="https://lists.w3.org/Archives/Public/public-webappsec/" rel="discussion">archives</a>)</span>
-      <dt>Issue Tracking:
-      <dd><a href="https://github.com/mikewest/signature-based-sri/issues/">GitHub</a>
-      <dd><a href="#issues-index">Inline In Spec</a>
-      <dt class="editor">Editor:
-      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:mkwst@google.com">Mike West</a> (<span class="p-org org">Google LLC.</span>)
-      <dt>Toggle Diffs:
-      <dd>
-       <label for="hidedel" id="hidedel-label">Hide deleted text</label>
-     </dl>
-    </div>
-   </details>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-10-14">14 October 2024</time></p>
+   <div data-fill-with="spec-metadata">
+    <dl>
+     <dt>This version:
+     <dd><a class="u-url" href="https://mikewest.github.io/signature-based-sri/">https://mikewest.github.io/signature-based-sri/</a>
+     <dt>Issue Tracking:
+     <dd><a href="https://github.com/mikewest/signature-based-sri/issues/">GitHub</a>
+     <dd><a href="#issues-index">Inline In Spec</a>
+     <dt class="editor">Editor:
+     <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:mkwst@google.com">Mike West</a> (<span class="p-org org">Google LLC.</span>)
+     <dt>Toggle Diffs:
+     <dd>
+      <label for="hidedel" id="hidedel-label">Hide deleted text</label>
+    </dl>
+   </div>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2024 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/policies/#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/policies/#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/copyright/software-license/" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply. </p>
+   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2024 the Contributors to the Signature-based Integrity Specification, published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>.
+A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/">summary</a> is available. </p>
    <hr title="Separator for header">
   </div>
   <div class="p-summary" data-fill-with="abstract">
@@ -779,8 +774,15 @@ integrity checks. These are conceptually similar to the
 content-based checks currently defined, but have different
 properties that seem interesting to explore.</p>
   </div>
-  <h2 class="no-num no-toc no-ref heading settled" id="sotd"><span class="content">Status of this document</span></h2>
+  <div data-fill-with="at-risk"></div>
+  <h2 class="no-num no-toc no-ref heading settled" id="status"><span class="content">Status of this document</span></h2>
   <div data-fill-with="status">
+   <p> This specification was published by the <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a>.
+  It is not a W3C Standard nor is it on the W3C Standards Track.
+
+  Please note that under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a> there is a limited opt-out and other conditions apply.
+
+  Learn more about <a href="http://www.w3.org/community/">W3C Community and Business Groups</a>. </p>
    <p></p>
   </div>
   <div data-fill-with="at-risk"></div>
