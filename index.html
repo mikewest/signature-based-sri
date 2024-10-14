@@ -7,7 +7,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-UD" rel="stylesheet">
   <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="6cd03ddefbda84fc18ee2809266d2a5325e15b8f" name="revision">
+  <meta content="4e972252df9e657416f248ff8613ef34e12ada5c" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -1063,7 +1063,7 @@ following steps. They return <code>valid</code> if the signature is valid, or <c
      <p>If <var>algorithm</var> is not an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive">ASCII case-insensitive</a> match for "ed25519",
 then return "<code>invalid</code>".</p>
     <li data-md>
-     <p>Verify an HTTP message signature as defined in <a href="https://www.rfc-editor.org/rfc/rfc9421.html#name-verifying-a-signature">Section 3.2</a> of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>, given <var>response</var> and the <a data-link-type="dfn" href="#verification-requirments-for-sri" id="ref-for-verification-requirments-for-sri">verification requirments for SRI</a> given
+     <p>Verify an HTTP message signature as defined in <a href="https://www.rfc-editor.org/rfc/rfc9421.html#name-verifying-a-signature">Section 3.2</a> of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>, given <var>response</var> and the <a data-link-type="dfn" href="#verification-requirements-for-sri" id="ref-for-verification-requirements-for-sri">verification requirements for SRI</a> given
 "<code>Ed25519</code>" and <var>public key</var>.</p>
      <p class="note" role="note"><span class="marker">Note:</span> When we support more than one algorithm, we’ll want to change this from a
 hard-coded string to a mapping between case-insensitive and canonical strings.</p>
@@ -1072,7 +1072,7 @@ hard-coded string to a mapping between case-insensitive and canonical strings.</
     <li data-md>
      <p>Otherwise, return "<code>invalid</code>".</p>
    </ol>
-   <p>The HTTP Message Signature <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="verification-requirments-for-sri">verification requirments for SRI</dfn> are the
+   <p>The HTTP Message Signature <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="verification-requirements-for-sri">verification requirements for SRI</dfn> are the
 following, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string②">string</a> <var>algorithm</var> and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string③">string</a> <var>public key</var>:</p>
    <ol>
     <li data-md>
@@ -1156,12 +1156,23 @@ these checks do not prevent rollback/downgrade attacks in which old, known-bad
 versions of a resource might be delivered, along with their known signatures.</p>
    <p>This might not be a problem, depending on developers' use cases. If it becomes
 a problem, it seems possible to add mitigations in the future. These could take
-various forms, ranging from enforcing freshness by signing additional timestamps
-through to sending a random challenge in an <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field" id="ref-for-name-the-accept-signature-field">Accept-Signature</a></code>`</span> field, along
-with requests that would be included in the signature’s "<code>nonce</code>" metadata
-parameter.</p>
-   <p>We’d want to evaluate the tradeoffs in these approaches (the latter, for example,
-makes offline signing difficult), and might wish to offer serveral options.</p>
+various forms. For example:</p>
+   <ol>
+    <li data-md>
+     <p>We could allow developers to require an "<code>expires</code>" parameter in the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field">Signature-Input</a></code>`</span> field, and adjust our <a data-link-type="dfn" href="#verification-requirements-for-sri" id="ref-for-verification-requirements-for-sri①">verification requirements for SRI</a> to enforce against it. Similarly, we could enforce a maximum age based on
+the inclusion of a "<code>created</code>" parameter.</p>
+    <li data-md>
+     <p>We could require additional components of the request to be included in the
+signature ("<code>content-type</code>", "<code>@path;req</code>", "<code>@method;req</code>", etc) in order
+to reduce the scope of potential resource substitution.</p>
+    <li data-md>
+     <p>We could allow developers to send a challenge along with the request (as
+an <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field" id="ref-for-name-the-accept-signature-field">Accept-Signature</a></code>`</span> parameter), and require that it be incorporated into
+the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field①">Signature-Input</a></code>`</span>'s "<code>nonce</code>" parameter.</p>
+   </ol>
+   <p>We’d want to evaluate the tradeoffs in these and other approaches (the last, for
+example, makes offline signing difficult), of course, but they seem quite plausibly
+valuable as future enhancements.</p>
    <h2 class="heading settled" data-level="5" id="privacy"><span class="secno">5. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
    <p>Given that the validation of a response’s signature continues to require the
 response to opt-into legibility via CORS, this mechanism does not seem to add
@@ -1205,7 +1216,7 @@ body or headers.</p>
    <li><a href="#abstract-opdef-validating-an-integrity-signature">validating an integrity signature</a><span>, in § 2.1.3</span>
    <li><a href="#valid-sri-signature-algorithm-token">valid SRI signature algorithm token</a><span>, in § 2.1.1</span>
    <li><a href="#valid-sri-signature-algorithm-token-set">valid SRI signature algorithm token set</a><span>, in § 2.1.1</span>
-   <li><a href="#verification-requirments-for-sri">verification requirments for SRI</a><span>, in § 2.1.3</span>
+   <li><a href="#verification-requirements-for-sri">verification requirements for SRI</a><span>, in § 2.1.3</span>
   </ul>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
@@ -1246,6 +1257,7 @@ body or headers.</p>
     <a data-link-type="biblio">[RFC9421]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="a5ce345d">accept-signature</span>
+     <li><span class="dfn-paneled" id="03c8b9b5">signature-input</span>
     </ul>
    <li>
     <a data-link-type="biblio">[SRI]</a> defines the following terms:
@@ -1492,6 +1504,7 @@ function parseHTML(markup) {
 {
 let dfnPanelData = {
 "03afaf9c": {"dfnID":"03afaf9c","dfnText":"empty","external":true,"refSections":[{"refs":[{"id":"ref-for-list-empty"},{"id":"ref-for-list-empty\u2460"},{"id":"ref-for-list-empty\u2461"}],"title":"2.1.2. Do bytes and response match metadataList?"}],"url":"https://infra.spec.whatwg.org/#list-empty"},
+"03c8b9b5": {"dfnID":"03c8b9b5","dfnText":"signature-input","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-signature-input-field"},{"id":"ref-for-name-the-signature-input-field\u2460"}],"title":"4.3. Rollback Attacks"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field"},
 "0698d556": {"dfnID":"0698d556","dfnText":"string","external":true,"refSections":[{"refs":[{"id":"ref-for-string"},{"id":"ref-for-string\u2460"},{"id":"ref-for-string\u2461"},{"id":"ref-for-string\u2462"}],"title":"2.1.3. Validate a signature over response using algorithm and public key"}],"url":"https://infra.spec.whatwg.org/#string"},
 "53275e46": {"dfnID":"53275e46","dfnText":"append (for list)","external":true,"refSections":[{"refs":[{"id":"ref-for-list-append"}],"title":"2.1.1. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#list-append"},
 "65181da8": {"dfnID":"65181da8","dfnText":"secure context","external":true,"refSections":[{"refs":[{"id":"ref-for-secure-context"}],"title":"4.1. Secure Contexts"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"},
@@ -1514,7 +1527,7 @@ let dfnPanelData = {
 "f937b7b6": {"dfnID":"f937b7b6","dfnText":"continue","external":true,"refSections":[{"refs":[{"id":"ref-for-iteration-continue"}],"title":"2.1.1. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#iteration-continue"},
 "valid-sri-signature-algorithm-token": {"dfnID":"valid-sri-signature-algorithm-token","dfnText":"valid SRI signature algorithm token","external":false,"refSections":[{"refs":[{"id":"ref-for-valid-sri-signature-algorithm-token"}],"title":"2.1.1. Parse metadata."}],"url":"#valid-sri-signature-algorithm-token"},
 "valid-sri-signature-algorithm-token-set": {"dfnID":"valid-sri-signature-algorithm-token-set","dfnText":"valid SRI signature algorithm token set","external":false,"refSections":[{"refs":[{"id":"ref-for-valid-sri-signature-algorithm-token-set"}],"title":"2.1.1. Parse metadata."}],"url":"#valid-sri-signature-algorithm-token-set"},
-"verification-requirments-for-sri": {"dfnID":"verification-requirments-for-sri","dfnText":"verification requirments for SRI","external":false,"refSections":[{"refs":[{"id":"ref-for-verification-requirments-for-sri"}],"title":"2.1.3. Validate a signature over response using algorithm and public key"}],"url":"#verification-requirments-for-sri"},
+"verification-requirements-for-sri": {"dfnID":"verification-requirements-for-sri","dfnText":"verification requirements for SRI","external":false,"refSections":[{"refs":[{"id":"ref-for-verification-requirements-for-sri"}],"title":"2.1.3. Validate a signature over response using algorithm and public key"},{"refs":[{"id":"ref-for-verification-requirements-for-sri\u2460"}],"title":"4.3. Rollback Attacks"}],"url":"#verification-requirements-for-sri"},
 };
 
 document.addEventListener("DOMContentLoaded", ()=>{
@@ -1906,7 +1919,7 @@ let refsData = {
 "#abstract-opdef-validating-an-integrity-signature": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"validating an integrity signature","type":"abstract-op","url":"#abstract-opdef-validating-an-integrity-signature"},
 "#valid-sri-signature-algorithm-token": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"valid sri signature algorithm token","type":"dfn","url":"#valid-sri-signature-algorithm-token"},
 "#valid-sri-signature-algorithm-token-set": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"valid sri signature algorithm token set","type":"dfn","url":"#valid-sri-signature-algorithm-token-set"},
-"#verification-requirments-for-sri": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"verification requirments for sri","type":"dfn","url":"#verification-requirments-for-sri"},
+"#verification-requirements-for-sri": {"export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"verification requirements for sri","type":"dfn","url":"#verification-requirements-for-sri"},
 "https://fetch.spec.whatwg.org/#concept-request-integrity-metadata": {"export":true,"for_":["request"],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"integrity metadata","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-request-integrity-metadata"},
 "https://fetch.spec.whatwg.org/#concept-response": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"response","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-response"},
 "https://html.spec.whatwg.org/multipage/webappapis.html#secure-context": {"export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"secure context","type":"dfn","url":"https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"},
@@ -1925,6 +1938,7 @@ let refsData = {
 "https://w3c.github.io/webappsec-subresource-integrity/#valid-sri-hash-algorithm-token": {"export":true,"for_":[],"level":"","normative":true,"shortname":"sri","spec":"sri","status":"anchor-block","text":"valid sri hash algorithm token","type":"dfn","url":"https://w3c.github.io/webappsec-subresource-integrity/#valid-sri-hash-algorithm-token"},
 "https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field": {"export":true,"for_":[],"level":"","normative":true,"shortname":"id.pardue-http-identity-digest","spec":"id.pardue-http-identity-digest","status":"anchor-block","text":"identity-digest","type":"http-header","url":"https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field"},
 "https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field": {"export":true,"for_":[],"level":"","normative":true,"shortname":"rfc9421","spec":"rfc9421","status":"anchor-block","text":"accept-signature","type":"http-header","url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field"},
+"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field": {"export":true,"for_":[],"level":"","normative":true,"shortname":"rfc9421","spec":"rfc9421","status":"anchor-block","text":"signature-input","type":"http-header","url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field"},
 };
 
 function mkRefHint(link, ref) {

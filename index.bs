@@ -251,7 +251,7 @@ following steps. They return `valid` if the signature is valid, or `invalid` oth
     then return "`invalid`".
 2.  Verify an HTTP message signature as defined in
     [Section 3.2](https://www.rfc-editor.org/rfc/rfc9421.html#name-verifying-a-signature)
-    of [[!RFC9421]], given |response| and the [=verification requirments for SRI=] given
+    of [[!RFC9421]], given |response| and the [=verification requirements for SRI=] given
     "`Ed25519`" and |public key|.
     
     Note: When we support more than one algorithm, we'll want to change this from a
@@ -261,7 +261,7 @@ following steps. They return `valid` if the signature is valid, or `invalid` oth
 
 
 
-The HTTP Message Signature <dfn>verification requirments for SRI</dfn> are the
+The HTTP Message Signature <dfn>verification requirements for SRI</dfn> are the
 following, given a [=string=] |algorithm| and a [=string=] |public key|:
 
 1.  The signature's covered components MUST include the [:Identity-Digest:] field.
@@ -377,13 +377,24 @@ versions of a resource might be delivered, along with their known signatures.
 
 This might not be a problem, depending on developers' use cases. If it becomes
 a problem, it seems possible to add mitigations in the future. These could take
-various forms, ranging from enforcing freshness by signing additional timestamps
-through to sending a random challenge in an [:Accept-Signature:] field, along
-with requests that would be included in the signature's "`nonce`" metadata
-parameter.
+various forms. For example:
 
-We'd want to evaluate the tradeoffs in these approaches (the latter, for example,
-makes offline signing difficult), and might wish to offer serveral options.
+1.  We could allow developers to require an "`expires`" parameter in the
+    [:Signature-Input:] field, and adjust our [=verification requirements for SRI=]
+    to enforce against it. Similarly, we could enforce a maximum age based on
+    the inclusion of a "`created`" parameter.
+
+2.  We could require additional components of the request to be included in the
+    signature ("`content-type`", "`@path;req`", "`@method;req`", etc) in order
+    to reduce the scope of potential resource substitution.
+
+3.  We could allow developers to send a challenge along with the request (as
+    an [:Accept-Signature:] parameter), and require that it be incorporated into
+    the [:Signature-Input:]'s "`nonce`" parameter.
+
+We'd want to evaluate the tradeoffs in these and other approaches (the last, for
+example, makes offline signing difficult), of course, but they seem quite plausibly
+valuable as future enhancements.
 
 
 Privacy Considerations {#privacy}
