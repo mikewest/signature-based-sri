@@ -353,7 +353,7 @@ Non-versioned third-party libraries {#deployment-scenario-3p}
 
 The web is built on composability and it is quite common to include JS from third-parties (e.g. analytics scripts or tools for [real user monitoring](https://en.wikipedia.org/wiki/Real_user_monitoring)). These scripts are often non-versioned to allow third-parties to continually update and improve these libraries. Signature-based SRI makes it possible to enable integrity validation for these libraries, to ensure that the included libraries are built and served in a trustworthy manner.
 
-### Architectural Notes {#deployment-scenario-3p-notes}
+### Architectural Notes ### {#deployment-scenario-3p-notes}
 
 In this deployment scenario, `third-party.com/library.js` would deploy signature-based SRI. `third-party.com` would then document that when including the library, reliant websites should specify `integrity="ed25519-[base64-encoded-public-key]"`. 
 
