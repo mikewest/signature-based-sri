@@ -2,8 +2,8 @@
 Title: Signature-based Integrity
 Shortname: signature-based-sri
 Level: none
-Status: w3c/UD
-Group: webappsec
+Status: w3c/CG-DRAFT
+Group: wicg
 Repository: mikewest/signature-based-sri
 URL: https://mikewest.github.io/signature-based-sri/
 Editor: Mike West, Google LLC., mkwst@google.com
@@ -22,7 +22,17 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC9651
     for: structured header
         text: token; url: #name-tokens
         text: list; url: #name-list
-
+urlPrefix: https://w3c.github.io/webappsec-subresource-integrity/; spec: SRI
+    type: dfn
+        text: valid SRI hash algorithm token
+urlPrefix: https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html; spec: ID.pardue-http-identity-digest
+    type: http-header; 
+        text: Identity-Digest; url: name-the-identity-digest-field
+urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
+    type: http-header; 
+        text: Accept-Signature; url: name-the-accept-signature-field
+        text: Signature-Input; url: name-the-signature-input-field
+        text: Signature; url: name-the-signature-field
 </pre>
 <pre class="biblio">
 {
@@ -30,6 +40,11 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC9651
     "authors": [ "Yoav Weiss", "Ilya Grigorik" ],
     "href": "https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing",
     "title": "PCIv4: SRI gaps and opportunities"
+  },
+  "ID.pardue-http-identity-digest": {
+    "authors": [ "Lucas Pardue" ],
+    "href": "https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html",
+    "title": "HTTP Identity Digest"
   }
 }
 </pre>
@@ -63,11 +78,13 @@ This document outlines the changes that would be necessary to [[Fetch]], and
     <xmp highlight="html">
       <script src="https://my.cdn/script.js"
               crossorigin="anonymous"
-              integrity="ed25519-[base64-encoded-public-key]"></script>
+              integrity="ed25519-[base64-encoded-public-key]"
+              ...></script>
     </xmp>
 
-    Servers will deliver a signature using the corresponding private key along
-    with the resource as an HTTP response header:
+    Servers will deliver a signature over the resource content using the
+    corresponding private key along with the resource as an HTTP message
+    signature [[RFC9421]]:
 
     <xmp highlight="http">
         HTTP/1.1 200 OK
@@ -75,7 +92,9 @@ This document outlines the changes that would be necessary to [[Fetch]], and
         Vary: Accept-Encoding
         Content-Type: text/javascript; charset=UTF-8
         Access-Control-Allow-Origin: *
-        Integrity: ed25519-[base64-encoded result of Ed25519(`console.log("Hello, world!");`)]
+        Identity-Digest: sha-512=:[base64-encoded digest of `console.log("Hello, world!");`]:
+        Signature-Input: sig1=("identity-digest"); alg="Ed25519"; keyid="[base64-encoded public key]"
+        Signature: sig1=:[base64-encoded result of Ed25519(`console.log("Hello, world!");`)]:
 
         console.log("Hello, world!");
     </xmp>
@@ -145,15 +164,14 @@ The following sections adjust algorithms accordingly.
 
 <h4 id="parsing" algorithm>Parse |metadata|.</h4>
 
-First, we'll newly define two sets of algorithm tokens:
+First, we'll define valid signature algorithms:
 
-*   <ins>A [=string=] |alg| is a <dfn>valid SRI hashing algorithm token</dfn>
-    if the [=ASCII lowercase=] of |alg| is [=set/contained=] within the set
-    « "sha256", "sha384", "sha512" ».</ins>
+*   <ins>The <dfn>valid SRI signature algorithm token set</dfn> is the
+    [=ordered set=] « "`ed25519`" » (corresponding to Ed25519 [[!RFC8032]]).</ins>
 
-*   <ins>A [=string=] |alg| is a <dfn>valid SRI signature algorithm token</dfn>
-    if the [=ASCII lowercase=] of |alg| is [=set/contained=] within the set
-    « "ed25519" ».</ins>
+*   <ins>A string is a <dfn>valid SRI signature algorithm token</dfn> if its
+    [=ASCII lowercase=] is [=set/contained=] in the
+    [=valid SRI signature algorithm token set=].
 
 Then, we'll adjust SRI's <dfn abstract-op>Parse |metadata|</dfn>. algorithm as
 follows:
@@ -166,32 +184,24 @@ of signature expressions which are likewise understood:
       «[ "hashes" → « », "signatures" → « » ]».</ins>
 2.  For each |item| returned by <a lt="strictly split">splitting</a>
     |metadata| on spaces:
-    1.  Let <del>|hash-with-opt-token-list|</del><ins>|expression-and-options|</ins> be the result of
+    1.  Let |expression-and-options| be the result of
         <a lt="strictly split">splitting</a> |item| on U+003F (?).
-    2.  Let <del>|hash-expression|</del><ins>|algorithm-expression|</ins> be <del>|hash-with-opt-token-list|</del><ins>|expression-and-options|</ins>[0].
+    2.  Let |algorithm-expression| be |expression-and-options|[0].
     3.  Let |base64-value| be the empty string.
-    4.  Let
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>
-        be the result of
-        <a lt="strictly split">splitting</a>
-        <del>|hash-expression|</del><ins>|algorithm-expression|</ins>
-        on U+002D (-).
-    5.  Let |algorithm| be 
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[0].
-    6.  If
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[1]
-        <a for=list>exists</a>, set |base64-value| to
-        <del>|hash-expr-token-list|</del><ins>|algorithm-and-value|</ins>[1].
-    7.  <del>If |algorithm| is not a hash function recognized by the user agent, [=continue=].</del>
-    8.  <del>Let |metadata| be the ordered map  «["alg" → |algorithm|, "val" → |base64-value|]».
+    4.  Let |algorithm-and-value| be the result of
+        <a lt="strictly split">splitting</a> |algorithm-expression| on U+002D (-).
+    5.  Let |algorithm| be |algorithm-and-value|[0].
+    6.  If |algorithm-and-value|[1] <a for=list>exists</a>, set
+        |base64-value| to |algorithm-and-value|[1].
+    7.  <del>If |algorithm| is not a [=valid SRI hash algorithm token=], then [=iteration/continue=].</del>
+    8.  Let <del>|metadata|</del><ins>|data|</ins> be the ordered map  «["alg" → |algorithm|, "val" → |base64-value|]».</del>
     9.  <del><a for=list>Append</a> |metadata| to |result|.</del>
-    10. <ins>Let |data| be the ordered map «["`alg`" → |algorithm|, "`val`" → |base64-value|]».</ins>
-    11. <ins>If |algorithm| is a [=valid SRI hashing algorithm token=], then [=set/append=] |data| to |result|["`hashes`"].</ins>
-    12.  <ins>Otherwise, if |data| is a [=valid SRI signature algorithm token=], then [=set/append=] |metadata| to |result|["`signatures`"].</ins>
+    11. <ins>If |algorithm| is a [=valid SRI hash algorithm token=], then [=set/append=] |data| to |result|["`hashes`"].</ins>
+    12. <ins>Otherwise, if |algorithm| is a [=valid SRI signature algorithm token=], then [=set/append=] |data| to |result|["`signatures`"].</ins>
 3.  Return |result|.
 
 
-<h4 id="matching" algorithm>Do |bytes| and |header list| match |metadataList|?</h4>
+<h4 id="matching" algorithm>Do |bytes| and |response| match |metadataList|?</h4>
 
 Since we adjusted the result of [[#parsing]] above, we need to adjust the
 matching algorithm to match. The core change will be processing both hashing
@@ -203,9 +213,10 @@ the [application of multiple Content Security Policies](https://w3c.github.io/we
 
 In order to validate signatures, we'll need to change Fetch to pass in the
 relevant HTTP response header. For the moment, let's simply pass in the
-entire [=response/header list=]:
+entire [=/response=] (|response|), as that makes the integration with [[RFC9421]] somewhat
+explicable:
 
-1.  Let |parsedMetadata| be the result of executing [[SRI#parse-metadata]] on |metadataList|.
+1.  Let |parsedMetadata| be the result of executing [[SRI#parse-metadata]|] on |metadataList|.
 2.  If both |parsedMetadata|<ins>["`hashes`"] and |parsedMetadata["`signatures`"]</ins> are [=set/empty=] set, return `true`.
 3.  Let <del>|metadata|</del><ins>|hash-metadata|</ins> be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|<ins>["`hashes`"]</ins>.</a>.
 4.  <ins>Let |signature-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`signatures`"].</ins>
@@ -220,113 +231,54 @@ entire [=response/header list=]:
 8.  <ins>For each |item| in |signature-metadata|:</ins>
     1.  <ins>Let |algorithm| be the |item|["alg"].</ins>
     2.  <ins>Let |public key| be the |item|["val"].</ins>
-    3.  <ins>Let |result| be the result of [$validating a signature$]
-        using |algorithm| over |bytes| and |header list| with |public key|.</ins>
+    3.  <ins>Let |result| be the result of [$validating an integrity signature$]
+        over |response| using |algorithm| and |public key|.</ins>
     4.  <ins>If |result| is `true`, set |signature-match| to `true` and [=iteration/break=].</ins>
 9.  <del>Return `false`.</del><ins>Return `true` if both |hash-match| and |signature-match| are `true`. Otherwise return `false`.</ins>
 
-<h4 id="validation" algorithm>Validate a signature using |algorithm| over |bytes| and |header list| with |public key|</h4>
+<h4 id="validation" algorithm>Validate a signature over |response| using |algorithm| and |public key|</h4>
 
 The matching algorithm above calls into a new signature validation function.
 Let's write that down. At core, it will execute the Ed25519 validation steps
-from [[RFC8032]], using signatures extracted from an `Integrity` header that's
-defined in [[#integrity-header]].
+from [[RFC8032]], using signatures extracted from HTTP Message Signature
+headers defined in [[RFC9421]].
 
-<ins>
-To <dfn abstract-op lt="validating a signature">validate a signature</dfn> using a [=string=] |algorithm| over
-a [=byte sequence=] |bytes|, a [=/header list=] |header list|, and [=string=] |public key|, execute the following
-steps. They return `valid` if the signature is valid, or `invalid` otherwise.
+To <dfn abstract-op lt="validating an integrity signature">validate an integrity signature</dfn>
+over a [=/response=] |response|, [=string=] |algorithm|, and [=string=] |public key|, execute the
+following steps. They return `valid` if the signature is valid, or `invalid` otherwise.
 
-1.  If |algorithm| is an [=ASCII case-insensitive=] match for "ed25519", then:
-    1.  Let |signatures| be the result of [=header list/getting, decoding, and splitting=] ``` `Integrity` ``` from |header list|.
-    2.  If |signatures| is `null`, return `invalid`.
-    3.  For each |signature| in |signatures|:
-        1.  Execute the "Verify" steps for Ed25519 as defined in
-            [Section 5.1.7](https://datatracker.ietf.org/doc/html/rfc8032#section-5.1.7)
-            of [[!RFC8032]], using |bytes| as the message M , |public key| as the
-            public key A, and |signature| as the signature.
-        2.  If the signature is valid, return `valid`.
-    4.  Return `invalid`.
-2.  Assert: We won't reach this step, because `ed25519` is the only valid
-    signature algorithm token.
-3.  Return `invalid`.
+1.  If |algorithm| is not an [=ASCII case-insensitive=] match for "ed25519",
+    then return "`invalid`".
+2.  Verify an HTTP message signature as defined in
+    [Section 3.2](https://www.rfc-editor.org/rfc/rfc9421.html#name-verifying-a-signature)
+    of [[!RFC9421]], given |response| and the [=verification requirements for SRI=] given
+    "`Ed25519`" and |public key|.
+    
+    Note: When we support more than one algorithm, we'll want to change this from a
+    hard-coded string to a mapping between case-insensitive and canonical strings.
+3.  If a signature can be validated, return "`valid`".
+4.  Otherwise, return "`invalid`".
+
+
+
+The HTTP Message Signature <dfn>verification requirements for SRI</dfn> are the
+following, given a [=string=] |algorithm| and a [=string=] |public key|:
+
+1.  The signature's covered components MUST include the [:Identity-Digest:] field.
+    
+    ISSUE: It might be a good idea to limit this to *only* including the single
+    `Identity-Digest` header while we're gaining implementation experiences with
+    the signature mechanism generally?
+
+2.  The signature's parameters satisfy all of the following requirements:
+    *   The `alg` parameter's value is |algorithm|.
+    *   The `keyid` parameter's value is |public key|.
+
+    ISSUE: It might be reasonable to require an `expires` parameter to give
+    developers clear guidance about mitigating some of the risks described in
+    [[#security-rollback]].
 
 </ins>
-
-
-### Integrity Header ### {#integrity-header}
-
-ISSUE: Rather than introducing this header, perhaps we could/should reuse
-`Content-Digest`? [[RFC9530]] It's unfortunate that SRI already introduced
-syntax distinct from what Structured Headers landed on, but that's probably
-not reason enough to invent a new header... It's not entirely clear to me
-whether that header's acting on the same content as SRI, though (e.g. does
-it perform the check prior to resolving content encoding?).
-
-The <dfn http-header>`Integrity`</dfn> HTTP response header specifies a
-[=integrity metadata=] for a given [=/response=]. It is a [=Structured Header=]
-whose value MUST be a [=structured header/list=] of [=structured header/token=] [[!RFC9651]].
-
-Valid list values match the <a grammar>`hash-expression`</a> grammar as defined in [[!SRI]].
-
-<div class="example" id="integrity-header-example">
-A resource might be delivered with an integrity header specifying a signature that can
-be used to validate the resource's provenance:
-
-<xmp highlight="http">
-HTTP/1.1 200 OK
-Accept-Ranges: none
-Vary: Accept-Encoding
-Content-Type: text/javascript; charset=UTF-8
-Access-Control-Allow-Origin: *
-Integrity: ed25519-[base64-encoded Ed25519 signature]
-</xmp>
-</div>
-
-ISSUE: Do we need a mechanism (another header?) allowing the server to specify the public
-key used to sign the resource? That might allow developers to discover keys for resources
-more easily, and could be used to reject the resource without validation if we can
-determine a priori that the keys don't match...
-
-<div class="issue">
-    Would it be useful to extend this header's behavior to include client-side
-    content validation for hash algorithms? I think it's arguably outside SRI's threat model,
-    but you could imagine an attacker that could change content but not headers, which would
-    make enforcement of an `Integrity` header on the client meaningful for a variety of
-    resources (including top-level documents, which would help provide a web-accessible
-    explanation for some packaging behavior).
-
-    That is, a resource delivered with:
-
-    <xmp highlight="http">
-        Integrity: sha256-[base64'd hash goes here]
-    </xmp>
-
-    Could throw a network error in Fetch if the hash didn't match the delivered content.
-    Likewise, a resource delivered with:
-
-    <xmp highlight="http">
-        Integrity: ed25519-[base64'd hash goes here];public-key=[base64'd hash goes here]
-    </xmp>
-
-    Could throw a network error if the delivered signature and public key didn't validate
-    against the resource's content.
-
-    Or, sites could go crazy and deliver a header containing both:
-    <xmp highlight="http">
-        Integrity: sha256-[base64'd hash goes here],
-                   ed25519-[base64'd hash goes here];public-key=[base64'd hash goes here]
-    </xmp>
-
-    Which would enforce both constraints.
-
-    Not sure it's a priority, but it might be an interesting primitive to extract from
-    this proposal (especially if we end up adding a streaming hash primitive like
-    [[RFC7693]] as suggested in
-    [issue #104](https://github.com/w3c/webappsec-subresource-integrity/issues/104),
-    or [its successor](https://blake3.io/), suggested
-    [at TPAC in 2024](https://github.com/w3c/webappsec/blob/main/meetings/2024/2024-09-23-TPAC-Minutes.md#:~:text=Ben%3A%20Working%20on%20really%20big%20files%20to%20IPFS%20for%20a%20while.%20Browser%20tabs%20can%20easily%20crash%20just%20hashing%20a%20large%20file%20(BLAKE3%2C%20merkle%20trees%2C%20etc).%20Would%20be%20ideal%20for%20SRI%20to%20support%20incrementally%2Dverifiable%20hashing%20algorithms%20(https%3A//github.com/BLAKE3%2Dteam/BLAKE3%2DIETF).) ).
-</div>
 
 
 Patches to Fetch {#monkey-patch-fetch}
@@ -338,9 +290,8 @@ matching algorithm as redefined above.
 Step 22.3.1 of [[Fetch#main-fetch]] should be updated as follows:
 
 1.  If <var ignore>bytes</var> do not match <var ignore>request</var>’s
-    [=request/integrity metadata=]<ins> and <var ignore>response</var>'s
-    [=response/header list=]</ins>, then run processBodyError and
-    abort these steps. [[!SRI]]
+    [=request/integrity metadata=]<ins> and <var ignore>response</var></ins>,
+    then run processBodyError and abort these steps. [[!SRI]]
 
 
 Deployment Scenarios {#deployment-scenarios}
@@ -448,12 +399,24 @@ versions of a resource might be delivered, along with their known signatures.
 
 This might not be a problem, depending on developers' use cases. If it becomes
 a problem, it seems possible to add mitigations in the future. These could take
-various forms, ranging from enforcing freshness by signing additional timestamps
-through to sending a random challenge along with requests that would be included
-in the signature.
+various forms. For example:
 
-We'd want to evaluate the tradeoffs in these approaches (the latter, for example,
-makes offline signing difficult), and might wish to offer serveral options.
+1.  We could allow developers to require an "`expires`" parameter in the
+    [:Signature-Input:] field, and adjust our [=verification requirements for SRI=]
+    to enforce against it. Similarly, we could enforce a maximum age based on
+    the inclusion of a "`created`" parameter.
+
+2.  We could require additional components of the request to be included in the
+    signature ("`content-type`", "`@path;req`", "`@method;req`", etc) in order
+    to reduce the scope of potential resource substitution.
+
+3.  We could allow developers to send a challenge along with the request (as
+    an [:Accept-Signature:] parameter), and require that it be incorporated into
+    the [:Signature-Input:]'s "`nonce`" parameter.
+
+We'd want to evaluate the tradeoffs in these and other approaches (the last, for
+example, makes offline signing difficult), of course, but they seem quite plausibly
+valuable as future enhancements.
 
 
 Privacy Considerations {#privacy}
