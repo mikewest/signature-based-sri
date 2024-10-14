@@ -290,7 +290,7 @@ matching algorithm as redefined above.
 Step 22.3.1 of [[Fetch#main-fetch]] should be updated as follows:
 
 1.  If <var ignore>bytes</var> do not match <var ignore>request</var>’s
-    [=request/integrity metadata=]<ins> and <var ignore>response</var>,
+    [=request/integrity metadata=]<ins> and <var ignore>response</var></ins>,
     then run processBodyError and abort these steps. [[!SRI]]
 
 
