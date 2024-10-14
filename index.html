@@ -6,7 +6,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version 82ce88815, updated Thu Sep 7 16:33:55 2023 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="567431f6ad49c741c594162a68cbde04b9fd9fab" name="document-revision">
+  <meta content="88eaeb0aebdc0b6374462c6794a68a4c1d376b1b" name="document-revision">
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -730,19 +730,29 @@ A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/
       <li><a href="#monkey-patch-fetch"><span class="secno">2.2</span> <span class="content">Patches to Fetch</span></a>
      </ol>
     <li>
-     <a href="#deployment"><span class="secno">3</span> <span class="content">Deployment Considerations</span></a>
+     <a href="#deployment-scenarios"><span class="secno">3</span> <span class="content">Deployment Scenarios</span></a>
      <ol class="toc">
-      <li><a href="#deployment-key-management"><span class="secno">3.1</span> <span class="content">Key Management</span></a>
-      <li><a href="#deployment-key-rotation"><span class="secno">3.2</span> <span class="content">Key Rotation</span></a>
+      <li>
+       <a href="#deployment-scenario-3p"><span class="secno">3.1</span> <span class="content">Non-versioned third-party libraries</span></a>
+       <ol class="toc">
+        <li><a href="#deployment-scenario-3p-notes"><span class="secno">3.1.1</span> <span class="content">Architectural Notes</span></a>
+       </ol>
+      <li><a href="#deployment-scenario-1p"><span class="secno">3.2</span> <span class="content">Protecting first-party libraries</span></a>
      </ol>
     <li>
-     <a href="#security"><span class="secno">4</span> <span class="content">Security Considerations</span></a>
+     <a href="#deployment"><span class="secno">4</span> <span class="content">Deployment Considerations</span></a>
      <ol class="toc">
-      <li><a href="#security-secure-context"><span class="secno">4.1</span> <span class="content">Secure Contexts</span></a>
-      <li><a href="#security-provenance-not-content"><span class="secno">4.2</span> <span class="content">Provenance, not Content</span></a>
-      <li><a href="#security-rollback"><span class="secno">4.3</span> <span class="content">Rollback Attacks</span></a>
+      <li><a href="#deployment-key-management"><span class="secno">4.1</span> <span class="content">Key Management</span></a>
+      <li><a href="#deployment-key-rotation"><span class="secno">4.2</span> <span class="content">Key Rotation</span></a>
      </ol>
-    <li><a href="#privacy"><span class="secno">5</span> <span class="content">Privacy Considerations</span></a>
+    <li>
+     <a href="#security"><span class="secno">5</span> <span class="content">Security Considerations</span></a>
+     <ol class="toc">
+      <li><a href="#security-secure-context"><span class="secno">5.1</span> <span class="content">Secure Contexts</span></a>
+      <li><a href="#security-provenance-not-content"><span class="secno">5.2</span> <span class="content">Provenance, not Content</span></a>
+      <li><a href="#security-rollback"><span class="secno">5.3</span> <span class="content">Rollback Attacks</span></a>
+     </ol>
+    <li><a href="#privacy"><span class="secno">6</span> <span class="content">Privacy Considerations</span></a>
     <li>
      <a href="#w3c-conformance"><span class="secno"></span> <span class="content">Conformance</span></a>
      <ol class="toc">
@@ -1013,7 +1023,7 @@ the signature mechanism generally?</p>
        <p>The <code>keyid</code> parameter’s value is <var>public key</var>.</p>
      </ul>
      <p class="issue" id="issue-b80bb208"><a class="self-link" href="#issue-b80bb208"></a> It might be reasonable to require an <code>expires</code> parameter to give
-developers clear guidance about mitigating some of the risks described in <a href="#security-rollback">§ 4.3 Rollback Attacks</a>.</p>
+developers clear guidance about mitigating some of the risks described in <a href="#security-rollback">§ 5.3 Rollback Attacks</a>.</p>
    </ol>
    <h3 class="heading settled" data-level="2.2" id="monkey-patch-fetch"><span class="secno">2.2. </span><span class="content">Patches to Fetch</span><a class="self-link" href="#monkey-patch-fetch"></a></h3>
    <p>The only change we need to make to Fetch is to pass additional information into the
@@ -1028,8 +1038,17 @@ matching algorithm as redefined above.</p>
 then run processBodyError and abort these steps. <a data-link-type="biblio" href="#biblio-sri" title="Subresource Integrity">[SRI]</a>
      </p>
    </ol>
-   <h2 class="heading settled" data-level="3" id="deployment"><span class="secno">3. </span><span class="content">Deployment Considerations</span><a class="self-link" href="#deployment"></a></h2>
-   <h3 class="heading settled" data-level="3.1" id="deployment-key-management"><span class="secno">3.1. </span><span class="content">Key Management</span><a class="self-link" href="#deployment-key-management"></a></h3>
+   <h2 class="heading settled" data-level="3" id="deployment-scenarios"><span class="secno">3. </span><span class="content">Deployment Scenarios</span><a class="self-link" href="#deployment-scenarios"></a></h2>
+   <p>Signature-based SRI is meant to be a general primitive that can be used in a wide variety of ways that we can’t possibly exhaustively document. But below we document a few different scenarios for how signature-based SRI can be used to enable new functionality for the web.</p>
+   <h3 class="heading settled" data-level="3.1" id="deployment-scenario-3p"><span class="secno">3.1. </span><span class="content">Non-versioned third-party libraries</span><a class="self-link" href="#deployment-scenario-3p"></a></h3>
+   <p>The web is built on composability and it is quite common to include JS from third-parties (e.g. analytics scripts or tools for <a href="https://en.wikipedia.org/wiki/Real_user_monitoring">real user monitoring</a>). These scripts are often non-versioned to allow third-parties to continually update and improve these libraries. Signature-based SRI makes it possible to enable integrity validation for these libraries, to ensure that the included libraries are built and served in a trustworthy manner.</p>
+   <h4 class="heading settled" data-level="3.1.1" id="deployment-scenario-3p-notes"><span class="secno">3.1.1. </span><span class="content">Architectural Notes</span><a class="self-link" href="#deployment-scenario-3p-notes"></a></h4>
+   <p>In this deployment scenario, <code>third-party.com/library.js</code> would deploy signature-based SRI. <code>third-party.com</code> would then document that when including the library, reliant websites should specify <code>integrity="ed25519-[base64-encoded-public-key]"</code>.</p>
+   <p>If <code>third-party.com</code> offers multiple different libraries for different purposes, it is recommended to use isolated keys for each library. This ensures that an attacker can’t swap in <code>third-party.com/foo.js</code> for <code>third-party.com/bar.js</code>.</p>
+   <h3 class="heading settled" data-level="3.2" id="deployment-scenario-1p"><span class="secno">3.2. </span><span class="content">Protecting first-party libraries</span><a class="self-link" href="#deployment-scenario-1p"></a></h3>
+   <p>An alternate deployment scenario is a site using this to protect first-party resources. In many cases, hash-based SRI can work well for first-party use cases. But, some sites have deploy processes where they deploy the main-page separately from subresources, in which case it is possible for any hashes specified in the main-page to become out of date with the contents of subresources. Signature-based SRI makes it possible to enable integrity validation for these first-party resources without adding any constraints on how web apps are deployed.</p>
+   <h2 class="heading settled" data-level="4" id="deployment"><span class="secno">4. </span><span class="content">Deployment Considerations</span><a class="self-link" href="#deployment"></a></h2>
+   <h3 class="heading settled" data-level="4.1" id="deployment-key-management"><span class="secno">4.1. </span><span class="content">Key Management</span><a class="self-link" href="#deployment-key-management"></a></h3>
    <p>Key management is hard. This proposal doesn’t change that.</p>
    <p>It aims instead to be very lightweight. Perhaps it errs in that direction, but
 the goal is to be the simplest possible mechanimsm that supports known
@@ -1038,7 +1057,7 @@ use-cases.</p>
 aspects of the web PKI to chain trust, allow delegation, etc. That seems like
 more than we need today, and substantially more work. Perhaps something small
 is good enough?</p>
-   <h3 class="heading settled" data-level="3.2" id="deployment-key-rotation"><span class="secno">3.2. </span><span class="content">Key Rotation</span><a class="self-link" href="#deployment-key-rotation"></a></h3>
+   <h3 class="heading settled" data-level="4.2" id="deployment-key-rotation"><span class="secno">4.2. </span><span class="content">Key Rotation</span><a class="self-link" href="#deployment-key-rotation"></a></h3>
    <p>Since this design relies on websites pinning a specific public key in the <code>integrity</code> attribute, this design does not easily support key rotation. If a
 signing key is compromised, there is no easy way to rotate the key and ensure
 that reliant websites check signatures against an updated public key.</p>
@@ -1053,15 +1072,15 @@ could support automated key rotation.</p>
    <p class="note" role="note"><span class="marker">Note:</span> This proposal does support pinning multiple keys for a single
 resource, so it will be possible to support rotation in a coordinated way
 without requiring each entity to move in lockstep.</p>
-   <h2 class="heading settled" data-level="4" id="security"><span class="secno">4. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
-   <h3 class="heading settled" data-level="4.1" id="security-secure-context"><span class="secno">4.1. </span><span class="content">Secure Contexts</span><a class="self-link" href="#security-secure-context"></a></h3>
+   <h2 class="heading settled" data-level="5" id="security"><span class="secno">5. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
+   <h3 class="heading settled" data-level="5.1" id="security-secure-context"><span class="secno">5.1. </span><span class="content">Secure Contexts</span><a class="self-link" href="#security-secure-context"></a></h3>
    <p>SRI does not require a secure context, nor does it apply only to resources
 delivered via encrypted and authenticated channels. That means that it’s
 entirely possible to believe that SRI offers a level of protection that it
 simply cannot aspire to. Signatures do not change that calculus.</p>
    <p>Thus, it remains recommended that developers rely on integrity metadata only
 within <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context" id="ref-for-secure-context">secure contexts</a>. See also <a data-link-type="biblio" href="#biblio-securing-web" title="Securing the Web">[SECURING-WEB]</a>.</p>
-   <h3 class="heading settled" data-level="4.2" id="security-provenance-not-content"><span class="secno">4.2. </span><span class="content">Provenance, not Content</span><a class="self-link" href="#security-provenance-not-content"></a></h3>
+   <h3 class="heading settled" data-level="5.2" id="security-provenance-not-content"><span class="secno">5.2. </span><span class="content">Provenance, not Content</span><a class="self-link" href="#security-provenance-not-content"></a></h3>
    <p>Signatures do not provide any assurance that the content delivered is the
 content a developer expected. They ensure only that the content was signed
 by the expected entity. This could allow resources signed by the same
@@ -1072,7 +1091,7 @@ instead of signatures (or, as discussed above, both hashes <em>and</em> signatur
 Servers can likewise defend against this risk by minting fresh keys for each
 interesting resource. This, of course, creates more key-management problems,
 but it might be a reasonable tradeoff.</p>
-   <h3 class="heading settled" data-level="4.3" id="security-rollback"><span class="secno">4.3. </span><span class="content">Rollback Attacks</span><a class="self-link" href="#security-rollback"></a></h3>
+   <h3 class="heading settled" data-level="5.3" id="security-rollback"><span class="secno">5.3. </span><span class="content">Rollback Attacks</span><a class="self-link" href="#security-rollback"></a></h3>
    <p>The simple signature checks described in this document <em>only</em> provide proof of
 provenance, ensuring that a given resource was at one point signed by someone
 in posession of the relevant private key. It does not say anything about whether
@@ -1098,7 +1117,7 @@ the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.or
    <p>We’d want to evaluate the tradeoffs in these and other approaches (the last, for
 example, makes offline signing difficult), of course, but they seem quite plausibly
 valuable as future enhancements.</p>
-   <h2 class="heading settled" data-level="5" id="privacy"><span class="secno">5. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
+   <h2 class="heading settled" data-level="6" id="privacy"><span class="secno">6. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
    <p>Given that the validation of a response’s signature continues to require the
 response to opt-into legibility via CORS, this mechanism does not seem to add
 any new data channels from the server to the client. The choice of private
@@ -1226,7 +1245,7 @@ decision point. <a class="issue-return" href="#issue-779438ed" title="Jump to se
    <div class="issue"> It might be a good idea to limit this to <em>only</em> including the single <code>Identity-Digest</code> header while we’re gaining implementation experiences with
 the signature mechanism generally? <a class="issue-return" href="#issue-8c081fd0" title="Jump to section">↵</a></div>
    <div class="issue"> It might be reasonable to require an <code>expires</code> parameter to give
-developers clear guidance about mitigating some of the risks described in <a href="#security-rollback">§ 4.3 Rollback Attacks</a>. <a class="issue-return" href="#issue-b80bb208" title="Jump to section">↵</a></div>
+developers clear guidance about mitigating some of the risks described in <a href="#security-rollback">§ 5.3 Rollback Attacks</a>. <a class="issue-return" href="#issue-b80bb208" title="Jump to section">↵</a></div>
   </div>
 <script>/* Boilerplate: script-dfn-panel */
 "use strict";
@@ -1538,7 +1557,7 @@ developers clear guidance about mitigating some of the risks described in <a hre
 window.dfnpanelData = {};
 window.dfnpanelData['d79a826f'] = {"dfnID": "d79a826f", "url": "https://fetch.spec.whatwg.org/#concept-request-integrity-metadata", "dfnText": "integrity metadata", "refSections": [{"refs": [{"id": "ref-for-concept-request-integrity-metadata"}], "title": "2.2. Patches to Fetch"}], "external": true};
 window.dfnpanelData['ee7bba09'] = {"dfnID": "ee7bba09", "url": "https://fetch.spec.whatwg.org/#concept-response", "dfnText": "response", "refSections": [{"refs": [{"id": "ref-for-concept-response"}], "title": "2.1.2. Do bytes and response match metadataList?"}, {"refs": [{"id": "ref-for-concept-response\u2460"}], "title": "2.1.3. Validate a signature over response using algorithm and public key"}], "external": true};
-window.dfnpanelData['65181da8'] = {"dfnID": "65181da8", "url": "https://html.spec.whatwg.org/multipage/webappapis.html#secure-context", "dfnText": "secure context", "refSections": [{"refs": [{"id": "ref-for-secure-context"}], "title": "4.1. Secure Contexts"}], "external": true};
+window.dfnpanelData['65181da8'] = {"dfnID": "65181da8", "url": "https://html.spec.whatwg.org/multipage/webappapis.html#secure-context", "dfnText": "secure context", "refSections": [{"refs": [{"id": "ref-for-secure-context"}], "title": "5.1. Secure Contexts"}], "external": true};
 window.dfnpanelData['a6a369ef'] = {"dfnID": "a6a369ef", "url": "https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field", "dfnText": "identity-digest", "refSections": [{"refs": [{"id": "ref-for-name-the-identity-digest-field"}], "title": "2.1.3. Validate a signature over response using algorithm and public key"}], "external": true};
 window.dfnpanelData['53275e46'] = {"dfnID": "53275e46", "url": "https://infra.spec.whatwg.org/#list-append", "dfnText": "append (for list)", "refSections": [{"refs": [{"id": "ref-for-list-append"}], "title": "2.1.1. Parse metadata."}], "external": true};
 window.dfnpanelData['a3b18719'] = {"dfnID": "a3b18719", "url": "https://infra.spec.whatwg.org/#set-append", "dfnText": "append (for set)", "refSections": [{"refs": [{"id": "ref-for-set-append"}, {"id": "ref-for-set-append\u2460"}], "title": "2.1.1. Parse metadata."}], "external": true};
@@ -1553,13 +1572,13 @@ window.dfnpanelData['84b454ff'] = {"dfnID": "84b454ff", "url": "https://infra.sp
 window.dfnpanelData['692595fe'] = {"dfnID": "692595fe", "url": "https://infra.spec.whatwg.org/#ordered-set", "dfnText": "ordered set", "refSections": [{"refs": [{"id": "ref-for-ordered-set"}], "title": "2.1.1. Parse metadata."}], "external": true};
 window.dfnpanelData['e5fc5b88'] = {"dfnID": "e5fc5b88", "url": "https://infra.spec.whatwg.org/#strictly-split", "dfnText": "strictly split", "refSections": [{"refs": [{"id": "ref-for-strictly-split"}, {"id": "ref-for-strictly-split\u2460"}, {"id": "ref-for-strictly-split\u2461"}], "title": "2.1.1. Parse metadata."}], "external": true};
 window.dfnpanelData['0698d556'] = {"dfnID": "0698d556", "url": "https://infra.spec.whatwg.org/#string", "dfnText": "string", "refSections": [{"refs": [{"id": "ref-for-string"}, {"id": "ref-for-string\u2460"}, {"id": "ref-for-string\u2461"}, {"id": "ref-for-string\u2462"}], "title": "2.1.3. Validate a signature over response using algorithm and public key"}], "external": true};
-window.dfnpanelData['a5ce345d'] = {"dfnID": "a5ce345d", "url": "https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field", "dfnText": "accept-signature", "refSections": [{"refs": [{"id": "ref-for-name-the-accept-signature-field"}], "title": "4.3. Rollback Attacks"}], "external": true};
-window.dfnpanelData['03c8b9b5'] = {"dfnID": "03c8b9b5", "url": "https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field", "dfnText": "signature-input", "refSections": [{"refs": [{"id": "ref-for-name-the-signature-input-field"}, {"id": "ref-for-name-the-signature-input-field\u2460"}], "title": "4.3. Rollback Attacks"}], "external": true};
+window.dfnpanelData['a5ce345d'] = {"dfnID": "a5ce345d", "url": "https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field", "dfnText": "accept-signature", "refSections": [{"refs": [{"id": "ref-for-name-the-accept-signature-field"}], "title": "5.3. Rollback Attacks"}], "external": true};
+window.dfnpanelData['03c8b9b5'] = {"dfnID": "03c8b9b5", "url": "https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field", "dfnText": "signature-input", "refSections": [{"refs": [{"id": "ref-for-name-the-signature-input-field"}, {"id": "ref-for-name-the-signature-input-field\u2460"}], "title": "5.3. Rollback Attacks"}], "external": true};
 window.dfnpanelData['7a3110fb'] = {"dfnID": "7a3110fb", "url": "https://w3c.github.io/webappsec-subresource-integrity/#valid-sri-hash-algorithm-token", "dfnText": "valid sri hash algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-hash-algorithm-token"}, {"id": "ref-for-valid-sri-hash-algorithm-token\u2460"}], "title": "2.1.1. Parse metadata."}], "external": true};
 window.dfnpanelData['valid-sri-signature-algorithm-token-set'] = {"dfnID": "valid-sri-signature-algorithm-token-set", "url": "#valid-sri-signature-algorithm-token-set", "dfnText": "valid SRI signature algorithm token set", "refSections": [{"refs": [{"id": "ref-for-valid-sri-signature-algorithm-token-set"}], "title": "2.1.1. Parse metadata."}], "external": false};
 window.dfnpanelData['valid-sri-signature-algorithm-token'] = {"dfnID": "valid-sri-signature-algorithm-token", "url": "#valid-sri-signature-algorithm-token", "dfnText": "valid SRI signature algorithm token", "refSections": [{"refs": [{"id": "ref-for-valid-sri-signature-algorithm-token"}], "title": "2.1.1. Parse metadata."}], "external": false};
 window.dfnpanelData['abstract-opdef-validating-an-integrity-signature'] = {"dfnID": "abstract-opdef-validating-an-integrity-signature", "url": "#abstract-opdef-validating-an-integrity-signature", "dfnText": "validate an integrity signature", "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-validating-an-integrity-signature"}], "title": "2.1.2. Do bytes and response match metadataList?"}], "external": false};
-window.dfnpanelData['verification-requirements-for-sri'] = {"dfnID": "verification-requirements-for-sri", "url": "#verification-requirements-for-sri", "dfnText": "verification requirements for SRI", "refSections": [{"refs": [{"id": "ref-for-verification-requirements-for-sri"}], "title": "2.1.3. Validate a signature over response using algorithm and public key"}, {"refs": [{"id": "ref-for-verification-requirements-for-sri\u2460"}], "title": "4.3. Rollback Attacks"}], "external": false};
+window.dfnpanelData['verification-requirements-for-sri'] = {"dfnID": "verification-requirements-for-sri", "url": "#verification-requirements-for-sri", "dfnText": "verification requirements for SRI", "refSections": [{"refs": [{"id": "ref-for-verification-requirements-for-sri"}], "title": "2.1.3. Validate a signature over response using algorithm and public key"}, {"refs": [{"id": "ref-for-verification-requirements-for-sri\u2460"}], "title": "5.3. Rollback Attacks"}], "external": false};
 </script>
 <script>/* Boilerplate: script-dom-helper */
 function query(sel) { return document.querySelector(sel); }
