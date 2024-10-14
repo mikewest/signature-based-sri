@@ -7,7 +7,6 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-UD" rel="stylesheet">
   <meta content="Bikeshed version 6270e4735, updated Tue Aug 6 12:12:30 2024 -0700" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="37ff558e9d9a5f8ceb378135305a270e39ae16bf" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -748,7 +747,7 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Signature-based Integrity</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#UD">Unofficial Proposal Draft</a>, <time class="dt-updated" datetime="2024-10-10">10 October 2024</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#UD">Unofficial Proposal Draft</a>, <time class="dt-updated" datetime="2024-10-14">14 October 2024</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -811,7 +810,7 @@ properties that seem interesting to explore.</p>
       <li>
        <a href="#deployment-scenario-3p"><span class="secno">3.1</span> <span class="content">Non-versioned third-party libraries</span></a>
        <ol class="toc">
-        <li><a href="#deployment-scenario-3p-notes"><span class="secno">3.1.1</span> <span class="content">Architectural Notes {#deployment-scenario-3p-notes}</span></a>
+        <li><a href="#deployment-scenario-3p-notes"><span class="secno">3.1.1</span> <span class="content">Architectural Notes</span></a>
        </ol>
       <li><a href="#deployment-scenario-1p"><span class="secno">3.2</span> <span class="content">Protecting first-party libraries</span></a>
      </ol>
@@ -1185,7 +1184,7 @@ abort these steps. <a data-link-type="biblio" href="#biblio-sri" title="Subresou
    <p>Signature-based SRI is meant to be a general primitive that can be used in a wide variety of ways that we can’t possibly exhaustively document. But below we document a few different scenarios for how signature-based SRI can be used to enable new functionality for the web.</p>
    <h3 class="heading settled" data-level="3.1" id="deployment-scenario-3p"><span class="secno">3.1. </span><span class="content">Non-versioned third-party libraries</span><a class="self-link" href="#deployment-scenario-3p"></a></h3>
    <p>The web is built on composability and it is quite common to include JS from third-parties (e.g. analytics scripts or tools for <a href="https://en.wikipedia.org/wiki/Real_user_monitoring">real user monitoring</a>). These scripts are often non-versioned to allow third-parties to continually update and improve these libraries. Signature-based SRI makes it possible to enable integrity validation for these libraries, to ensure that the included libraries are built and served in a trustworthy manner.</p>
-   <h4 class="heading settled" data-level="3.1.1" id="deployment-scenario-3p-notes"><span class="secno">3.1.1. </span><span class="content">Architectural Notes {#deployment-scenario-3p-notes}</span><a class="self-link" href="#deployment-scenario-3p-notes"></a></h4>
+   <h4 class="heading settled" data-level="3.1.1" id="deployment-scenario-3p-notes"><span class="secno">3.1.1. </span><span class="content">Architectural Notes</span><a class="self-link" href="#deployment-scenario-3p-notes"></a></h4>
    <p>In this deployment scenario, <code>third-party.com/library.js</code> would deploy signature-based SRI. <code>third-party.com</code> would then document that when including the library, reliant websites should specify <code>integrity="ed25519-[base64-encoded-public-key]"</code>.</p>
    <p>If <code>third-party.com</code> offers multiple different libraries for different purposes, it is recommended to use isolated keys for each library. This ensures that an attacker can’t swap in <code>third-party.com/foo.js</code> for <code>third-party.com/bar.js</code>.</p>
    <h3 class="heading settled" data-level="3.2" id="deployment-scenario-1p"><span class="secno">3.2. </span><span class="content">Protecting first-party libraries</span><a class="self-link" href="#deployment-scenario-1p"></a></h3>
