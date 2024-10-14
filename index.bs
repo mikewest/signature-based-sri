@@ -294,6 +294,28 @@ Step 22.3.1 of [[Fetch#main-fetch]] should be updated as follows:
     then run processBodyError and abort these steps. [[!SRI]]
 
 
+Deployment Scenarios {#deployment-scenarios}
+=======================================
+
+Signature-based SRI is meant to be a general primitive that can be used in a wide variety of ways that we can't possibly exhaustively document. But below we document a few different scenarios for how signature-based SRI can be used to enable new functionality for the web. 
+
+Non-versioned third-party libraries {#deployment-scenario-3p}
+-------------------------------------------
+
+The web is built on composability and it is quite common to include JS from third-parties (e.g. analytics scripts or tools for [real user monitoring](https://en.wikipedia.org/wiki/Real_user_monitoring)). These scripts are often non-versioned to allow third-parties to continually update and improve these libraries. Signature-based SRI makes it possible to enable integrity validation for these libraries, to ensure that the included libraries are built and served in a trustworthy manner.
+
+### Architectural Notes ### {#deployment-scenario-3p-notes}
+
+In this deployment scenario, `third-party.com/library.js` would deploy signature-based SRI. `third-party.com` would then document that when including the library, reliant websites should specify `integrity="ed25519-[base64-encoded-public-key]"`. 
+
+If `third-party.com` offers multiple different libraries for different purposes, it is recommended to use isolated keys for each library. This ensures that an attacker can't swap in `third-party.com/foo.js` for `third-party.com/bar.js`.
+
+Protecting first-party libraries {#deployment-scenario-1p}
+-------------------------------------------
+
+An alternate deployment scenario is a site using this to protect first-party resources. In many cases, hash-based SRI can work well for first-party use cases. But, some sites have deploy processes where they deploy the main-page separately from subresources, in which case it is possible for any hashes specified in the main-page to become out of date with the contents of subresources. Signature-based SRI makes it possible to enable integrity validation for these first-party resources without adding any constraints on how web apps are deployed.
+
+
 Deployment Considerations {#deployment}
 =======================================
 
