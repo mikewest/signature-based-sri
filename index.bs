@@ -29,6 +29,8 @@ urlPrefix: https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.
     type: http-header; 
         text: Identity-Digest; url: name-the-identity-digest-field
 urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
+    type: dfn
+        text: signature base; url: name-creating-the-signature-base
     type: http-header; 
         text: Accept-Signature; url: name-the-accept-signature-field
         text: Signature-Input; url: name-the-signature-input-field
@@ -251,8 +253,7 @@ following steps. They return `valid` if the signature is valid, or `invalid` oth
     then return "`invalid`".
 2.  Verify an HTTP message signature as defined in
     [Section 3.2](https://www.rfc-editor.org/rfc/rfc9421.html#name-verifying-a-signature)
-    of [[!RFC9421]], given |response| and the [=verification requirements for SRI=] given
-    "`Ed25519`" and |public key|.
+    of [[!RFC9421]], given |response| and the [=verification requirements for SRI=].
     
     Note: When we support more than one algorithm, we'll want to change this from a
     hard-coded string to a mapping between case-insensitive and canonical strings.
@@ -262,21 +263,78 @@ following steps. They return `valid` if the signature is valid, or `invalid` oth
 
 
 The HTTP Message Signature <dfn>verification requirements for SRI</dfn> are the
-following, given a [=string=] |algorithm| and a [=string=] |public key|:
+following:
 
-1.  The signature's covered components MUST include the [:Identity-Digest:] field.
+1.  The components specified in the [:Signature-Input:] header MUST include
+    *only* a single item that [=string/is=] the string "`identity-digest`".
+    This item MUST include *only* the parameter `sf`.
     
-    ISSUE: It might be a good idea to limit this to *only* including the single
-    `Identity-Digest` header while we're gaining implementation experiences with
-    the signature mechanism generally?
+2.  The signature's parameters MUST satisfy all of the following requirements:
+    *   The `alg` parameter is present, and its value [=string/is=] "`ed25519`".
+    *   If the `created` parameter is present, its value represents a time in
+        the past.
+    *   If the `expires` parameter is present, its value represents a time in
+        the future.
+    *   The `keyid` parameter is present, and its value is a string containing
+        a base64 encoding of an Ed25519 public key.
+    *   The `tag` parameter's value [=string/is=] "`sri`".
+    *   The parameters are specified in alphabetical order.
 
-2.  The signature's parameters satisfy all of the following requirements:
-    *   The `alg` parameter's value is |algorithm|.
-    *   The `keyid` parameter's value is |public key|.
+<div class="example" id="example-verification-requirements">
+    Valid [:Signature-Input:] header values would therefore include:
 
-    ISSUE: It might be reasonable to require an `expires` parameter to give
-    developers clear guidance about mitigating some of the risks described in
-    [[#security-rollback]].
+    *   `("identity-digest";sf);alg="ed25519";keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"`
+</div>
+
+<div class="note">
+Note: These requirements are fairly draconian, allowing only a very small subset
+of the flexibility allowed by the HTTP Message Signature format. It is entirely
+probable that we can expand the scope of allowed signature inputs in the future,
+but as we're figuring out how to do signature validation on the client it seems
+prudent to provide as much strict guidance as possible in order to keep the
+initial complexity under control.
+
+For posterity, this set of requirements has a few helpful implications:
+
+1.  Specifying the `tag` parameter as "`sri`" is a pretty clear signal that the
+    developer is aiming to validate the integrity and/or provenance of a given
+    subresource, and can therefore be reasonably expected to adhere to the set
+    of constraints and processing instructions described in this document.
+    Developers specifying that tag can be expected to be unsurprised when
+    resources are blocked if their signatures don't properly validate.
+
+2.  Specifying the `keyid` parameter as a base64 encoding of the signer's public
+    key makes it possible for validation to be enforced whether or not the
+    resource was requested from a page requiring integrity.
+
+3.  Specifying the `alg` parameter as "`ed25519`" is a good place to start as
+    the keys are small and the algorithm is broadly supported. Choosing one
+    algorithm simplifies initial implementations, and reduces the set of choices
+    we ask developers to make about crypto primitives.
+
+4.  The [:Signature-Input:] header is very flexible as specified, and most of
+    the restrictions here aim to reduce its complexity as we gain implementation
+    experience on both the client and server sides of the signature generation
+    process. [[RFC9421]] leaves several important questions about the
+    serialization of the "[=signature base=]" open to agreement between the
+    signer and verifier: we're locking most of those joints down here in order
+    to ensure that we start with a simple story for both sides.
+
+    To that end, we're supporting signatures only over the one specific header
+    necessary to meaningfully assert something about the resource's body. We're
+    explicitly specifying strict serialization of that header, and we're
+    requiring it to be a header, not a trailer.
+
+5.  In order to avoid potential disagreements between servers and clients about
+    the serialization of a [=signature base=] for a given response, we're
+    specifying how both sides ought to "Determine an order for any signature
+    parameters" by locking in alphabetical sorting of the signature's
+    parameters. We really only need to do this when generating the signature
+    base: the [:Signature-Input:] header could in theory be arbitrarily sorted.
+    In practice, however, it seems prudent to ensure that we make the expected
+    representation as clear as possible.
+
+</div>
 
 </ins>
 
@@ -284,15 +342,19 @@ following, given a [=string=] |algorithm| and a [=string=] |public key|:
 Patches to Fetch {#monkey-patch-fetch}
 --------------------------------------
 
-The only change we need to make to Fetch is to pass additional information into the
-matching algorithm as redefined above.
+Fetch needs to change in two ways:
 
-Step 22.3.1 of [[Fetch#main-fetch]] should be updated as follows:
+First, the trivial change: Step 22.3.1 of [[Fetch#main-fetch]] should be updated
+as follows:
 
 1.  If <var ignore>bytes</var> do not match <var ignore>request</var>’s
     [=request/integrity metadata=]<ins> and <var ignore>response</var></ins>,
     then run processBodyError and abort these steps. [[!SRI]]
 
+Next, the more complicated change: Fetch needs to enforce assertions about
+resource integrity made via [:Identity-Digest:] headers.
+
+ISSUE: TODO(mkwst): Spell out how that enforcement works.
 
 Deployment Scenarios {#deployment-scenarios}
 =======================================
