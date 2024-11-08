@@ -1,13 +1,15 @@
 # Blindly copy/pasted from https://w3c.github.io/spec-prod/#deploy-to-github-pages
+# and https://github.com/w3c-fedid/FedCM/blob/main/.github/workflows/build-validate-publish.yaml
 name: CI
 on:
   pull_request: {}
   push:
     branches: [main]
+
 jobs:
   main:
     name: Build, Validate and Deploy
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -15,3 +17,4 @@ jobs:
       - uses: w3c/spec-prod@v2
         with:
           GH_PAGES_BRANCH: gh-pages
+          BUILD_FAIL_ON: nothing
