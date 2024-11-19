@@ -36,6 +36,10 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
         text: Signature-Input; url: name-the-signature-input-field
         text: Signature; url: name-the-signature-field
 </pre>
+<pre class="link-defaults">
+spec:html; type:element; text:script
+spec:html; type:element; text:link
+</pre>
 <pre class="biblio">
 {
   "PCIv4-SRI-Gaps": {
@@ -53,6 +57,8 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
 
 Introduction {#intro}
 =====================
+
+**This section is non-normative.**
 
 Subresource Integrity [[SRI]] defines a mechanism by which developers can
 ensure that script or stylesheet loaded into their pages' contexts are
@@ -95,7 +101,7 @@ This document outlines the changes that would be necessary to [[Fetch]], and
         Content-Type: text/javascript; charset=UTF-8
         Access-Control-Allow-Origin: *
         Identity-Digest: sha-512=:[base64-encoded digest of `console.log("Hello, world!");`]:
-        Signature-Input: sig1=("identity-digest"); alg="Ed25519"; keyid="[base64-encoded public key]"
+        Signature-Input: sig1=("identity-digest";sf); alg="Ed25519"; keyid="[base64-encoded public key]"; tag="sri"
         Signature: sig1=:[base64-encoded result of Ed25519(`console.log("Hello, world!");`)]:
 
         console.log("Hello, world!");
@@ -130,6 +136,84 @@ similarly removes the necessity to trust intermediaries.
 With these properties in mind, signature-based integrity checks aim to protect
 against attackers who might be able to manipulate the content of resources that
 a site depends upon, but who cannot gain access to the signing key.
+
+High-Level Overview {#overview}
+-------------------------------
+
+The mechanism described in the remainder of this document can be broken down
+into a few independent parts, layered on top of one another to achive the goals
+developers are aiming for.
+
+1.  **Server-initiated integrity checks**: Servers can deliver an
+    [:Identity-Digest:] header along with responses that contain one or more
+    digests of the response's content _after_ decoding any transfer encodings
+    (gzip, brotli, etc).
+    
+    If such a header is present, user agents can enforce it by synthesizing a
+    network error if the delivered content does not match the asserted digest.
+    See [[#identity-digest-enforcement]] below for more details.
+
+2.  **Server-initiated signature checks**: Servers can deliver HTTP Message
+    Signature headers ([:Signature:] and [:Signature-Input:] from [[RFC9421]])
+    that allow the verification of request/response metadata. We can construct
+    these headers in }such a way that user agents can enforce them, and further
+    ensure that the signed metadata includes the server-initiated integrity
+    checks noted above. Enforcing signature verification, then, means ensuring
+    that the private key's possessor signed the specific content in question.
+    
+    See the [=verification requirements for SRI=] described below for more
+    detail about these headers' construction.
+
+3.  **Client-initiated integrity checks**: Pages need to be able to specify
+    [=request/integrity metadata=] for <{script}> and <{link}> elements that
+    can be matched against the server-initiated checks described above.
+    The work necessary is described in [[#monkey-patch-sri]] below.
+
+4.  **CSP-driven enforcement**: As described in [[CSP#external-hash]], it's
+    possible today to safely allow JavaScript execution by specifying
+    [=request/integrity metadata=] on a given element, matching that metadata
+    against a page's active policies, and relying upon SRI to enforce the
+    constraints the metadata declares. The same should be possible for
+    signatures (and should fall out of CSP's specification without much
+    additional work).
+    
+    ISSUE: TODO(mkwst): Make sure that's true.
+
+Implementing the mechanism in this document therefore requires:
+
+1.  Implementing [:Identity-Digest:] checks, at least for the subset of
+    resource types upon which SRI can act: scripts and stylesheets.
+
+2.  Implementing the subset of HTTP Message Signatures required to support the
+    headers which meet the [=verification requirements for SRI=].
+
+3.  Implementing the patches against SRI necessary to support the new integrity
+    types, described in [[#monkey-patch-sri]].
+
+Revisiting the example above, the following things might happen to ensure that
+we're only executing script correctly signed with a key we expect:
+
+1.  Prior to sending the request, the page's CSP will verify the content of the
+    relevent <{script}> element's <{script/integrity}> attribute, ensuring that
+    any public keys asserted match the page's requirements.
+
+2.  The user agent receives response headers for `https://my.cdn/script.js`,
+    parses the [:Signature-Input:] header, and uses it to verify the
+    [:Signature:] header's content, blocking the response if verification fails.
+    This verification shows that we'll only be dealing with responses for which
+    we have proof that the private key's possessor signed this response,
+    including the integrity information.
+
+3.  The user agent matches the public key contained in the [:Signature-Input:]
+    header with the request's [=request/integrity metadata=], blocking the
+    response if there's a mismatch. This ensures that we're meeting the page's
+    requirements for resource inclusion.
+
+4.  Once the response has streamed in, we validate the integrity information
+    contained in the [:Identity-Digest:] headers against the response body,
+    refusing to execute any mismatched responses.
+
+5.  We're done, executing probably-safe JavaScript to our heart's content.
 
 Monkey Patches {#monkey-patches}
 ================================
@@ -351,6 +435,8 @@ as follows:
     [=request/integrity metadata=]<ins> and <var ignore>response</var></ins>,
     then run processBodyError and abort these steps. [[!SRI]]
 
+### `Identity-Digest` Enforcement ### {#identity-digest-enforcement}
+
 Next, the more complicated change: Fetch needs to enforce assertions about
 resource integrity made via [:Identity-Digest:] headers.
 
@@ -358,6 +444,8 @@ ISSUE: TODO(mkwst): Spell out how that enforcement works.
 
 Deployment Scenarios {#deployment-scenarios}
 =======================================
+
+**This section is non-normative.**
 
 Signature-based SRI is meant to be a general primitive that can be used in a wide variety of ways that we can't possibly exhaustively document. But below we document a few different scenarios for how signature-based SRI can be used to enable new functionality for the web. 
 
@@ -380,6 +468,8 @@ An alternate deployment scenario is a site using this to protect first-party res
 
 Deployment Considerations {#deployment}
 =======================================
+
+**This section is non-normative.**
 
 Key Management {#deployment-key-management}
 -------------------------------------------
@@ -420,6 +510,8 @@ without requiring each entity to move in lockstep.
 
 Security Considerations {#security}
 ===================================
+
+**This section is non-normative.**
 
 Secure Contexts {#security-secure-context}
 ------------------------------------------
@@ -483,6 +575,8 @@ valuable as future enhancements.
 
 Privacy Considerations {#privacy}
 =================================
+
+**This section is non-normative.**
 
 Given that the validation of a response's signature continues to require the
 response to opt-into legibility via CORS, this mechanism does not seem to add
