@@ -6,9 +6,20 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version 742f3d674, updated Mon Nov 4 14:56:54 2024 -0800" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="81cbcaccf4741c2beedf977b48d2c1055e21c369" name="revision">
+  <meta content="17324bb4194faaff7c51a88b54309c6ae452e7ec" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
+<style>
+  .line-no {
+    display: none;
+  }
+  .line {
+    min-height: 1.5em;
+  }
+  .highlight-line {
+    font-weight: bold;
+  }
+</style>
 <style>/* Boilerplate: style-autolinks */
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
@@ -476,6 +487,50 @@ a[href].issue-return {
     text-decoration: none;
 }
 </style>
+<style>/* Boilerplate: style-line-highlighting */
+:root {
+    --highlight-hover-bg: rgba(0, 0, 0, .05);
+}
+.line-numbered {
+    display: grid !important;
+    grid-template-columns: min-content 1fr;
+    grid-auto-flow: rows;
+}
+.line-numbered > *,
+.line-numbered::before,
+.line-numbered::after {
+    grid-column: 1/-1;
+}
+.line-no {
+    grid-column: 1;
+    color: gray;
+}
+.line {
+    grid-column: 2;
+}
+.line.highlight-line {
+    background: var(--highlight-hover-bg);
+}
+.line-no.highlight-line {
+    background: var(--highlight-hover-bg);
+    color: #444;
+    font-weight: bold;
+}
+.line-no.highlight-line[data-line]::before {
+    padding: 0 .5em 0 .1em;
+    content: attr(data-line);
+}
+.line-no.highlight-line[data-line-end]::after {
+    padding: 0 .5em 0 .1em;
+    content: attr(data-line-end);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --highlight-hover-bg: rgba(255, 255, 255, .05);
+    }
+}
+</style>
 <style>/* Boilerplate: style-md-lists */
 /* This is a weird hack for me not yet following the commonmark spec
    regarding paragraph and lists. */
@@ -747,7 +802,7 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Signature-based Integrity</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-11-21">21 November 2024</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-11-22">22 November 2024</time></p>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -836,6 +891,7 @@ properties that seem interesting to explore.</p>
       <li><a href="#security-rollback"><span class="secno">5.3</span> <span class="content">Rollback Attacks</span></a>
      </ol>
     <li><a href="#privacy"><span class="secno">6</span> <span class="content">Privacy Considerations</span></a>
+    <li><a href="#examples"><span class="secno">7</span> <span class="content">An End-to-End Example</span></a>
     <li>
      <a href="#w3c-conformance"><span class="secno"></span> <span class="content">Conformance</span></a>
      <ol class="toc">
@@ -1420,6 +1476,63 @@ any new data channels from the server to the client. The choice of private
 key used to sign the resource is potentially interesting, but doesn’t seem to
 offer any capability that isn’t possible more directly by altering the resource
 body or headers.</p>
+   <h2 class="heading settled" data-level="7" id="examples"><span class="secno">7. </span><span class="content">An End-to-End Example</span><a class="self-link" href="#examples"></a></h2>
+   <p>The following example walks through the process a developer might go through
+to sign a given resource. Let’s start with the following JSON response:</p>
+<pre class="highlight"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c->
+<c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c->
+<c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c->
+<c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c->
+
+<c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c->
+</pre>
+   <p>First, the developer would deliver information to the client that would support
+an integrity check upon receipt. To do so, they’ll generate a digest over the
+response’s body:</p>
+<pre class="language-console highlight">user@host:~/path$  echo -n <c- u>"{\"hello\": \"world\"}"</c-> <c- p>|</c-> openssl dgst -binary -sha256 <c- p>|</c-> base64
+X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=
+</pre>
+   <p>And send that digest along with the response via an <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑤">Identity-Digest</a></code>`</span> header;</p>
+<pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no highlight-line" data-line="5"></span><span class="line highlight-line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
+   <p>Next, the developer will pick an Ed25519 public/private key pair to use when
+signing the response. Assume that they (through amazing coincidence!) generate
+the same key pair that’s used as an example in <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>, section B.2:</p>
+<pre class="language-console highlight">user@host:~/path$  openssl genpkey -algorithm ed25519 -out /tmp/tmp_key.pem
+user@host:~/path$  cat /tmp/tmp_key.pem
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIJ+DYvh6SEqVTm50DFtMDoQikTmiCqirVv9mWG9qfSnF
+-----END PRIVATE KEY-----
+user@host:~/path$  openssl pkey -in /tmp/tmp_key.pem -pubout
+-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=
+-----END PUBLIC KEY-----
+</pre>
+   <p>For the next step, we’ll need a base64 encoding of the public key’s raw bytes.
+There’s unfortunately not a trivial way to extract that from the PKCS#8-encoded
+PEM format above, but the following tiny Python script will do the work:</p>
+<pre class="language-python highlight"><c- kn>from</c-> <c- nn>cryptography.hazmat.primitives</c-> <c- kn>import</c-> <c- n>serialization</c->
+<c- kn>import</c-> <c- nn>base64</c->
+
+<c- k>with</c-> open<c- p>(</c-><c- u>"/tmp/tmp_key.pem"</c-><c- p>,</c-> <c- u>"rb"</c-><c- p>)</c-> <c- k>as</c-> <c- n>pem</c-><c- p>:</c->
+    <c- n>public_key</c-> <c- o>=</c-> <c- n>serialization</c-><c- o>.</c-><c- n>load_pem_private_key</c-><c- p>(</c->
+        <c- n>pem</c-><c- o>.</c-><c- n>read</c-><c- p>(),</c-> <c- n>password</c-><c- o>=</c-><c- kc>None</c->
+    <c- p>)</c-><c- o>.</c-><c- n>public_key</c-><c- p>()</c->
+    <c- n>byte_string</c-> <c- o>=</c-> <c- n>base64</c-><c- o>.</c-><c- n>b64encode</c-><c- p>(</c-><c- n>public_key</c-><c- o>.</c-><c- n>public_bytes_raw</c-><c- p>())</c->
+    print<c- p>(</c-><c- n>byte_string</c-><c- o>.</c-><c- n>decode</c-><c- p>(</c-><c- u>"utf-8"</c-><c- p>))</c->
+</pre>
+   <p>With that encoding in hand, the developer can construct a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑧">Signature-Input</a></code>`</span> header that specifies the <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑥">Identity-Digest</a></code>`</span> header as a signed component,
+and includes the base64-encoded public key as the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10②"><code>keyid</code></a> parameter
+(as discussed in [#profile]):</p>
+<pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no highlight-line" data-line="6"></span><span class="line highlight-line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
+   <p>Now we have everything we need to construct the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-creating-the-signature-base" id="ref-for-name-creating-the-signature-base②">signature base</a>, following
+the steps described in Section 2.5 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>, and choosing an alphabetical
+ordering each time it instructs us to "determine an order" in Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>. We’ll end up with:</p>
+<pre>"identity-digest": sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+"@signature-params": ("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+</pre>
+   <p>That’s the string we’ll sign, placing the base64-encoded signature into a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-field" id="ref-for-name-the-signature-field②">Signature</a></code>`</span> header on the response:</p>
+<pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no highlight-line" data-line="7"></span><span class="line highlight-line"><c- e>Signature</c-><c- o>:</c-> <c- l>signature=:H7AqWWgo1DJ7VdyF9DKotG/4hvatKDfRTq2mpuY/hvJupSn+EYzus5p24qPK7DtVQcxJFhzSYDj4RBq9grZTAQ==:</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
+   <p>Done!</p>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="w3c-conformance"><span class="content">Conformance</span><a class="self-link" href="#w3c-conformance"></a></h2>
@@ -1768,15 +1881,15 @@ function parseHTML(markup) {
 {
 let dfnPanelData = {
 "03afaf9c": {"dfnID":"03afaf9c","dfnText":"empty","external":true,"refSections":[{"refs":[{"id":"ref-for-list-empty"},{"id":"ref-for-list-empty\u2460"},{"id":"ref-for-list-empty\u2461"}],"title":"2.1.3. Do bytes and response match metadataList?"}],"url":"https://infra.spec.whatwg.org/#list-empty"},
-"03c8b9b5": {"dfnID":"03c8b9b5","dfnText":"Signature-Input","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-signature-input-field"},{"id":"ref-for-name-the-signature-input-field\u2460"},{"id":"ref-for-name-the-signature-input-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2462"},{"id":"ref-for-name-the-signature-input-field\u2463"},{"id":"ref-for-name-the-signature-input-field\u2464"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2465"},{"id":"ref-for-name-the-signature-input-field\u2466"}],"title":"5.3. Rollback Attacks"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field"},
+"03c8b9b5": {"dfnID":"03c8b9b5","dfnText":"Signature-Input","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-signature-input-field"},{"id":"ref-for-name-the-signature-input-field\u2460"},{"id":"ref-for-name-the-signature-input-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2462"},{"id":"ref-for-name-the-signature-input-field\u2463"},{"id":"ref-for-name-the-signature-input-field\u2464"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2465"},{"id":"ref-for-name-the-signature-input-field\u2466"}],"title":"5.3. Rollback Attacks"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2467"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field"},
 "0698d556": {"dfnID":"0698d556","dfnText":"string","external":true,"refSections":[{"refs":[{"id":"ref-for-string"},{"id":"ref-for-string\u2460"}],"title":"2.1.4. Validate a signature over response using algorithm and public key"}],"url":"https://infra.spec.whatwg.org/#string"},
 "0cf3964f": {"dfnID":"0cf3964f","dfnText":"script","external":true,"refSections":[{"refs":[{"id":"ref-for-script"},{"id":"ref-for-script\u2460"}],"title":"1.2. High-Level Overview"}],"url":"https://html.spec.whatwg.org/multipage/scripting.html#script"},
-"0ddb0f61": {"dfnID":"0ddb0f61","dfnText":"keyid","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.10"},{"id":"ref-for-section-2.3-4.10\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10"},
+"0ddb0f61": {"dfnID":"0ddb0f61","dfnText":"keyid","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.10"},{"id":"ref-for-section-2.3-4.10\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-section-2.3-4.10\u2461"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10"},
 "1edea83c": {"dfnID":"1edea83c","dfnText":"tag","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.12"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.12"},
 "1f1e47cf": {"dfnID":"1f1e47cf","dfnText":"dictionary","external":true,"refSections":[{"refs":[{"id":"ref-for-name-dictionary"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-dictionary"},
 "3dc5399b": {"dfnID":"3dc5399b","dfnText":"integrity","external":true,"refSections":[{"refs":[{"id":"ref-for-attr-script-integrity"}],"title":"1.2. High-Level Overview"}],"url":"https://html.spec.whatwg.org/multipage/scripting.html#attr-script-integrity"},
 "53275e46": {"dfnID":"53275e46","dfnText":"append (for list)","external":true,"refSections":[{"refs":[{"id":"ref-for-list-append"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#list-append"},
-"622b92f5": {"dfnID":"622b92f5","dfnText":"signature base","external":true,"refSections":[{"refs":[{"id":"ref-for-name-creating-the-signature-base"},{"id":"ref-for-name-creating-the-signature-base\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-creating-the-signature-base"},
+"622b92f5": {"dfnID":"622b92f5","dfnText":"signature base","external":true,"refSections":[{"refs":[{"id":"ref-for-name-creating-the-signature-base"},{"id":"ref-for-name-creating-the-signature-base\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-creating-the-signature-base\u2461"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-creating-the-signature-base"},
 "6507a74c": {"dfnID":"6507a74c","dfnText":"signature parameters","external":true,"refSections":[{"refs":[{"id":"ref-for-signature-params"},{"id":"ref-for-signature-params\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#signature-params"},
 "65181da8": {"dfnID":"65181da8","dfnText":"secure context","external":true,"refSections":[{"refs":[{"id":"ref-for-secure-context"}],"title":"5.1. Secure Contexts"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"},
 "692595fe": {"dfnID":"692595fe","dfnText":"ordered set","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-set"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ordered-set"},
@@ -1790,7 +1903,7 @@ let dfnPanelData = {
 "9c57c2af": {"dfnID":"9c57c2af","dfnText":"alg","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.8"},{"id":"ref-for-section-2.3-4.8\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"},
 "a3b18719": {"dfnID":"a3b18719","dfnText":"append (for set)","external":true,"refSections":[{"refs":[{"id":"ref-for-set-append"},{"id":"ref-for-set-append\u2460"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#set-append"},
 "a5ce345d": {"dfnID":"a5ce345d","dfnText":"Accept-Signature","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-accept-signature-field"}],"title":"5.3. Rollback Attacks"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field"},
-"a6a369ef": {"dfnID":"a6a369ef","dfnText":"Identity-Digest","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-identity-digest-field"},{"id":"ref-for-name-the-identity-digest-field\u2460"},{"id":"ref-for-name-the-identity-digest-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2462"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2463"}],"title":"2.2.1. Identity-Digest Enforcement"}],"url":"https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field"},
+"a6a369ef": {"dfnID":"a6a369ef","dfnText":"Identity-Digest","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-identity-digest-field"},{"id":"ref-for-name-the-identity-digest-field\u2460"},{"id":"ref-for-name-the-identity-digest-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2462"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2463"}],"title":"2.2.1. Identity-Digest Enforcement"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2464"},{"id":"ref-for-name-the-identity-digest-field\u2465"}],"title":"7. An End-to-End Example"}],"url":"https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field"},
 "abstract-opdef-parse-metadata": {"dfnID":"abstract-opdef-parse-metadata","dfnText":"Parse metadata","external":false,"refSections":[],"url":"#abstract-opdef-parse-metadata"},
 "abstract-opdef-validating-an-integrity-signature": {"dfnID":"abstract-opdef-validating-an-integrity-signature","dfnText":"validate an integrity signature","external":false,"refSections":[{"refs":[{"id":"ref-for-abstract-opdef-validating-an-integrity-signature"}],"title":"2.1.3. Do bytes and response match metadataList?"}],"url":"#abstract-opdef-validating-an-integrity-signature"},
 "ac57951b": {"dfnID":"ac57951b","dfnText":"component identifier","external":true,"refSections":[{"refs":[{"id":"ref-for-covered-components"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#covered-components"},
@@ -1800,7 +1913,7 @@ let dfnPanelData = {
 "d79a826f": {"dfnID":"d79a826f","dfnText":"integrity metadata","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-request-integrity-metadata"},{"id":"ref-for-concept-request-integrity-metadata\u2460"},{"id":"ref-for-concept-request-integrity-metadata\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-concept-request-integrity-metadata\u2462"}],"title":"2.2. Patches to Fetch"}],"url":"https://fetch.spec.whatwg.org/#concept-request-integrity-metadata"},
 "e1c77118": {"dfnID":"e1c77118","dfnText":"sf","external":true,"refSections":[{"refs":[{"id":"ref-for-http-field-structured"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#http-field-structured"},
 "e5fc5b88": {"dfnID":"e5fc5b88","dfnText":"strictly split","external":true,"refSections":[{"refs":[{"id":"ref-for-strictly-split"},{"id":"ref-for-strictly-split\u2460"},{"id":"ref-for-strictly-split\u2461"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#strictly-split"},
-"e7971ceb": {"dfnID":"e7971ceb","dfnText":"Signature","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-signature-field"},{"id":"ref-for-name-the-signature-field\u2460"}],"title":"1.2. High-Level Overview"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-field"},
+"e7971ceb": {"dfnID":"e7971ceb","dfnText":"Signature","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-signature-field"},{"id":"ref-for-name-the-signature-field\u2460"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-signature-field\u2461"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-field"},
 "eb1b1af3": {"dfnID":"eb1b1af3","dfnText":"network error","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-network-error"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://fetch.spec.whatwg.org/#concept-network-error"},
 "ee7bba09": {"dfnID":"ee7bba09","dfnText":"response","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-response"}],"title":"2.1.3. Do bytes and response match metadataList?"},{"refs":[{"id":"ref-for-concept-response\u2460"}],"title":"2.1.4. Validate a signature over response using algorithm and public key"}],"url":"https://fetch.spec.whatwg.org/#concept-response"},
 "f20eaef8": {"dfnID":"f20eaef8","dfnText":"expires","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.4"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.4"},
