@@ -63,6 +63,17 @@ spec:html; type:element; text:link
   }
 }
 </pre>
+<style>
+  .line-no {
+    display: none;
+  }
+  .line {
+    min-height: 1.5em;
+  }
+  .highlight-line {
+    font-weight: bold;
+  }
+</style>
 
 Introduction {#intro}
 =====================
@@ -664,3 +675,115 @@ any new data channels from the server to the client. The choice of private
 key used to sign the resource is potentially interesting, but doesn't seem to
 offer any capability that isn't possible more directly by altering the resource
 body or headers.
+
+
+An End-to-End Example {#examples}
+=================================
+
+The following example walks through the process a developer might go through
+to sign a given resource. Let's start with the following JSON response:
+
+<xmp highlight=http>
+HTTP/1.1 200 OK
+Date: Tue, 20 Apr 2021 02:07:56 GMT
+Content-Type: application/json
+Content-Length: 18
+
+{"hello": "world"}
+</xmp>
+
+First, the developer would deliver information to the client that would support
+an integrity check upon receipt. To do so, they'll generate a digest over the
+response's body:
+
+```console
+user@host:~/path$  echo -n "{\"hello\": \"world\"}" | openssl dgst -binary -sha256 | base64
+X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=
+```
+
+And send that digest along with the response via an [:Identity-Digest:] header;
+
+<xmp highlight=http line-highlight=5>
+HTTP/1.1 200 OK
+Date: Tue, 20 Apr 2021 02:07:56 GMT
+Content-Type: application/json
+Content-Length: 18
+Identity-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+
+{"hello": "world"}
+</xmp>
+
+Next, the developer will pick an Ed25519 public/private key pair to use when
+signing the response. Assume that they (through amazing coincidence!) generate
+the same key pair that's used as an example in [[RFC9421]], section B.2:
+
+```console
+user@host:~/path$  openssl genpkey -algorithm ed25519 -out /tmp/tmp_key.pem
+user@host:~/path$  cat /tmp/tmp_key.pem
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIJ+DYvh6SEqVTm50DFtMDoQikTmiCqirVv9mWG9qfSnF
+-----END PRIVATE KEY-----
+user@host:~/path$  openssl pkey -in /tmp/tmp_key.pem -pubout
+-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=
+-----END PUBLIC KEY-----
+```
+
+For the next step, we'll need a base64 encoding of the public key's raw bytes.
+There's unfortunately not a trivial way to extract that from the PKCS#8-encoded
+PEM format above, but the following tiny Python script will do the work:
+
+```python
+from cryptography.hazmat.primitives import serialization
+import base64
+
+with open("/tmp/tmp_key.pem", "rb") as pem:
+    public_key = serialization.load_pem_private_key(
+        pem.read(), password=None
+    ).public_key()
+    byte_string = base64.b64encode(public_key.public_bytes_raw())
+    print(byte_string.decode("utf-8"))
+```
+
+With that encoding in hand, the developer can construct a [:Signature-Input:]
+header that specifies the [:Identity-Digest:] header as a signed component,
+and includes the base64-encoded public key as the <a>`keyid`</a> parameter
+(as discussed in [#profile]):
+
+<xmp highlight=http line-highlight=6>
+HTTP/1.1 200 OK
+Date: Tue, 20 Apr 2021 02:07:56 GMT
+Content-Type: application/json
+Content-Length: 18
+Identity-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Signature-Input: signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+
+{"hello": "world"}
+</xmp>
+
+Now we have everything we need to construct the [=signature base=], following
+the steps described in Section 2.5 of [[RFC9421]], and choosing an alphabetical
+ordering each time it instructs us to "determine an order" in Section 2.3 of
+[[RFC9421]]. We'll end up with:
+
+```
+"identity-digest": sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+"@signature-params": ("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+```
+
+That's the string we'll sign, placing the base64-encoded signature into a
+[:Signature:] header on the response:
+
+<xmp highlight=http line-highlight=7>
+HTTP/1.1 200 OK
+Date: Tue, 20 Apr 2021 02:07:56 GMT
+Content-Type: application/json
+Identity-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Content-Length: 18
+Signature-Input: signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+Signature: signature=:H7AqWWgo1DJ7VdyF9DKotG/4hvatKDfRTq2mpuY/hvJupSn+EYzus5p24qPK7DtVQcxJFhzSYDj4RBq9grZTAQ==:
+
+{"hello": "world"}
+</xmp>
+
+Done!
