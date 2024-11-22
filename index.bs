@@ -598,6 +598,16 @@ Note: This proposal does support pinning multiple keys for a single
 resource, so it will be possible to support rotation in a coordinated way
 without requiring each entity to move in lockstep.
 
+Key Discovery {#deployment-key-discovery}
+-----------------------------------------
+
+Servers that support this feature need to include the public key used to
+validate a resource's signature in the [:Signature-Input:] header's
+<a>`keyid`</a> signature parameter. Developer who wish to enforce signature
+validation against a particular key can do so by requesting the relevant
+resource, and extracting the key from its headers and inserting it into,
+for example, a <{script}>'s <{script/integrity}> attribute.
+
 
 Security Considerations {#security}
 ===================================
