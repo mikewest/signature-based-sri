@@ -44,6 +44,9 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
         text: Accept-Signature; url: name-the-accept-signature-field
         text: Signature-Input; url: name-the-signature-input-field
         text: Signature; url: name-the-signature-field
+urlPrefix: https://www.rfc-editor.org/rfc/rfc9651.html; spec: STRUCTURED-FIELDS
+    type: abstract-op
+        text: parsing structured fields; url: text-parse
 </pre>
 <pre class="link-defaults">
 spec:html; type:element; text:script
@@ -360,6 +363,7 @@ guidelines from Section 1.4 of [[RFC9421]]:
 
 :   **Other**
 ::  The HTTP Message Signature must be delivered with a response.
+::  The [:Identity-Digest:] header must be [=Identity-Digest/valid for SRI=].
 
 
 <div class="example" id="example-verification-requirements">
@@ -554,6 +558,42 @@ Next, the more complicated change: Fetch needs to enforce assertions about
 resource integrity made via [:Identity-Digest:] headers.
 
 ISSUE: TODO(mkwst): Spell out how that enforcement works.
+
+### `Identity-Digest` Validation ### {#identity-digest-validation}
+
+<div algorithm>
+
+An [:Identity-Digest:] [=header=] (|header|) is
+<dfn for="Identity-Digest">valid for SRI</dfn> if the following steps return
+"`valid`":
+
+1.  Let |parsed| be the result of [$parsing structured fields$] with `input_string`
+    set to |header|'s [=header/value=], and `header_type` set to "`dictionary`".
+
+    ISSUE: Here, I'm assuming that a structured field Dictionary turns into a
+    [=map=] after parsing? That doesn't seem unreasonable, but it might be?
+
+2.  If parsing failed or if |parsed| [=map/is empty=], return "`invalid`".
+
+3.  [=map/iterate|For each=] |key| → |value| of |parsed|:
+
+    1.  If |value| is not a [=byte sequence=], return "`invalid`".
+
+    2.  If |key| is not [=list/contain|contained within=] the [=list=]
+        « "sha-256", "sha-384", "sha-512" », return "`invalid`".
+
+    3.  If |key| is "`sha-256`", and |value|'s [=byte sequence/length=] is
+        not 32, return "`invalid`".
+
+    4.  If |key| is "`sha-384`", and |value|'s [=byte sequence/length=] is
+        not 48, return "`invalid`".
+
+    5.  If |key| is "`sha-512`", and |value|'s [=byte sequence/length=] is
+        not 64, return "`invalid`".
+
+4.  Return "`valid`".
+
+</div>
 
 
 ### `Signature` and `Signature-Input` Enforcement ### {#signature-enforcement}
