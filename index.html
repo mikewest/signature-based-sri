@@ -6,7 +6,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version 742f3d674, updated Mon Nov 4 14:56:54 2024 -0800" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="80fa3d887f566410550f731455d785f9c4c31cd2" name="revision">
+  <meta content="87d54dc5b7b8e53921e8a5a5eefb72fbf297d984" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>
@@ -1108,12 +1108,18 @@ constraints:</p>
          <p><code>identity-digest</code>, which MUST include the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#http-field-structured" id="ref-for-http-field-structured"><code>sf</code></a> parameter and
 no other parameters.</p>
        </ul>
+       <p class="note" role="note"><span class="marker">Note:</span> We’ll extend this over time. The limitation to <code>identity-digest</code> is artificial, and aimed towards making a prototype of this approach
+as simple as possible to implement and evaluate as we decide what makes
+sense to ship at scale.</p>
       <li data-md>
        <p>Include the following <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#signature-params" id="ref-for-signature-params">signature parameters</a> with their associated
 constraints:</p>
        <ul>
         <li data-md>
          <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8"><code>alg</code></a>, whose value MUST be the string <code>ed25519</code></p>
+         <p class="issue" id="issue-42a91512"><a class="self-link" href="#issue-42a91512"></a> <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6">Section 7.3.6 of RFC9421</a> suggests dropping the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8①"><code>alg</code></a> parameter when the algorithm can
+be determined unambigiously. Perhaps we should do that there rather
+than requiring its explicit presence.</p>
         <li data-md>
          <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10"><code>keyid</code></a>, whose value MUST be a string containing a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#forgiving-base64-encode" id="ref-for-forgiving-base64-encode">base64 encoding</a> of the public key
 portion of the signature’s verification key material.</p>
@@ -1133,8 +1139,14 @@ with their associated constraints:</p>
       <li data-md>
        <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.4" id="ref-for-section-2.3-4.4"><code>expires</code></a>, an integer whose value MUST represent a time in the future.</p>
       <li data-md>
-       <p><code>nonce</code>, which is a string.</p>
+       <p><code>nonce</code>, which is a string whose value SHOULD be generated in a fashion
+which guarantees uniqueness.</p>
      </ul>
+     <p class="issue" id="issue-edca7137"><a class="self-link" href="#issue-edca7137"></a> "in the past" and "in the future" require a reference point, which
+presumably would be the point at which the message was received by a user
+agent. We’ll also want to deal in some way with clock drift that might come
+into play for very new or very old signatures (ideally in a way consistent
+with browsers' approaches to TLS certificate <code>NotBefore</code>/<code>NotAfter</code> assertions.</p>
     <dt data-md><strong>Structured Field Types</strong>:
     <dd data-md>
      <ul>
@@ -1148,12 +1160,13 @@ from the signature input’s <a data-link-type="dfn" href="https://www.rfc-edito
 as a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#forgiving-base64-encode" id="ref-for-forgiving-base64-encode①">base64 encoded</a> string.</p>
     <dt data-md><strong>Signature Algorithms</strong>:
     <dd data-md>
-     <p>The only signature algorithm allowed is <code>ed25519</code>.</p>
+     <p>The only signature algorithm identifier allowed is "<code>ed25519</code>", as defined
+in <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-3.3.6">Section 3.3.6 of RFC9421</a>.</p>
     <dt data-md><strong>Determine Key/Algorithm Appropriateness</strong>:
     <dd data-md>
      <p>Since the only accepted algorithm is <code>ed25519</code>, it is appropriate for any
 context in which this profile will be used, and we require it to be
-specified as the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8①"><code>alg</code></a> parameter to the signature’s input.</p>
+specified as the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8②"><code>alg</code></a> parameter to the signature’s input.</p>
     <dt data-md><strong>Derivation Context</strong>
     <dd data-md>
      <p>The context for derivation of message components from an HTTP message and
@@ -1755,8 +1768,16 @@ ordering each time it instructs us to "determine an order" in Section 2.3 of <a 
 packaging constraints in ways that seem useful, but does introduce some
 additional complexity in developers' mental model. So, consider it a
 decision point. <a class="issue-return" href="#issue-779438ed" title="Jump to section">↵</a></div>
+   <div class="issue"> <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6">Section 7.3.6 of RFC9421</a> suggests dropping the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"><code>alg</code></a> parameter when the algorithm can
+be determined unambigiously. Perhaps we should do that there rather
+than requiring its explicit presence. <a class="issue-return" href="#issue-42a91512" title="Jump to section">↵</a></div>
    <div class="issue"> Perhaps something more specific to make room for variants
 in the future that have different constraints? <code>enforce-ed25519-provenance</code>? <a class="issue-return" href="#issue-24e8d4a7" title="Jump to section">↵</a></div>
+   <div class="issue"> "in the past" and "in the future" require a reference point, which
+presumably would be the point at which the message was received by a user
+agent. We’ll also want to deal in some way with clock drift that might come
+into play for very new or very old signatures (ideally in a way consistent
+with browsers' approaches to TLS certificate <code>NotBefore</code>/<code>NotAfter</code> assertions. <a class="issue-return" href="#issue-edca7137" title="Jump to section">↵</a></div>
    <div class="issue"> TODO(mkwst): Spell out how that enforcement works. <a class="issue-return" href="#issue-57d58326" title="Jump to section">↵</a></div>
    <div class="issue"> Here, I’m assuming that a structured field Dictionary turns into a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map">map</a> after parsing? That doesn’t seem unreasonable, but it might be? <a class="issue-return" href="#issue-fee2ef14" title="Jump to section">↵</a></div>
    <div class="issue"> TODO(mkwst): Spell this out too. <a class="issue-return" href="#issue-5ba2e8e0" title="Jump to section">↵</a></div>
@@ -1987,7 +2008,7 @@ let dfnPanelData = {
 "7b0d918d": {"dfnID":"7b0d918d","dfnText":"break","external":true,"refSections":[{"refs":[{"id":"ref-for-iteration-break"},{"id":"ref-for-iteration-break\u2460"}],"title":"2.1.3. Do bytes and response match metadataList?"}],"url":"https://infra.spec.whatwg.org/#iteration-break"},
 "84b454ff": {"dfnID":"84b454ff","dfnText":"ordered map","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-map"}],"title":"2.1.2. Parse metadata."},{"refs":[{"id":"ref-for-ordered-map\u2460"}],"title":"2.2.2. Identity-Digest Validation"}],"url":"https://infra.spec.whatwg.org/#ordered-map"},
 "8a608b90": {"dfnID":"8a608b90","dfnText":"value","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-value"}],"title":"2.2.2. Identity-Digest Validation"}],"url":"https://fetch.spec.whatwg.org/#concept-header-value"},
-"9c57c2af": {"dfnID":"9c57c2af","dfnText":"alg","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.8"},{"id":"ref-for-section-2.3-4.8\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"},
+"9c57c2af": {"dfnID":"9c57c2af","dfnText":"alg","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.8"},{"id":"ref-for-section-2.3-4.8\u2460"},{"id":"ref-for-section-2.3-4.8\u2461"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"},
 "a3b18719": {"dfnID":"a3b18719","dfnText":"append (for set)","external":true,"refSections":[{"refs":[{"id":"ref-for-set-append"},{"id":"ref-for-set-append\u2460"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#set-append"},
 "a5ce345d": {"dfnID":"a5ce345d","dfnText":"Accept-Signature","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-accept-signature-field"}],"title":"5.3. Rollback Attacks"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field"},
 "a6a369ef": {"dfnID":"a6a369ef","dfnText":"Identity-Digest","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-identity-digest-field"},{"id":"ref-for-name-the-identity-digest-field\u2460"},{"id":"ref-for-name-the-identity-digest-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2462"},{"id":"ref-for-name-the-identity-digest-field\u2463"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2464"}],"title":"2.2.1. Identity-Digest Enforcement"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2465"}],"title":"2.2.2. Identity-Digest Validation"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2466"},{"id":"ref-for-name-the-identity-digest-field\u2467"}],"title":"7. An End-to-End Example"}],"url":"https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field"},
