@@ -358,6 +358,9 @@ guidelines from Section 1.4 of [[RFC9421]]:
 :   **Security Considerations**
 ::  See [[#security]].
 
+:   **Other**
+::  The HTTP Message Signature must be delivered with a response.
+
 
 <div class="example" id="example-verification-requirements">
     Valid [:Signature-Input:] header values would therefore include:
@@ -470,8 +473,8 @@ relevant HTTP response header. For the moment, let's simply pass in the
 entire [=/response=] (|response|), as that makes the integration with [[RFC9421]] somewhat
 explicable:
 
-1.  Let |parsedMetadata| be the result of executing [[SRI#parse-metadata]|] on |metadataList|.
-2.  If both |parsedMetadata|<ins>["`hashes`"] and |parsedMetadata["`signatures`"]</ins> are [=set/empty=] set, return `true`.
+1.  Let |parsedMetadata| be the result of executing [$Parse metadata$] on |metadataList|.
+2.  If both |parsedMetadata|<ins>["`hashes`"] and |parsedMetadata|["`signatures`"]</ins> are [=set/empty=] set, return `true`.
 3.  Let <del>|metadata|</del><ins>|hash-metadata|</ins> be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|<ins>["`hashes`"]</ins>.</a>.
 4.  <ins>Let |signature-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`signatures`"].</ins>
 5.  <ins>Let |hash-match| be `true` if |hash-metadata| is [=list/empty=], and `false` otherwise.</ins>
@@ -487,7 +490,7 @@ explicable:
     2.  <ins>Let |public key| be the |item|["val"].</ins>
     3.  <ins>Let |result| be the result of [$validating an integrity signature$]
         over |response| using |algorithm| and |public key|.</ins>
-    4.  <ins>If |result| is `true`, set |signature-match| to `true` and [=iteration/break=].</ins>
+    4.  <ins>If |result| is "`valid`", set |signature-match| to `true` and [=iteration/break=].</ins>
 9.  <del>Return `false`.</del><ins>Return `true` if both |hash-match| and |signature-match| are `true`. Otherwise return `false`.</ins>
 
 <h4 id="validation" algorithm>Validate a signature over |response| using |algorithm| and |public key|</h4>
@@ -501,17 +504,36 @@ To <dfn abstract-op lt="validating an integrity signature">validate an integrity
 over a [=/response=] |response|, [=string=] |algorithm|, and [=string=] |public key|, execute the
 following steps. They return `valid` if the signature is valid, or `invalid` otherwise.
 
-1.  If |algorithm| is not an [=ASCII case-insensitive=] match for "ed25519",
-    then return "`invalid`".
-2.  Verify an HTTP message signature as defined in
+1.  Let |result| be the result of verifying an HTTP Message Signature as defined in
     [Section 3.2](https://www.rfc-editor.org/rfc/rfc9421.html#name-verifying-a-signature)
-    of [[!RFC9421]], given |response| and the [=verification requirements for SRI=].
-    
-    Note: When we support more than one algorithm, we'll want to change this from a
-    hard-coded string to a mapping between case-insensitive and canonical strings.
-3.  If a signature can be validated, return "`valid`".
-4.  Otherwise, return "`invalid`".
+    of [[!RFC9421]], given |response| as the signature context, the [=verification
+    requirements for SRI=], and the following processing instructions:
 
+    1.  When executing Step 1.1 of the verification algorithm referenced above,
+        "determine which signature should be processed for this message" by
+        evaluating all signatures whose input's <a>`tag`</a> parameter
+        [=string/is=] "`sri`".
+
+    2.  When executing Step 4 of the verification algorithm, use the [=verification
+        requirements for SRI=] described above.
+
+    3.  When executing Step 5 of the verification algorithm:
+
+        1.  "Determine the verification key material" by
+            [=forgiving-base64 decode|base64 decoding=] the signature input's
+            <a>`keyid`</a> parameter.
+
+        2.  "Determine the trustworthiness of the key material" by comparing
+            the signature input's <a>`keyid`</a> parameter to |public key|.
+            If the two do not match, fail validation for this signature.
+
+    4.  Assert: When executing Step 6, the result of "Determine the algorithm"
+        [=string/is=] "`ed25519`" due to the [=verification requirements for
+        SRI=] applied above.
+
+2.  If |result| is failure, return "`invalid`".
+
+3.  Otherwise, return "`valid`".
 
 
 Patches to Fetch {#monkey-patch-fetch}
@@ -532,6 +554,11 @@ Next, the more complicated change: Fetch needs to enforce assertions about
 resource integrity made via [:Identity-Digest:] headers.
 
 ISSUE: TODO(mkwst): Spell out how that enforcement works.
+
+
+### `Signature` and `Signature-Input` Enforcement ### {#signature-enforcement}
+
+ISSUE: TODO(mkwst): Spell this out too.
 
 Deployment Scenarios {#deployment-scenarios}
 =======================================
