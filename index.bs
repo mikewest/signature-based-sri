@@ -304,11 +304,22 @@ guidelines from Section 1.4 of [[RFC9421]]:
 
         *   `identity-digest`, which MUST include the <a>`sf`</a> parameter and
             no other parameters.
+        
+        Note: We'll extend this over time. The limitation to `identity-digest`
+        is artificial, and aimed towards making a prototype of this approach
+        as simple as possible to implement and evaluate as we decide what makes
+        sense to ship at scale.
 
     2.  Include the following [=signature parameters=] with their associated
         constraints:
 
         *   <a>`alg`</a>, whose value MUST be the string `ed25519`
+
+            ISSUE: [Section 7.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6)
+            suggests dropping the <a>`alg`</a> parameter when the algorithm can
+            be determined unambigiously. Perhaps we should do that there rather
+            than requiring its explicit presence.
+
         *   <a>`keyid`</a>, whose value MUST be a string containing a
             [=forgiving-base64 encode|base64 encoding=] of the public key
             portion of the signature's verification key material.
@@ -325,7 +336,15 @@ guidelines from Section 1.4 of [[RFC9421]]:
 
     *   <a>`created`</a>, an integer whose value MUST represent a time in the past.
     *   <a>`expires`</a>, an integer whose value MUST represent a time in the future.
-    *   `nonce`, which is a string.
+    *   `nonce`, which is a string whose value SHOULD be generated in a fashion
+        which guarantees uniqueness.
+    
+    ISSUE: "in the past" and "in the future" require a reference point, which
+    presumably would be the point at which the message was received by a user
+    agent. We'll also want to deal in some way with clock drift that might come
+    into play for very new or very old signatures (ideally in a way consistent
+    with browsers' approaches to TLS certificate `NotBefore`/`NotAfter`
+    assertions.
 
 :   **Structured Field Types**:
 ::  *   The `identity-digest` component references the [:Identity-Digest:]
@@ -338,7 +357,8 @@ guidelines from Section 1.4 of [[RFC9421]]:
     as a [=forgiving-base64 encode|base64 encoded=] string.
 
 :   **Signature Algorithms**:
-::  The only signature algorithm allowed is `ed25519`.
+::  The only signature algorithm identifier allowed is "`ed25519`", as defined
+    in [Section 3.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-3.3.6).
 
 :   **Determine Key/Algorithm Appropriateness**:
 ::  Since the only accepted algorithm is `ed25519`, it is appropriate for any
