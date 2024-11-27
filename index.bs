@@ -329,8 +329,6 @@ guidelines from Section 1.4 of [[RFC9421]]:
             in the future that have different constraints?
             `enforce-ed25519-provenance`?
 
-    3.  Order the signature's parameters alphabetically.
-
     The signature's input MAY include the following [=signature parameters=],
     with their associated constraints:
 
@@ -384,6 +382,9 @@ guidelines from Section 1.4 of [[RFC9421]]:
 :   **Other**
 ::  The HTTP Message Signature must be delivered with a response.
 ::  The [:Identity-Digest:] header must be [=Identity-Digest/valid for SRI=].
+::  When instructed to "determine an order" while constructing the signature
+    base, clients and servers both MUST choose the same order as the
+    [:Signature-Input:] header they consume or produce, respectively.
 
 
 <div class="example" id="example-verification-requirements">
@@ -434,11 +435,9 @@ For posterity, this set of requirements has a few helpful implications:
 5.  In order to avoid potential disagreements between servers and clients about
     the serialization of a [=signature base=] for a given response, we're
     specifying how both sides ought to "Determine an order for any signature
-    parameters" by locking in alphabetical sorting of the signature's
-    parameters. We really only need to do this when generating the signature
-    base: the [:Signature-Input:] header could in theory be arbitrarily sorted.
-    In practice, however, it seems prudent to ensure that we make the expected
-    representation as clear as possible.
+    parameters" through reference to the header as-delivered. Whatever order
+    the server produces in the [:Signature-Input:] header is the order that
+    the client will expect the signature base to represent.
 
 </div>
 
@@ -859,9 +858,9 @@ Signature-Input: signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/8
 </xmp>
 
 Now we have everything we need to construct the [=signature base=], following
-the steps described in Section 2.5 of [[RFC9421]], and choosing an alphabetical
-ordering each time it instructs us to "determine an order" in Section 2.3 of
-[[RFC9421]]. We'll end up with:
+the steps described in Section 2.5 of [[RFC9421]], and choosing the same order
+as the header's ordering each time it instructs us to "determine an order" in
+Section 2.3 of [[RFC9421]]. We'll end up with:
 
 ```
 "identity-digest": sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
