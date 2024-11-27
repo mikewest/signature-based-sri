@@ -6,7 +6,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version 742f3d674, updated Mon Nov 4 14:56:54 2024 -0800" name="generator">
   <link href="https://mikewest.github.io/signature-based-sri/" rel="canonical">
-  <meta content="87d54dc5b7b8e53921e8a5a5eefb72fbf297d984" name="revision">
+  <meta content="97f55c34d6cade0dbb62ba962f4f9d3fa14094bf" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>
@@ -802,7 +802,7 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Signature-based Integrity</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-11-26">26 November 2024</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-11-27">27 November 2024</time></p>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1128,8 +1128,6 @@ portion of the signature’s verification key material.</p>
          <p class="issue" id="issue-24e8d4a7"><a class="self-link" href="#issue-24e8d4a7"></a> Perhaps something more specific to make room for variants
 in the future that have different constraints? <code>enforce-ed25519-provenance</code>?</p>
        </ul>
-      <li data-md>
-       <p>Order the signature’s parameters alphabetically.</p>
      </ol>
      <p>The signature’s input MAY include the following <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#signature-params" id="ref-for-signature-params①">signature parameters</a>,
 with their associated constraints:</p>
@@ -1187,9 +1185,12 @@ on the usage of response data.</p>
      <p>The HTTP Message Signature must be delivered with a response.</p>
     <dd data-md>
      <p>The <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field④">Identity-Digest</a></code>`</span> header must be <a data-link-type="dfn" href="#identity-digest-valid-for-sri" id="ref-for-identity-digest-valid-for-sri">valid for SRI</a>.</p>
+    <dd data-md>
+     <p>When instructed to "determine an order" while constructing the signature
+base, clients and servers both MUST choose the same order as the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field③">Signature-Input</a></code>`</span> header they consume or produce, respectively.</p>
    </dl>
    <div class="example" id="example-verification-requirements">
-    <a class="self-link" href="#example-verification-requirements"></a> Valid <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field③">Signature-Input</a></code>`</span> header values would therefore include: 
+    <a class="self-link" href="#example-verification-requirements"></a> Valid <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field④">Signature-Input</a></code>`</span> header values would therefore include: 
     <ul>
      <li data-md>
       <p><code>("identity-digest";sf);alg="ed25519";keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</code></p>
@@ -1221,7 +1222,7 @@ the keys are small and the algorithm is broadly supported. Choosing one
 algorithm simplifies initial implementations, and reduces the set of choices
 we ask developers to make about crypto primitives.</p>
      <li data-md>
-      <p>The <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field④">Signature-Input</a></code>`</span> header is very flexible as specified, and most of
+      <p>The <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑤">Signature-Input</a></code>`</span> header is very flexible as specified, and most of
 the restrictions here aim to reduce its complexity as we gain implementation
 experience on both the client and server sides of the signature generation
 process. <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a> leaves several important questions about the
@@ -1236,11 +1237,9 @@ requiring it to be a header, not a trailer.</p>
       <p>In order to avoid potential disagreements between servers and clients about
 the serialization of a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-creating-the-signature-base" id="ref-for-name-creating-the-signature-base①">signature base</a> for a given response, we’re
 specifying how both sides ought to "Determine an order for any signature
-parameters" by locking in alphabetical sorting of the signature’s
-parameters. We really only need to do this when generating the signature
-base: the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑤">Signature-Input</a></code>`</span> header could in theory be arbitrarily sorted.
-In practice, however, it seems prudent to ensure that we make the expected
-representation as clear as possible.</p>
+parameters" through reference to the header as-delivered. Whatever order
+the server produces in the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑥">Signature-Input</a></code>`</span> header is the order that
+the client will expect the signature base to represent.</p>
     </ol>
    </div>
    <h4 class="heading settled algorithm" data-algorithm="Parse metadata." data-level="2.1.2" id="parsing"><span class="secno">2.1.2. </span><span class="content">Parse <var>metadata</var>.</span><a class="self-link" href="#parsing"></a></h4>
@@ -1496,7 +1495,7 @@ resource, so it will be possible to support rotation in a coordinated way
 without requiring each entity to move in lockstep.</p>
    <h3 class="heading settled" data-level="4.3" id="deployment-key-discovery"><span class="secno">4.3. </span><span class="content">Key Discovery</span><a class="self-link" href="#deployment-key-discovery"></a></h3>
    <p>Servers that support this feature need to include the public key used to
-validate a resource’s signature in the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑥">Signature-Input</a></code>`</span> header’s <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10④"><code>keyid</code></a> signature parameter. Developer who wish to enforce signature
+validate a resource’s signature in the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑦">Signature-Input</a></code>`</span> header’s <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10④"><code>keyid</code></a> signature parameter. Developer who wish to enforce signature
 validation against a particular key can do so by requesting the relevant
 resource, and extracting the key from its headers and inserting it into,
 for example, a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script②">script</a></code>'s <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/scripting.html#attr-script-integrity" id="ref-for-attr-script-integrity①">integrity</a></code> attribute.</p>
@@ -1532,7 +1531,7 @@ a problem, it seems possible to add mitigations in the future. These could take
 various forms. For example:</p>
    <ol>
     <li data-md>
-     <p>We could allow developers to require an "<code>expires</code>" parameter in the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑦">Signature-Input</a></code>`</span> field, and adjust our <a data-link-type="dfn" href="#verification-requirements-for-sri" id="ref-for-verification-requirements-for-sri⑤">verification requirements for SRI</a> to enforce against it. Similarly, we could enforce a maximum age based on
+     <p>We could allow developers to require an "<code>expires</code>" parameter in the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑧">Signature-Input</a></code>`</span> field, and adjust our <a data-link-type="dfn" href="#verification-requirements-for-sri" id="ref-for-verification-requirements-for-sri⑤">verification requirements for SRI</a> to enforce against it. Similarly, we could enforce a maximum age based on
 the inclusion of a "<code>created</code>" parameter.</p>
     <li data-md>
      <p>We could require additional components of the request to be included in the
@@ -1541,7 +1540,7 @@ to reduce the scope of potential resource substitution.</p>
     <li data-md>
      <p>We could allow developers to send a challenge along with the request (as
 an <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field" id="ref-for-name-the-accept-signature-field">Accept-Signature</a></code>`</span> parameter), and require that it be incorporated into
-the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑧">Signature-Input</a></code>`</span>'s "<code>nonce</code>" parameter.</p>
+the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑨">Signature-Input</a></code>`</span>'s "<code>nonce</code>" parameter.</p>
    </ol>
    <p>We’d want to evaluate the tradeoffs in these and other approaches (the last, for
 example, makes offline signing difficult), of course, but they seem quite plausibly
@@ -1598,13 +1597,14 @@ PEM format above, but the following tiny Python script will do the work:</p>
     <c- n>byte_string</c-> <c- o>=</c-> <c- n>base64</c-><c- o>.</c-><c- n>b64encode</c-><c- p>(</c-><c- n>public_key</c-><c- o>.</c-><c- n>public_bytes_raw</c-><c- p>())</c->
     print<c- p>(</c-><c- n>byte_string</c-><c- o>.</c-><c- n>decode</c-><c- p>(</c-><c- u>"utf-8"</c-><c- p>))</c->
 </pre>
-   <p>With that encoding in hand, the developer can construct a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑨">Signature-Input</a></code>`</span> header that specifies the <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑧">Identity-Digest</a></code>`</span> header as a signed component,
+   <p>With that encoding in hand, the developer can construct a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field①⓪">Signature-Input</a></code>`</span> header that specifies the <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑧">Identity-Digest</a></code>`</span> header as a signed component,
 and includes the base64-encoded public key as the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10⑤"><code>keyid</code></a> parameter
 (as discussed in [#profile]):</p>
 <pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no highlight-line" data-line="6"></span><span class="line highlight-line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
    <p>Now we have everything we need to construct the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-creating-the-signature-base" id="ref-for-name-creating-the-signature-base②">signature base</a>, following
-the steps described in Section 2.5 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>, and choosing an alphabetical
-ordering each time it instructs us to "determine an order" in Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>. We’ll end up with:</p>
+the steps described in Section 2.5 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>, and choosing the same order
+as the header’s ordering each time it instructs us to "determine an order" in
+Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>. We’ll end up with:</p>
 <pre>"identity-digest": sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
 "@signature-params": ("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
 </pre>
@@ -1983,7 +1983,7 @@ function parseHTML(markup) {
 {
 let dfnPanelData = {
 "03afaf9c": {"dfnID":"03afaf9c","dfnText":"empty","external":true,"refSections":[{"refs":[{"id":"ref-for-list-empty"},{"id":"ref-for-list-empty\u2460"},{"id":"ref-for-list-empty\u2461"}],"title":"2.1.3. Do bytes and response match metadataList?"}],"url":"https://infra.spec.whatwg.org/#list-empty"},
-"03c8b9b5": {"dfnID":"03c8b9b5","dfnText":"Signature-Input","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-signature-input-field"},{"id":"ref-for-name-the-signature-input-field\u2460"},{"id":"ref-for-name-the-signature-input-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2462"},{"id":"ref-for-name-the-signature-input-field\u2463"},{"id":"ref-for-name-the-signature-input-field\u2464"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2465"}],"title":"4.3. Key Discovery"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2466"},{"id":"ref-for-name-the-signature-input-field\u2467"}],"title":"5.3. Rollback Attacks"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2468"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field"},
+"03c8b9b5": {"dfnID":"03c8b9b5","dfnText":"Signature-Input","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-signature-input-field"},{"id":"ref-for-name-the-signature-input-field\u2460"},{"id":"ref-for-name-the-signature-input-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2462"},{"id":"ref-for-name-the-signature-input-field\u2463"},{"id":"ref-for-name-the-signature-input-field\u2464"},{"id":"ref-for-name-the-signature-input-field\u2465"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2466"}],"title":"4.3. Key Discovery"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2467"},{"id":"ref-for-name-the-signature-input-field\u2468"}],"title":"5.3. Rollback Attacks"},{"refs":[{"id":"ref-for-name-the-signature-input-field\u2460\u24ea"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field"},
 "0698d556": {"dfnID":"0698d556","dfnText":"string","external":true,"refSections":[{"refs":[{"id":"ref-for-string"},{"id":"ref-for-string\u2460"}],"title":"2.1.4. Validate a signature over response using algorithm and public key"}],"url":"https://infra.spec.whatwg.org/#string"},
 "0cf3964f": {"dfnID":"0cf3964f","dfnText":"script","external":true,"refSections":[{"refs":[{"id":"ref-for-script"},{"id":"ref-for-script\u2460"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-script\u2461"}],"title":"4.3. Key Discovery"}],"url":"https://html.spec.whatwg.org/multipage/scripting.html#script"},
 "0ddb0f61": {"dfnID":"0ddb0f61","dfnText":"keyid","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.10"},{"id":"ref-for-section-2.3-4.10\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-section-2.3-4.10\u2461"},{"id":"ref-for-section-2.3-4.10\u2462"}],"title":"2.1.4. Validate a signature over response using algorithm and public key"},{"refs":[{"id":"ref-for-section-2.3-4.10\u2463"}],"title":"4.3. Key Discovery"},{"refs":[{"id":"ref-for-section-2.3-4.10\u2464"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10"},
