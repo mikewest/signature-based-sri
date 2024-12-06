@@ -17,12 +17,16 @@ Markup Shorthands: markdown yes, css no
 Toggle Diffs: true
 </pre>
 <pre class="anchors">
+urlPrefix: https://fetch.spec.whatwg.org/; type: dfn; spec: FETCH
+    text: fetch response handover; url: #fetch-finale
 urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC9651
     text: structured header; url: #name-introduction
     for: structured header
         text: token; url: #name-tokens
         text: list; url: #name-list
+        text: inner list; url: #name-inner-list
         text: dictionary; url: #name-dictionary
+        text: parameters; url: #name-parameters
 urlPrefix: https://w3c.github.io/webappsec-subresource-integrity/; spec: SRI
     type: dfn
         text: valid SRI hash algorithm token
@@ -174,7 +178,7 @@ developers are aiming for.
     
     If such a header is present, user agents can enforce it by synthesizing a
     network error if the delivered content does not match the asserted digest.
-    See [[#identity-digest-enforcement]] below for more details.
+    See [[#monkey-patch-fetch]] below for more details.
 
 2.  **Server-initiated signature checks**: Servers can deliver HTTP Message
     Signature headers ([:Signature:] and [:Signature-Input:] from [[RFC9421]])
@@ -441,6 +445,43 @@ For posterity, this set of requirements has a few helpful implications:
 
 </div>
 
+#### `Identity-Digest` Validation for SRI #### {#identity-digest-validation-for-sri}
+
+<div algorithm>
+
+An [:Identity-Digest:] [=header=] (|header|) is
+<dfn for="Identity-Digest">valid for SRI</dfn> if the following steps return
+"`valid`":
+
+1.  Let |parsed| be the result of [$parsing structured fields$] with `input_string`
+    set to |header|'s [=header/value=], and `header_type` set to
+    "<a for="structured header">`dictionary`</a>".
+
+    ISSUE: Here, I'm assuming that a structured field Dictionary turns into a
+    [=map=] after parsing? That doesn't seem unreasonable, but it might be?
+
+2.  If parsing failed or if |parsed| [=map/is empty=], return "`invalid`".
+
+3.  [=map/iterate|For each=] |key| → |value| of |parsed|:
+
+    1.  If |value| is not a [=byte sequence=], return "`invalid`".
+
+    2.  If |key| is not [=list/contain|contained within=] the [=/list=]
+        « "sha-256", "sha-384", "sha-512" », return "`invalid`".
+
+    3.  If |key| is "`sha-256`", and |value|'s [=byte sequence/length=] is
+        not 32, return "`invalid`".
+
+    4.  If |key| is "`sha-384`", and |value|'s [=byte sequence/length=] is
+        not 48, return "`invalid`".
+
+    5.  If |key| is "`sha-512`", and |value|'s [=byte sequence/length=] is
+        not 64, return "`invalid`".
+
+4.  Return "`valid`".
+
+</div>
+
 
 <h4 id="parsing" algorithm>Parse |metadata|.</h4>
 
@@ -494,34 +535,39 @@ the [application of multiple Content Security Policies](https://w3c.github.io/we
 In order to validate signatures, we'll need to change Fetch to pass in the
 relevant HTTP response header. For the moment, let's simply pass in the
 entire [=/response=] (|response|), as that makes the integration with [[RFC9421]] somewhat
-explicable:
+explicable.
 
-1.  Let |parsedMetadata| be the result of executing [$Parse metadata$] on |metadataList|.
-2.  If both |parsedMetadata|<ins>["`hashes`"] and |parsedMetadata|["`signatures`"]</ins> are [=set/empty=] set, return `true`.
-3.  Let <del>|metadata|</del><ins>|hash-metadata|</ins> be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|<ins>["`hashes`"]</ins>.</a>.
-4.  <ins>Let |signature-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`signatures`"].</ins>
-5.  <ins>Let |hash-match| be `true` if |hash-metadata| is [=list/empty=], and `false` otherwise.</ins>
-6.  <ins>Let |signature-match| be `true` if |signature-metadata| is [=list/empty=], and `false` otherwise.</ins>
-7.  For each |item| in <del>|metadata|</del><ins>|hash-metadata|</ins>:
-    1.  Let |algorithm| be the |item|["alg"].
-    2.  Let |expectedValue| be the |item|["val"].
+To <dfn abstract-op>perform client-initiated integrity checks</dfn> for a given
+[=byte sequence=] (|bytes|), [=/request=] (|request|), and [=/response=]
+(|response|), execute the following steps. They return "`passed`" or "`failed`":
+
+1.  Let |parsedMetadata| be the result of executing [$Parse metadata$] on |request|'s [=request/integrity metadata=].
+2.  If both |parsedMetadata|["`hashes`"] and |parsedMetadata|["`signatures`"] are [=set/empty=] set, return "`passed`".
+3.  Let |hash-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`hashes`"].</a>.
+4.  Let |signature-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`signatures`"].</ins>
+5.  Let |hash-match| be `true` if |hash-metadata| is [=list/empty=], and `false` otherwise.</ins>
+6.  Let |signature-match| be `true` if |signature-metadata| is [=list/empty=], and `false` otherwise.</ins>
+7.  For each |item| in |hash-metadata|</ins>:
+    1.  Let |algorithm| be the |item|["`alg`"].
+    2.  Let |expectedValue| be the |item|["`val`"].
     3.  Let |actualValue| be the result of [[SRI#apply-algorithm-to-response]] on |algorithm| and |bytes|.
     4.  If |actualValue| is a case-sensitive match for
-        |expectedValue|, <del>return `true`</del><ins>set |hash-match| to `true` and [=iteration/break=].</ins>
-8.  <ins>For each |item| in |signature-metadata|:</ins>
-    1.  <ins>Let |algorithm| be the |item|["alg"].</ins>
-    2.  <ins>Let |public key| be the |item|["val"].</ins>
-    3.  <ins>Let |result| be the result of [$validating an integrity signature$]
-        over |response| using |algorithm| and |public key|.</ins>
-    4.  <ins>If |result| is "`valid`", set |signature-match| to `true` and [=iteration/break=].</ins>
-9.  <del>Return `false`.</del><ins>Return `true` if both |hash-match| and |signature-match| are `true`. Otherwise return `false`.</ins>
+        |expectedValue|, set |hash-match| to `true` and [=iteration/break=].</ins>
+8.  For each |item| in |signature-metadata|:</ins>
+    1.  Let |algorithm| be the |item|["`alg`"].</ins>
+    2.  Let |public key| be the |item|["`val`"].</ins>
+    3.  Let |result| be the result of [$validating an integrity signature$]
+        over |request| and |response| using |algorithm| and |public key|.</ins>
+    4.  If |result| is "`valid`", set |signature-match| to `true` and [=iteration/break=].</ins>
+9.  Return "`passed`" if both |hash-match| and |signature-match| are `true`. Otherwise return "`failed`".</ins>
 
 <h4 id="validation" algorithm>Validate a signature over |response| using |algorithm| and |public key|</h4>
 
 The matching algorithm above calls into a new signature validation function.
 Let's write that down. At core, it will execute the Ed25519 validation steps
-from [[RFC8032]], using signatures extracted from HTTP Message Signature
-headers defined in [[RFC9421]].
+from [[RFC8032]] using signatures extracted from HTTP Message Signature
+headers defined in [[RFC9421]], then compare valid signatures against the
+expected public key.
 
 To <dfn abstract-op lt="validating an integrity signature">validate an integrity signature</dfn>
 over a [=/response=] |response|, [=string=] |algorithm|, and [=string=] |public key|, execute the
@@ -562,62 +608,227 @@ following steps. They return `valid` if the signature is valid, or `invalid` oth
 Patches to Fetch {#monkey-patch-fetch}
 --------------------------------------
 
-Fetch needs to change in two ways:
+Support for this feature would require twoish changes to [[Fetch]]:
 
-First, the trivial change: Step 22.3.1 of [[Fetch#main-fetch]] should be updated
-as follows:
+### Safelist Headers ### {#patch-cors-list}
 
-1.  If <var ignore>bytes</var> do not match <var ignore>request</var>’s
-    [=request/integrity metadata=]<ins> and <var ignore>response</var></ins>,
-    then run processBodyError and abort these steps. [[!SRI]]
+First, we extend Fetch's [=CORS-safelisted response-header name=] list to
+include the [:Signature:], [:Signature-Input:], and [:Identity-Digest:] headers.
+This makes the processing model clear by including these headers along with the
+[=CORS filtered response=].
 
-### `Identity-Digest` Enforcement ### {#identity-digest-enforcement}
+ISSUE(#17): We have at least three options: extend the safelist as proposed here,
+reach into a [=/response=]'s [=internal response=] when doing validation
+below, or require developers to add these headers to each response's
+[:Access-Control-Expose-Headers:] header. Extending the safelist is simplest for
+developers and clarifying for spec authors. That said, other headers with
+similar effect rely on accessing [=internal responses=] (see e.g. CORP checks in
+step 5 of [[Fetch#http-fetch]], as well as MIX/CSP/MIME/nosniff in step 19 of
+[[Fetch#main-fetch]]). Perhaps that's even more clear and direct?
 
-Next, the more complicated change: Fetch needs to enforce assertions about
-resource integrity made via [:Identity-Digest:] headers.
 
-ISSUE: TODO(mkwst): Spell out how that enforcement works.
+### Patching Main Fetch ### {#patch-main-fetch} 
 
-### `Identity-Digest` Validation ### {#identity-digest-validation}
+Next, we'll make two changes to [[Fetch#main-fetch]] to support enforcement of
+server-initiated integrity checks through [:Identity-Digest:], [:Signature:],
+and [:Signature-Input:], and to pass the right set of information into the version
+of [[SRI#does-response-match-metadatalist]] altered by this specification in order
+to enable signature-based checks that require information from the request
+([=request/integrity metadata=] on the one hand, request headers and properties
+for signature components on the other) and the response (integrity headers and
+the body):
 
-<div algorithm>
+[[Fetch#main-fetch]] step 22 will be updated as follows:
 
-An [:Identity-Digest:] [=header=] (|header|) is
-<dfn for="Identity-Digest">valid for SRI</dfn> if the following steps return
-"`valid`":
+<ol start=21 algorithm="monkey patching Main Fetch">
+  <li>
+    If |request|'s [=request/integrity metadata=] is not the empty string,
+    <ins>or |response|'s [=response/header list=] [=list/contains=]
+    [:Identity-Digest:],</ins> then:
 
-1.  Let |parsed| be the result of [$parsing structured fields$] with `input_string`
-    set to |header|'s [=header/value=], and `header_type` set to "`dictionary`".
+    <ol>
+      <li>
+        Let <var ignore>processBodyError</var> be this step: run [=fetch response handover=]
+        given <var ignore>fetchParams</var> and a [=network error=].
+      </li>
+      <li>
+        If |response|'s [=response/body=] is null, then run <var ignore>processBodyError</var> and
+        abort these steps.
+      </li>
+      <li>
+        Let <var ignore>processBody</var> given <var ignore>bytes</var> be these steps:
 
-    ISSUE: Here, I'm assuming that a structured field Dictionary turns into a
-    [=map=] after parsing? That doesn't seem unreasonable, but it might be?
+        <ol>
+          <li><ins>
+            <a lt="perform server-initiated integrity checks" abstract-op>Perform
+            server-initiated integrity checks</a> on <var ignore>bytes</var>,
+            <var ignore>request</var>, and <var ignore>response</var>. If the result
+            is "`failed`", then run <var ignore>processBodyError</var> and abort
+            these steps.
+          </ins></li>
+          <li>
+            <del>
+              If <var ignore>bytes</var> do not match |request|'s
+              [=request/integrity metadata=]
+            </del>
+            <ins>
+              <a lt="perform client-initiated integrity checks" abstract-op>Perform
+              client-initiated integrity checks</a> given <var ignore>request</var>
+              and <var ignore>response</var>,
+            </ins>
+            then run <var ignore>processBodyError</var> and abort these steps. [[!SRI]]
+          </li>
+          <li>
+            Set <var ignore>response</var>'s <a for=response>body</a> to <var ignore>bytes</var>
+            [=byte sequence/as a body=].
+          </li>
+          <li>
+            Run [=fetch response handover=] given <var ignore>fetchParams</var> and <var ignore>response</var>.
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </li>
+</ol>
 
-2.  If parsing failed or if |parsed| [=map/is empty=], return "`invalid`".
+#### Server-Initiated Integrity Checks #### {#server-initiated}
 
-3.  [=map/iterate|For each=] |key| → |value| of |parsed|:
+<div algorithm="server-initiated integrity checks">
 
-    1.  If |value| is not a [=byte sequence=], return "`invalid`".
+To <dfn abstract-op>perform server-initiated integrity checks</dfn> given a
+[=byte sequence=] (|bytes|), a [=/request=] (|request|), and a [=/response=]
+(|response|), execute the following steps. They return "`passed`" or
+"`failed`" as appropriate:
 
-    2.  If |key| is not [=list/contain|contained within=] the [=list=]
-        « "sha-256", "sha-384", "sha-512" », return "`invalid`".
+1.  <a lt="verify Identity-Digest assertions" abstract-op>Verify
+    `Identify-Digest` assertions</a> for |bytes| and |response|. If the
+    result is "`failed`", return "`failed`".
 
-    3.  If |key| is "`sha-256`", and |value|'s [=byte sequence/length=] is
-        not 32, return "`invalid`".
+2.  <a lt="verify SRI Message Signature assertions" abstract-op>Verify SRI
+    Message Signature assertions</a> for |request|, and |response|.
+    If the result is "`failed`", return "`failed`".
 
-    4.  If |key| is "`sha-384`", and |value|'s [=byte sequence/length=] is
-        not 48, return "`invalid`".
+3.  Return "`passed`".
 
-    5.  If |key| is "`sha-512`", and |value|'s [=byte sequence/length=] is
-        not 64, return "`invalid`".
+</div>
 
-4.  Return "`valid`".
+#### `Identity-Digest` Validation #### {#identity-digest-validation}
+
+<div algorithm="identity-digest validation">
+To <dfn abstract-op>verify `Identity-Digest` assertions</dfn> given a
+[=byte sequence=] (|bytes|) and a [=/response=] (|response|), execute the
+following steps. They return "`verified`" or "`failed`":
+
+1.  Let |header| be the result of [=header list/get a structured field value|getting=]
+    the [:Identity-Digest:] header as a "<a for="structured header">`dictionary`</a>"
+    from |response|'s [=response/header list=].
+
+2.  If |header| is `null`, return "`verified`".
+
+3.  [=map/iterate|For each=] |alg| → |digest| of |header|:
+
+    1.  If |alg| is not one of "sha-256", "sha-384", or "sha-512", then [=continue=].
+
+    2.  Let |body digest| be the result of executing [[SRI#apply-algorithm-to-response]]
+        on |alg| and |bytes|.
+
+    3.  If |body digest| matches |digest|, continue.
+
+    4.  Return "`failed`".
+
+4.  Return "`verified`".
+
+Note: This algorithm requires *all* valid digests delivered via
+[:Identity-Digest:] to match the response's decoded body. Since the server
+controls both the body and the headers, it seems unnecessary to allow the
+flexibility of allowing the asserted digests to match more than one resource
+(as we do in client-initiated checks, which need to support servers' content
+negotiation).
 
 </div>
 
 
-### `Signature` and `Signature-Input` Enforcement ### {#signature-enforcement}
 
-ISSUE: TODO(mkwst): Spell this out too.
+#### `Signature` and `Signature-Input` Enforcement #### {#signature-enforcement}
+
+<div algorithm="signature validation">
+To <dfn abstract-op>verify `SRI` Message Signature assertions</dfn> given a
+[=/request=] (|request|), and a [=/response=] (|response|), execute the
+following steps. They return "`verified`" or "`failed`":
+
+1.  Let |inputs| be the result of [=header list/get a structured field value|getting=]
+    the [:Signature-Input:] header as a "<a for="structured header">`dictionary`</a>"
+    from |response|'s [=response/header list=].
+
+2.  Let |signatures| be the result of [=header list/get a structured field value|getting=]
+    the [:Signature:] header as a "<a for="structured header">`dictionary`</a>" from
+    |response|'s [=response/header list=].
+
+3.  [=map/iterate|For each=] |key| → |components| of |inputs|:
+
+    1.  If |signatures| does not [=map/contain=] |key|, [=continue=].
+
+    2.  If any of the following requirements for |components| are not met,
+        [=continue=]:
+
+        1.  |components| is a parameterized [=structured header/Inner List=].
+        2.  |components| [=list/size=] is 1.
+        3.  |components|[0] [=string/is=] the [=string=] "`identity-digest`".
+        4.  |components|[0] has a single [=structured header/parameter=]: <a>`sf`</a>.
+
+    3.  Let |params| be |components| [=structured header/parameters=].
+
+    4.  If any of the following requirements for |signature params| are not
+        met, [=continue=]:
+
+        1.  |params| [=map/contains=] <a>`alg`</a>, and its value
+            [=string/is=] the [=structured header/string=] "`ed25519`".
+        2.  |params| [=map/contains=] <a>`keyid`</a>, and its value is
+            a [=structured header/string=] which, when [=forgiving-base64 decoded=],
+            returns a [=byte sequence=] whose [=byte sequence/length=] is 32.
+        3.  |params| [=map/contains=] <a>`tag`</a>, and its value
+            [=string/is=] the [=structured header/string=] "`sri`".
+
+    5.  If |params| [=map/contains=] <a>`expires`</a>, and |params|["`expires`"]
+        is greater than the number of seconds between the [=Unix epoch=] and the
+        [=wall clock/unsafe current time=], return "`failed`".
+
+    6.  Let |signature-params| be the result of executing the algorithm in
+        [Section 2.3](https://www.rfc-editor.org/rfc/rfc9421.html#signature-params)
+        of [[!RFC9421]] on |components|.
+
+    7.  Let |signature base| be the result of executing the algorithm in
+        [Section 2.5](https://www.rfc-editor.org/rfc/rfc9421.html#create-sig-input)
+        of [[!RFC9421]] on |request|, |response, and |signature-params|.
+        
+        If this algorithm produces an error, return "`failed`".
+        
+        Note: Errors here might represent invalid component or parameter names,
+        missing headers, etc.
+
+    8.  Let |public key| be the result of [=forgiving-base64 decoding=]
+        |params|["`keyid`"].
+
+    9.  Execute Ed25519's "`Verify`" algorithm as defined in
+        [Section 5.1.7](https://rfc-editor.org/rfc/rfc8032#section-5.1.7) of
+        [[!RFC8023]], to verify the signature |signatures|["`key`"] over the
+        message |signature base| using |public key|.
+
+    10. If verification failed, return "`failed`".
+
+4.  Return "`verified`".
+
+Note: This is a reformulation and simplification of the steps described in
+[Section 3.2](https://www.rfc-editor.org/rfc/rfc9421.html#name-verifying-a-signature)
+of [[!RFC9421]], making the integration with the [[#profile]] described above
+explict.
+
+Note: This algorithm requires *all* valid signatures delivered with the response
+to be verified in order to return "`verified`"
+
+
+</div>
+
 
 Deployment Scenarios {#deployment-scenarios}
 =======================================
