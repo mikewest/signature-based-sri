@@ -201,4 +201,23 @@ That's it. This seems like the simplest possible approach, and has some interest
     failings. It paves the way for something more complicated in the future if it turns out that
     complexity is warranted.
 
+*   **SHA2 doesn't allow for progressive processing of content.**
+
+    That's not a question.
+
+    But yes, it's correct. SHA2 has the benefits of being widely deployed and well understood, but
+    they do impose a performance penalty insofar as they can't be evaluated until the resource is
+    entirely present. This is a problem in general, but _not_ for scripts and stylesheets, which
+    are already executed atomicly once the entire resource is present. So, SHA2 will fall down for
+    many use cases, but it works just fine for these two very important cases, and fits into a
+    toolkit with which developers are already familiar.
+
+    We should extend SRI to support additional hash functions. When we do so, extending
+    `Identity-Digest` will come along trivially.
+
+    (For the record, Ed25519 is also not streaming-friendly, but the scheme described above allows
+    us to do all the crypto verification directly after receiving the resource's headers, without
+    waiting for the body. The lack of a streaming hash algorithm is the problem, not signature
+    verification.)
+
 [origin-policy]: https://wicg.github.io/origin-policy/
