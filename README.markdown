@@ -147,7 +147,7 @@ That's it. This seems like the simplest possible approach, and has some interest
 [gh-449]: https://github.com/w3c/webappsec/issues/449
 [profile]: https://wicg.github.io/signature-based-sri/#profile
 [RFC9421]: https://www.rfc-editor.org/rfc/rfc9421
-[ID.pardue-http-identity-digest]: https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html
+[ID.pardue-http-identity-digest]: https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-http-identity-digest.html
 
  
 ## FAQs.

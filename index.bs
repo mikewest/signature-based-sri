@@ -64,8 +64,8 @@ spec:html; type:element; text:link
     "title": "PCIv4: SRI gaps and opportunities"
   },
   "ID.pardue-http-identity-digest": {
-    "authors": [ "Lucas Pardue" ],
-    "href": "https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html",
+    "authors": [ "Lucas Pardue", "Mike West" ],
+    "href": "https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-http-identity-digest.html",
     "title": "HTTP Identity Digest"
   }
 }
