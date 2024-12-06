@@ -4,8 +4,8 @@ Shortname: signature-based-sri
 Level: none
 Status: w3c/CG-DRAFT
 Group: wicg
-Repository: mikewest/signature-based-sri
-URL: https://mikewest.github.io/signature-based-sri/
+Repository: wicg/signature-based-sri
+URL: https://wicg.github.io/signature-based-sri/
 Editor: Mike West, Google LLC., mkwst@google.com
 Abstract: 
     A monkey-patch spec that enhances SRI with signature-based
