@@ -51,7 +51,7 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
 urlPrefix: https://www.rfc-editor.org/rfc/rfc9651.html; spec: STRUCTURED-FIELDS
     type: abstract-op
         text: parsing structured fields; url: text-parse
-urlPrefix: https://datatracker.ietf.org/doc/html/rfc9110; spec: HTTP-SEMANTICS
+urlPrefix: https://www.rfc-editor.org/rfc/rfc9110.html; spec: HTTP-SEMANTICS
     type: dfn
         text: content codings; url: name-content-codings
 </pre>
