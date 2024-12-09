@@ -51,6 +51,9 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
 urlPrefix: https://www.rfc-editor.org/rfc/rfc9651.html; spec: STRUCTURED-FIELDS
     type: abstract-op
         text: parsing structured fields; url: text-parse
+urlPrefix: https://datatracker.ietf.org/doc/html/rfc9110; spec: HTTP-SEMANTICS
+    type: dfn
+        text: content codings; url: name-content-codings
 </pre>
 <pre class="link-defaults">
 spec:html; type:element; text:script
@@ -168,12 +171,12 @@ High-Level Overview {#overview}
 -------------------------------
 
 The mechanism described in the remainder of this document can be broken down
-into a few independent parts, layered on top of one another to achive the goals
+into a few independent parts, layered on top of one another to achieve the goals
 developers are aiming for.
 
 1.  **Server-initiated integrity checks**: Servers can deliver an
     [:Identity-Digest:] header along with responses that contain one or more
-    digests of the response's content _after_ decoding any transfer encodings
+    digests of the response's content _after_ decoding any [=content codings=]
     (gzip, brotli, etc).
     
     If such a header is present, user agents can enforce it by synthesizing a
@@ -183,7 +186,7 @@ developers are aiming for.
 2.  **Server-initiated signature checks**: Servers can deliver HTTP Message
     Signature headers ([:Signature:] and [:Signature-Input:] from [[RFC9421]])
     that allow the verification of request/response metadata. We can construct
-    these headers in }such a way that user agents can enforce them, and further
+    these headers in such a way that user agents can enforce them, and further
     ensure that the signed metadata includes the server-initiated integrity
     checks noted above. Enforcing signature verification, then, means ensuring
     that the private key's possessor signed the specific content in question.
