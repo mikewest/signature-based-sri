@@ -164,6 +164,18 @@ That's it. This seems like the simplest possible approach, and has some interest
     benefit from robust protections against injection attacks, but who would also desire a less
     brittle deployment mechanism than hashes.
 
+    Additionally, many websites which are using hash-based CSPs today experience friction from
+    having to update the CSP header when scripts on the page change, but do not want to use the
+    less safe host-based allowlists in CSP. This would allow specifying a fixed public key in the
+    CSP and on the `<script>` elements and thereafter only updating the headers on the script
+    itself.
+
+*   **How will this interact with CSP?**
+
+    CSP will be updated to allow `ed25519-` [hash-source][hash-source] values, which will allow
+    script elements which have a matching `integrity` attribute (and valid corresponding headers)
+    to execute.
+
 *   **This mechanism just validates a signature against a given public key. Wouldn't this allow an
     attacker to perform version rollback, delivering older versions of a script known to be
     vulnerable to attack?**
@@ -221,3 +233,4 @@ That's it. This seems like the simplest possible approach, and has some interest
     verification.)
 
 [origin-policy]: https://wicg.github.io/origin-policy/
+[hash-source]: https://w3c.github.io/webappsec-csp/#grammardef-hash-source
