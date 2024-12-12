@@ -37,6 +37,7 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
     type: dfn
         text: signature base; url: name-creating-the-signature-base
         text: component identifier; url: covered-components
+        text: derived components; url: name-derived-components
         text: signature parameters; url: signature-params
         text: sf; url: http-field-structured
         text: alg; url: section-2.3-4.8
@@ -44,6 +45,16 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
         text: expires; url: section-2.3-4.4
         text: keyid; url: section-2.3-4.10
         text: tag; url: section-2.3-4.12
+        text: req; url: section-2.4-2.2.1
+        text: @method; url: name-method
+        text: @target-uri; url: name-target-uri
+        text: @authority; url: name-authority
+        text: @scheme; url: name-scheme
+        text: @request-target; url: name-request-target
+        text: @path; url: name-path
+        text: @query; url: name-query
+        text: @query-param; url: name-query-parameters
+        text: @status; url: name-status-code
     type: http-header; 
         text: Accept-Signature; url: name-the-accept-signature-field
         text: Signature-Input; url: name-the-signature-input-field
@@ -312,10 +323,10 @@ guidelines from Section 1.4 of [[RFC9421]]:
         *   `identity-digest`, which MUST include the <a>`sf`</a> parameter and
             no other parameters.
         
-        Note: We'll extend this over time. The limitation to `identity-digest`
-        is artificial, and aimed towards making a prototype of this approach
-        as simple as possible to implement and evaluate as we decide what makes
-        sense to ship at scale.
+        Note: We'll extend the set of allowed headers over time. The limitation
+        to `identity-digest` is artificial, and aimed towards making a prototype
+        of this approach as simple as possible to implement and evaluate as we
+        decide what makes sense to ship at scale.
 
     2.  Include the following [=signature parameters=] with their associated
         constraints:
@@ -335,6 +346,20 @@ guidelines from Section 1.4 of [[RFC9421]]:
             ISSUE: Perhaps something more specific to make room for variants
             in the future that have different constraints?
             `enforce-ed25519-provenance`?
+
+    The signature's input MAY include the following [=derived components=] as
+    part of the list of [=component identifiers=], each of which MUST include
+    the <a>`req`</a> parameter and no other paramters:
+
+    *   <a dfn>`@authority`</a>
+    *   <a dfn>`@method`</a>
+    *   <a dfn>`@path`</a>
+    *   <a dfn>`@query-param`</a>
+    *   <a dfn>`@query`</a>
+    *   <a dfn>`@request-target`</a>
+    *   <a dfn>`@scheme`</a>
+    *   <a dfn>`@status`</a>
+    *   <a dfn>`@target-uri`</a>
 
     The signature's input MAY include the following [=signature parameters=],
     with their associated constraints:
