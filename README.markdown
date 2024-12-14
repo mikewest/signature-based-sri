@@ -1,4 +1,4 @@
-# Explainer: Signature-based Integrity
+Explainer: Signature-based Integrity
 
 TL;DR: It would be nice if web developers could verify the provenance of resources they depend
 upon, establishing the technical foundations upon which they can increase confidence in the
