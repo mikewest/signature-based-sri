@@ -679,9 +679,9 @@ headers and the body):
               [=request/integrity metadata=]
             </del>
             <ins>
-              <a lt="perform client-initiated integrity checks" abstract-op>Perform
-              client-initiated integrity checks</a> given <var ignore>request</var>
-              and <var ignore>internalResponse</var>,
+              <a abstract-op>Perform client-initiated integrity checks</a> given
+              <var ignore>request</var> and <var ignore>internalResponse</var>.
+              If the result is "`failed`",
             </ins>
             then run <var ignore>processBodyError</var> and abort these steps. [[!SRI]]
           </li>
