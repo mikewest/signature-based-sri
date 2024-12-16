@@ -636,43 +636,22 @@ following steps. They return `valid` if the signature is valid, or `invalid` oth
 Patches to Fetch {#monkey-patch-fetch}
 --------------------------------------
 
-Support for this feature would require twoish changes to [[Fetch]]:
-
-### Safelist Headers ### {#patch-cors-list}
-
-First, we extend Fetch's [=CORS-safelisted response-header name=] list to
-include the [:Signature:], [:Signature-Input:], and [:Identity-Digest:] headers.
-This makes the processing model clear by including these headers along with the
-[=CORS filtered response=].
-
-ISSUE(#17): We have at least three options: extend the safelist as proposed here,
-reach into a [=/response=]'s [=internal response=] when doing validation
-below, or require developers to add these headers to each response's
-[:Access-Control-Expose-Headers:] header. Extending the safelist is simplest for
-developers and clarifying for spec authors. That said, other headers with
-similar effect rely on accessing [=internal responses=] (see e.g. CORP checks in
-step 5 of [[Fetch#http-fetch]], as well as MIX/CSP/MIME/nosniff in step 19 of
-[[Fetch#main-fetch]]). Perhaps that's even more clear and direct?
-
-
-### Patching Main Fetch ### {#patch-main-fetch} 
-
-Next, we'll make two changes to [[Fetch#main-fetch]] to support enforcement of
-server-initiated integrity checks through [:Identity-Digest:], [:Signature:],
-and [:Signature-Input:], and to pass the right set of information into the version
-of [[SRI#does-response-match-metadatalist]] altered by this specification in order
-to enable signature-based checks that require information from the request
-([=request/integrity metadata=] on the one hand, request headers and properties
-for signature components on the other) and the response (integrity headers and
-the body):
+Support for this feature would require changes to [[Fetch#main-fetch]] to support
+enforcement of server-initiated integrity checks through [:Identity-Digest:],
+[:Signature:], and [:Signature-Input:], and to pass the right set of information
+into the version of [[SRI#does-response-match-metadatalist]] altered by this
+specification in order to enable signature-based checks that require information
+from the request ([=request/integrity metadata=] on the one hand, request headers
+and properties for signature components on the other) and the response (integrity
+headers and the body):
 
 [[Fetch#main-fetch]] step 22 will be updated as follows:
 
 <ol start=21 algorithm="monkey patching Main Fetch">
   <li>
     If |request|'s [=request/integrity metadata=] is not the empty string,
-    <ins>or |response|'s [=response/header list=] [=list/contains=]
-    [:Identity-Digest:],</ins> then:
+    <ins>or <var ignore>internalResponse</var>'s [=response/header list=]
+    [=list/contains=] [:Identity-Digest:],</ins> then:
 
     <ol>
       <li>
@@ -690,9 +669,9 @@ the body):
           <li><ins>
             <a lt="perform server-initiated integrity checks" abstract-op>Perform
             server-initiated integrity checks</a> on <var ignore>bytes</var>,
-            <var ignore>request</var>, and <var ignore>response</var>. If the result
-            is "`failed`", then run <var ignore>processBodyError</var> and abort
-            these steps.
+            <var ignore>request</var>, and <var ignore>internalResponse</var>.
+            If the result is "`failed`", then run <var ignore>processBodyError</var> and
+            abort these steps.
           </ins></li>
           <li>
             <del>
@@ -702,7 +681,7 @@ the body):
             <ins>
               <a lt="perform client-initiated integrity checks" abstract-op>Perform
               client-initiated integrity checks</a> given <var ignore>request</var>
-              and <var ignore>response</var>,
+              and <var ignore>internalResponse</var>,
             </ins>
             then run <var ignore>processBodyError</var> and abort these steps. [[!SRI]]
           </li>
