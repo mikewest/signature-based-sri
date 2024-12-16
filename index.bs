@@ -24,6 +24,7 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9651; type: dfn; spec: RFC9651
     for: structured header
         text: token; url: #name-tokens
         text: list; url: #name-list
+        text: string; url: #name-string
         text: inner list; url: #name-inner-list
         text: dictionary; url: #name-dictionary
         text: parameters; url: #name-parameters
@@ -103,7 +104,7 @@ Introduction {#intro}
 
 Subresource Integrity [[SRI]] defines a mechanism by which developers can
 ensure that script or stylesheet loaded into their pages' contexts are
-_exactly_ those scripts or stylesheets the developer expected. By specifying
+*exactly* those scripts or stylesheets the developer expected. By specifying
 a SHA-256 hash of a resource's content, any malicious or accidental deviation
 will be blocked before being executed. This is an excellent defense, but its
 deployment turns out to be brittle. If the resource living at a specific URL
@@ -115,7 +116,7 @@ Particularly as the industry becomes more interested in supply-chain integrity
 (see Shopify's [[PCIv4-SRI-Gaps]], for instance), it seems reasonable to explore
 alternatives to static hashes that could allow wider deployment of these checks,
 and therefore better understanding of the application experiences that
-developers are _actually_ composing. 
+developers are *actually* composing. 
 
 This document outlines the changes that would be necessary to [[Fetch]], and
 [[SRI]] in order to support the simplest version of a signature-based check:
@@ -155,7 +156,7 @@ This document outlines the changes that would be necessary to [[Fetch]], and
 </div>
 
 The goal here is to flesh out the proposal for discussion, recognizing that it
-might be too simple to ship. Then again, it might be _just_ simple enough...
+might be too simple to ship. Then again, it might be *just* simple enough...
 
 Signatures are not Hashes {#signatures-vs-hashes}
 -------------------------------------------------
@@ -550,7 +551,7 @@ of signature expressions which are likewise understood:
 3.  Return |result|.
 
 
-<h4 id="matching" algorithm>Do |bytes| and |response| match |metadataList|?</h4>
+<h4 id="matching" algorithm>Do |bytes| and |response| match <var ignore>metadataList</var>?</h4>
 
 Since we adjusted the result of [[#parsing]] above, we need to adjust the
 matching algorithm to match. The core change will be processing both hashing
@@ -659,7 +660,7 @@ headers and the body):
         given <var ignore>fetchParams</var> and a [=network error=].
       </li>
       <li>
-        If |response|'s [=response/body=] is null, then run <var ignore>processBodyError</var> and
+        If <var ignore>response</var>'s [=response/body=] is null, then run <var ignore>processBodyError</var> and
         abort these steps.
       </li>
       <li>
@@ -698,7 +699,7 @@ headers and the body):
   </li>
 </ol>
 
-#### Server-Initiated Integrity Checks #### {#server-initiated}
+### Server-Initiated Integrity Checks ### {#server-initiated}
 
 <div algorithm="server-initiated integrity checks">
 
@@ -719,7 +720,7 @@ To <dfn abstract-op>perform server-initiated integrity checks</dfn> given a
 
 </div>
 
-#### `Identity-Digest` Validation #### {#identity-digest-validation}
+### `Identity-Digest` Validation ### {#identity-digest-validation}
 
 <div algorithm="identity-digest validation">
 To <dfn abstract-op>verify `Identity-Digest` assertions</dfn> given a
@@ -756,7 +757,7 @@ negotiation).
 
 
 
-#### `Signature` and `Signature-Input` Enforcement #### {#signature-enforcement}
+### `Signature` and `Signature-Input` Enforcement ### {#signature-enforcement}
 
 <div algorithm="signature validation">
 To <dfn abstract-op>verify `SRI` Message Signature assertions</dfn> given a
@@ -785,8 +786,7 @@ following steps. They return "`verified`" or "`failed`":
 
     3.  Let |params| be |components| [=structured header/parameters=].
 
-    4.  If any of the following requirements for |signature params| are not
-        met, [=continue=]:
+    4.  If any of the following requirements for |params| are not met, [=continue=]:
 
         1.  |params| [=map/contains=] <a>`alg`</a>, and its value
             [=string/is=] the [=structured header/string=] "`ed25519`".
