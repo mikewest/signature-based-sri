@@ -219,7 +219,8 @@ developers are aiming for.
     signatures (and should fall out of CSP's specification without much
     additional work).
     
-    ISSUE: TODO(mkwst): Make sure that's true.
+    ISSUE(36): TODO(mkwst): Write up this integration, which requires at least
+    a grammar update in CSP.
 
 Implementing the mechanism in this document therefore requires:
 
@@ -285,13 +286,8 @@ At a high level, we'll make the following changes to SRI:
     set of the strongest content-based and signature-based algorithms specified
     in a given element. This would enable developers to specify both a hash and
     signature expectation for a resource, ensuring both that known resources
-    load, _and_ that they're accepted by a trusted party.
+    load, and that they're accepted by a trusted party.
     
-    ISSUE: This might not be necessary. It allows us to explain things like
-    packaging constraints in ways that seem useful, but does introduce some
-    additional complexity in developers' mental model. So, consider it a
-    decision point.
-
 4.  Finally, we'll adjust the matching algorithm to correctly handle signatures
     by passing the public key in to the comparison operation.
 
@@ -334,7 +330,7 @@ guidelines from Section 1.4 of [[RFC9421]]:
 
         *   <a>`alg`</a>, whose value MUST be the string `ed25519`
 
-            ISSUE: [Section 7.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6)
+            ISSUE(33): [Section 7.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6)
             suggests dropping the <a>`alg`</a> parameter when the algorithm can
             be determined unambigiously. Perhaps we should do that there rather
             than requiring its explicit presence.
@@ -344,9 +340,9 @@ guidelines from Section 1.4 of [[RFC9421]]:
             portion of the signature's verification key material.
         *   <a>`tag`</a>, whose value MUST be the string `sri`
             
-            ISSUE: Perhaps something more specific to make room for variants
-            in the future that have different constraints?
-            `enforce-ed25519-provenance`?
+            ISSUE(34): Perhaps something more specific to make room for
+            variants in the future that have different constraints?
+            `enforce-ed25519-provenance`? `ed25519-integrity`? Etc?
 
     The signature's input MAY include the following [=derived components=] as
     part of the list of [=component identifiers=], each of which MUST include
@@ -370,13 +366,6 @@ guidelines from Section 1.4 of [[RFC9421]]:
     *   `nonce`, which is a string whose value SHOULD be generated in a fashion
         which guarantees uniqueness.
     
-    ISSUE: "in the past" and "in the future" require a reference point, which
-    presumably would be the point at which the message was received by a user
-    agent. We'll also want to deal in some way with clock drift that might come
-    into play for very new or very old signatures (ideally in a way consistent
-    with browsers' approaches to TLS certificate `NotBefore`/`NotAfter`
-    assertions.
-
 :   **Structured Field Types**:
 ::  *   The `identity-digest` component references the [:Identity-Digest:]
         header defined in [[ID.pardue-http-identity-digest]]. It is a
@@ -485,9 +474,6 @@ An [:Identity-Digest:] [=header=] (|header|) is
 1.  Let |parsed| be the result of [$parsing structured fields$] with `input_string`
     set to |header|'s [=header/value=], and `header_type` set to
     "<a for="structured header">`dictionary`</a>".
-
-    ISSUE: Here, I'm assuming that a structured field Dictionary turns into a
-    [=map=] after parsing? That doesn't seem unreasonable, but it might be?
 
 2.  If parsing failed or if |parsed| [=map/is empty=], return "`invalid`".
 
@@ -904,6 +890,9 @@ following steps. They return "`verified`" or "`failed`":
         is greater than the number of seconds between the [=Unix epoch=] and the
         [=wall clock/unsafe current time=], return "`failed`".
 
+        ISSUE(34): Should we try to leave some flexibility here for user agents
+        to accept recently-expired signatures / deal with clock skew?
+        
     6.  Let |signature-params| be the result of executing the algorithm in
         [Section 2.3](https://www.rfc-editor.org/rfc/rfc9421.html#signature-params)
         of [[!RFC9421]] on |components|.
