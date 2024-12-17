@@ -6,7 +6,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version ac5ea272d, updated Fri Dec 6 15:45:15 2024 -0800" name="generator">
   <link href="https://wicg.github.io/signature-based-sri/" rel="canonical">
-  <meta content="fa700abd7e829dc33363ae5118de9f53d6aa888b" name="revision">
+  <meta content="b76d2f87485c4050b699867be82cccd5b0a9b127" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>
@@ -1020,7 +1020,8 @@ against a page’s active policies, and relying upon SRI to enforce the
 constraints the metadata declares. The same should be possible for
 signatures (and should fall out of CSP’s specification without much
 additional work).</p>
-     <p class="issue" id="issue-0c2d6b18"><a class="self-link" href="#issue-0c2d6b18"></a> TODO(mkwst): Make sure that’s true.</p>
+     <p class="issue" id="issue-76053066"><a class="self-link" href="#issue-76053066"></a> TODO(mkwst): Write up this integration, which requires at least
+a grammar update in CSP. <a href="https://github.com/wicg/signature-based-sri/issues/36">[Issue #36]</a></p>
    </ol>
    <p>Implementing the mechanism in this document therefore requires:</p>
    <ol>
@@ -1082,11 +1083,7 @@ practical ordering unchanged, we should define that explicitly.</p>
 set of the strongest content-based and signature-based algorithms specified
 in a given element. This would enable developers to specify both a hash and
 signature expectation for a resource, ensuring both that known resources
-load, _and_ that they’re accepted by a trusted party.</p>
-     <p class="issue" id="issue-779438ed"><a class="self-link" href="#issue-779438ed"></a> This might not be necessary. It allows us to explain things like
-packaging constraints in ways that seem useful, but does introduce some
-additional complexity in developers' mental model. So, consider it a
-decision point.</p>
+load, and that they’re accepted by a trusted party.</p>
     <li data-md>
      <p>Finally, we’ll adjust the matching algorithm to correctly handle signatures
 by passing the public key in to the comparison operation.</p>
@@ -1131,14 +1128,14 @@ constraints:</p>
          <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8"><code>alg</code></a>, whose value MUST be the string <code>ed25519</code></p>
          <p class="issue" id="issue-42a91512"><a class="self-link" href="#issue-42a91512"></a> <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6">Section 7.3.6 of RFC9421</a> suggests dropping the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8①"><code>alg</code></a> parameter when the algorithm can
 be determined unambigiously. Perhaps we should do that there rather
-than requiring its explicit presence.</p>
+than requiring its explicit presence. <a href="https://github.com/wicg/signature-based-sri/issues/33">[Issue #33]</a></p>
         <li data-md>
          <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10"><code>keyid</code></a>, whose value MUST be a string containing a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#forgiving-base64-encode" id="ref-for-forgiving-base64-encode">base64 encoding</a> of the public key
 portion of the signature’s verification key material.</p>
         <li data-md>
          <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.12" id="ref-for-section-2.3-4.12"><code>tag</code></a>, whose value MUST be the string <code>sri</code></p>
-         <p class="issue" id="issue-24e8d4a7"><a class="self-link" href="#issue-24e8d4a7"></a> Perhaps something more specific to make room for variants
-in the future that have different constraints? <code>enforce-ed25519-provenance</code>?</p>
+         <p class="issue" id="issue-d790eab8"><a class="self-link" href="#issue-d790eab8"></a> Perhaps something more specific to make room for
+variants in the future that have different constraints? <code>enforce-ed25519-provenance</code>? <code>ed25519-integrity</code>? Etc? <a href="https://github.com/wicg/signature-based-sri/issues/34">[Issue #34]</a></p>
        </ul>
      </ol>
      <p>The signature’s input MAY include the following <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-derived-components" id="ref-for-name-derived-components">derived components</a> as
@@ -1175,11 +1172,6 @@ with their associated constraints:</p>
        <p><code>nonce</code>, which is a string whose value SHOULD be generated in a fashion
 which guarantees uniqueness.</p>
      </ul>
-     <p class="issue" id="issue-edca7137"><a class="self-link" href="#issue-edca7137"></a> "in the past" and "in the future" require a reference point, which
-presumably would be the point at which the message was received by a user
-agent. We’ll also want to deal in some way with clock drift that might come
-into play for very new or very old signatures (ideally in a way consistent
-with browsers' approaches to TLS certificate <code>NotBefore</code>/<code>NotAfter</code> assertions.</p>
     <dt data-md><strong>Structured Field Types</strong>:
     <dd data-md>
      <ul>
@@ -1285,7 +1277,6 @@ the client will expect the signature base to represent.</p>
      <li data-md>
       <p>Let <var>parsed</var> be the result of <a data-link-type="abstract-op" href="https://www.rfc-editor.org/rfc/rfc9651.html#text-parse" id="ref-for-text-parse">parsing structured fields</a> with <code>input_string</code> set to <var>header</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-value" id="ref-for-concept-header-value">value</a>, and <code>header_type</code> set to
 "<a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-dictionary" id="ref-for-name-dictionary①"><code>dictionary</code></a>".</p>
-      <p class="issue" id="issue-fee2ef14"><a class="self-link" href="#issue-fee2ef14"></a> Here, I’m assuming that a structured field Dictionary turns into a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map">map</a> after parsing? That doesn’t seem unreasonable, but it might be?</p>
      <li data-md>
       <p>If parsing failed or if <var>parsed</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-is-empty" id="ref-for-map-is-empty">is empty</a>, return "<code>invalid</code>".</p>
      <li data-md>
@@ -1327,7 +1318,7 @@ of signature expressions which are likewise understood:</p>
      <p>
       Let <var>result</var> be 
       <del>the empty set</del>
-      <ins>the <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map①">ordered map</a> «[ "hashes" → « », "signatures" → « » ]».</ins>
+      <ins>the <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map">ordered map</a> «[ "hashes" → « », "signatures" → « » ]».</ins>
      </p>
     <li data-md>
      <p>For each <var>item</var> returned by <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#strictly-split" id="ref-for-strictly-split">splitting</a> <var>metadata</var> on spaces:</p>
@@ -1650,6 +1641,8 @@ returns a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequ
        <li data-md>
         <p>If <var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists④">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.4" id="ref-for-section-2.3-4.4①"><code>expires</code></a>, and <var>params</var>["<code>expires</code>"]
 is greater than the number of seconds between the <a data-link-type="dfn" href="https://w3c.github.io/hr-time/#dfn-unix-epoch" id="ref-for-dfn-unix-epoch">Unix epoch</a> and the <a data-link-type="dfn" href="https://w3c.github.io/hr-time/#wall-clock-unsafe-current-time" id="ref-for-wall-clock-unsafe-current-time">unsafe current time</a>, return "<code>failed</code>".</p>
+        <p class="issue" id="issue-e34631ac"><a class="self-link" href="#issue-e34631ac"></a> Should we try to leave some flexibility here for user agents
+to accept recently-expired signatures / deal with clock skew? <a href="https://github.com/wicg/signature-based-sri/issues/34">[Issue #34]</a></p>
        <li data-md>
         <p>Let <var>signature-params</var> be the result of executing the algorithm in <a href="https://www.rfc-editor.org/rfc/rfc9421.html#signature-params" id="42b8a7590">Section 2.3</a> of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a> on <var>components</var>.</p>
        <li data-md>
@@ -1946,7 +1939,6 @@ Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Mes
      <li><span class="dfn-paneled" id="efe8653e">iterate</span>
      <li><span class="dfn-paneled" id="36333997">length</span>
      <li><span class="dfn-paneled" id="649608b9">list</span>
-     <li><span class="dfn-paneled" id="3fca5a9e">map</span>
      <li><span class="dfn-paneled" id="84b454ff">ordered map</span>
      <li><span class="dfn-paneled" id="692595fe">ordered set</span>
      <li><span class="dfn-paneled" id="0204d188">size</span>
@@ -2037,23 +2029,16 @@ Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Mes
   </dl>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
-   <div class="issue"> TODO(mkwst): Make sure that’s true. <a class="issue-return" href="#issue-0c2d6b18" title="Jump to section">↵</a></div>
-   <div class="issue"> This might not be necessary. It allows us to explain things like
-packaging constraints in ways that seem useful, but does introduce some
-additional complexity in developers' mental model. So, consider it a
-decision point. <a class="issue-return" href="#issue-779438ed" title="Jump to section">↵</a></div>
+   <div class="issue"> TODO(mkwst): Write up this integration, which requires at least
+a grammar update in CSP. <a href="https://github.com/wicg/signature-based-sri/issues/36">[Issue #36]</a> <a class="issue-return" href="#issue-76053066" title="Jump to section">↵</a></div>
    <div class="issue"> <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6">Section 7.3.6 of RFC9421</a> suggests dropping the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"><code>alg</code></a> parameter when the algorithm can
 be determined unambigiously. Perhaps we should do that there rather
-than requiring its explicit presence. <a class="issue-return" href="#issue-42a91512" title="Jump to section">↵</a></div>
-   <div class="issue"> Perhaps something more specific to make room for variants
-in the future that have different constraints? <code>enforce-ed25519-provenance</code>? <a class="issue-return" href="#issue-24e8d4a7" title="Jump to section">↵</a></div>
-   <div class="issue"> "in the past" and "in the future" require a reference point, which
-presumably would be the point at which the message was received by a user
-agent. We’ll also want to deal in some way with clock drift that might come
-into play for very new or very old signatures (ideally in a way consistent
-with browsers' approaches to TLS certificate <code>NotBefore</code>/<code>NotAfter</code> assertions. <a class="issue-return" href="#issue-edca7137" title="Jump to section">↵</a></div>
-   <div class="issue"> Here, I’m assuming that a structured field Dictionary turns into a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map">map</a> after parsing? That doesn’t seem unreasonable, but it might be? <a class="issue-return" href="#issue-fee2ef14" title="Jump to section">↵</a></div>
+than requiring its explicit presence. <a href="https://github.com/wicg/signature-based-sri/issues/33">[Issue #33]</a> <a class="issue-return" href="#issue-42a91512" title="Jump to section">↵</a></div>
+   <div class="issue"> Perhaps something more specific to make room for
+variants in the future that have different constraints? <code>enforce-ed25519-provenance</code>? <code>ed25519-integrity</code>? Etc? <a href="https://github.com/wicg/signature-based-sri/issues/34">[Issue #34]</a> <a class="issue-return" href="#issue-d790eab8" title="Jump to section">↵</a></div>
    <div class="issue"> To support this change, we also need to clean up the processing in <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#cors-safelisted-request-header">CORS-safelisted request-header</a> to support this header, as discussed in <a href="https://github.com/wicg/signature-based-sri/issues/21">[Issue #21]</a> <a class="issue-return" href="#issue-297cef4f" title="Jump to section">↵</a></div>
+   <div class="issue"> Should we try to leave some flexibility here for user agents
+to accept recently-expired signatures / deal with clock skew? <a href="https://github.com/wicg/signature-based-sri/issues/34">[Issue #34]</a> <a class="issue-return" href="#issue-e34631ac" title="Jump to section">↵</a></div>
   </div>
 <script>/* Boilerplate: script-dom-helper */
 "use strict";
@@ -2273,7 +2258,6 @@ let dfnPanelData = {
 "36333997": {"dfnID":"36333997","dfnText":"length","external":true,"refSections":[{"refs":[{"id":"ref-for-byte-sequence-length"},{"id":"ref-for-byte-sequence-length\u2460"},{"id":"ref-for-byte-sequence-length\u2461"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-byte-sequence-length\u2462"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#byte-sequence-length"},
 "3dc5399b": {"dfnID":"3dc5399b","dfnText":"integrity","external":true,"refSections":[{"refs":[{"id":"ref-for-attr-script-integrity"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-attr-script-integrity\u2460"}],"title":"4.3. Key Discovery"}],"url":"https://html.spec.whatwg.org/multipage/scripting.html#attr-script-integrity"},
 "3de9e659": {"dfnID":"3de9e659","dfnText":"byte sequence","external":true,"refSections":[{"refs":[{"id":"ref-for-byte-sequence"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-byte-sequence\u2460"}],"title":"2.1.3. Do bytes and response match metadataList?"},{"refs":[{"id":"ref-for-byte-sequence\u2461"}],"title":"2.3. Server-Initiated Integrity Checks"},{"refs":[{"id":"ref-for-byte-sequence\u2462"}],"title":"2.3.1. Identity-Digest Validation"},{"refs":[{"id":"ref-for-byte-sequence\u2463"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#byte-sequence"},
-"3fca5a9e": {"dfnID":"3fca5a9e","dfnText":"map","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-map"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-ordered-map\u2460"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ordered-map"},
 "4a2cfa3a": {"dfnID":"4a2cfa3a","dfnText":"as a body","external":true,"refSections":[{"refs":[{"id":"ref-for-byte-sequence-as-a-body"}],"title":"2.2.1. Main Fetch"}],"url":"https://fetch.spec.whatwg.org/#byte-sequence-as-a-body"},
 "4d7b724c": {"dfnID":"4d7b724c","dfnText":"CORS-preflight request","external":true,"refSections":[{"refs":[{"id":"ref-for-cors-preflight-request"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"https://fetch.spec.whatwg.org/#cors-preflight-request"},
 "50d05931": {"dfnID":"50d05931","dfnText":"derived components","external":true,"refSections":[{"refs":[{"id":"ref-for-name-derived-components"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-derived-components"},
@@ -2298,7 +2282,7 @@ let dfnPanelData = {
 "7a87d819": {"dfnID":"7a87d819","dfnText":"is","external":true,"refSections":[{"refs":[{"id":"ref-for-string-is"},{"id":"ref-for-string-is\u2460"}],"title":"2.1.4. Validate a signature over response using algorithm and public key"},{"refs":[{"id":"ref-for-string-is\u2461"},{"id":"ref-for-string-is\u2462"},{"id":"ref-for-string-is\u2463"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#string-is"},
 "7b0d918d": {"dfnID":"7b0d918d","dfnText":"break","external":true,"refSections":[{"refs":[{"id":"ref-for-iteration-break"},{"id":"ref-for-iteration-break\u2460"}],"title":"2.1.3. Do bytes and response match metadataList?"}],"url":"https://infra.spec.whatwg.org/#iteration-break"},
 "81a76425": {"dfnID":"81a76425","dfnText":"body","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-response-body"},{"id":"ref-for-concept-response-body\u2460"}],"title":"2.2.1. Main Fetch"}],"url":"https://fetch.spec.whatwg.org/#concept-response-body"},
-"84b454ff": {"dfnID":"84b454ff","dfnText":"ordered map","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-map"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-ordered-map\u2460"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ordered-map"},
+"84b454ff": {"dfnID":"84b454ff","dfnText":"ordered map","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-map"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ordered-map"},
 "8a608b90": {"dfnID":"8a608b90","dfnText":"value","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-value"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"}],"url":"https://fetch.spec.whatwg.org/#concept-header-value"},
 "8e6d52cb": {"dfnID":"8e6d52cb","dfnText":"@query-param","external":true,"refSections":[{"refs":[{"id":"ref-for-name-query-parameters"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-query-parameters"},
 "91d655c0": {"dfnID":"91d655c0","dfnText":"@path","external":true,"refSections":[{"refs":[{"id":"ref-for-name-path"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-path"},
@@ -2782,7 +2766,7 @@ let refsData = {
 "https://infra.spec.whatwg.org/#map-exists": {"displayText":"contain","export":true,"for_":["map"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"contain","type":"dfn","url":"https://infra.spec.whatwg.org/#map-exists"},
 "https://infra.spec.whatwg.org/#map-is-empty": {"displayText":"is empty","export":true,"for_":["map"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"is empty","type":"dfn","url":"https://infra.spec.whatwg.org/#map-is-empty"},
 "https://infra.spec.whatwg.org/#map-iterate": {"displayText":"iterate","export":true,"for_":["map"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"iterate","type":"dfn","url":"https://infra.spec.whatwg.org/#map-iterate"},
-"https://infra.spec.whatwg.org/#ordered-map": {"displayText":"map","export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"map","type":"dfn","url":"https://infra.spec.whatwg.org/#ordered-map"},
+"https://infra.spec.whatwg.org/#ordered-map": {"displayText":"ordered map","export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"ordered map","type":"dfn","url":"https://infra.spec.whatwg.org/#ordered-map"},
 "https://infra.spec.whatwg.org/#ordered-set": {"displayText":"ordered set","export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"ordered set","type":"dfn","url":"https://infra.spec.whatwg.org/#ordered-set"},
 "https://infra.spec.whatwg.org/#set-append": {"displayText":"append","export":true,"for_":["set"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"append","type":"dfn","url":"https://infra.spec.whatwg.org/#set-append"},
 "https://infra.spec.whatwg.org/#strictly-split": {"displayText":"strictly split","export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"strictly split","type":"dfn","url":"https://infra.spec.whatwg.org/#strictly-split"},
