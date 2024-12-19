@@ -6,7 +6,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version ac5ea272d, updated Fri Dec 6 15:45:15 2024 -0800" name="generator">
   <link href="https://wicg.github.io/signature-based-sri/" rel="canonical">
-  <meta content="b76d2f87485c4050b699867be82cccd5b0a9b127" name="revision">
+  <meta content="c149a0b0b68de6765a736a1d3ee0e659a46a1060" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>
@@ -802,7 +802,7 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Signature-based Integrity</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-12-17">17 December 2024</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-12-19">19 December 2024</time></p>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -994,7 +994,7 @@ into a few independent parts, layered on top of one another to achieve the goals
 developers are aiming for.</p>
    <ol>
     <li data-md>
-     <p><strong>Server-initiated integrity checks</strong>: Servers can deliver an <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field">Identity-Digest</a></code>`</span> header along with responses that contain one or more
+     <p><strong>Server-initiated integrity checks</strong>: Servers can deliver an <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field">Identity-Digest</a></code>`</span> header along with responses that contain one or more
 digests of the response’s content _after_ decoding any <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9110.html#name-content-codings" id="ref-for-name-content-codings">content codings</a> (gzip, brotli, etc).</p>
      <p>If such a header is present, user agents can enforce it by synthesizing a
 network error if the delivered content does not match the asserted digest.
@@ -1026,7 +1026,7 @@ a grammar update in CSP. <a href="https://github.com/wicg/signature-based-sri/is
    <p>Implementing the mechanism in this document therefore requires:</p>
    <ol>
     <li data-md>
-     <p>Implementing <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field①">Identity-Digest</a></code>`</span> checks, at least for the subset of
+     <p>Implementing <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field①">Identity-Digest</a></code>`</span> checks, at least for the subset of
 resource types upon which SRI can act: scripts and stylesheets.</p>
     <li data-md>
      <p>Implementing the subset of HTTP Message Signatures required to support the
@@ -1054,7 +1054,7 @@ response if there’s a mismatch. This ensures that we’re meeting the page’s
 requirements for resource inclusion.</p>
     <li data-md>
      <p>Once the response has streamed in, we validate the integrity information
-contained in the <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field②">Identity-Digest</a></code>`</span> headers against the response body,
+contained in the <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field②">Identity-Digest</a></code>`</span> headers against the response body,
 refusing to execute any mismatched responses.</p>
     <li data-md>
      <p>We’re done, executing probably-safe JavaScript to our heart’s content.</p>
@@ -1176,7 +1176,7 @@ which guarantees uniqueness.</p>
     <dd data-md>
      <ul>
       <li data-md>
-       <p>The <code>identity-digest</code> component references the <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field③">Identity-Digest</a></code>`</span> header defined in <a data-link-type="biblio" href="#biblio-idpardue-http-identity-digest" title="HTTP Identity Digest">[ID.pardue-http-identity-digest]</a>. It is a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-dictionary" id="ref-for-name-dictionary">Dictionary</a> Structured Field.</p>
+       <p>The <code>identity-digest</code> component references the <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field③">Identity-Digest</a></code>`</span> header defined in <a data-link-type="biblio" href="#biblio-idpardue-httpbis-identity-digest" title="HTTP Identity Digest">[ID.pardue-httpbis-identity-digest]</a>. It is a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-dictionary" id="ref-for-name-dictionary">Dictionary</a> Structured Field.</p>
      </ul>
     <dt data-md><strong>Retrieving the Key Material</strong>:
     <dd data-md>
@@ -1211,7 +1211,7 @@ on the usage of response data.</p>
     <dd data-md>
      <p>The HTTP Message Signature must be delivered with a response.</p>
     <dd data-md>
-     <p>The <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field④">Identity-Digest</a></code>`</span> header must be <a data-link-type="dfn" href="#identity-digest-valid-for-sri" id="ref-for-identity-digest-valid-for-sri">valid for SRI</a>.</p>
+     <p>The <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field④">Identity-Digest</a></code>`</span> header must be <a data-link-type="dfn" href="#identity-digest-valid-for-sri" id="ref-for-identity-digest-valid-for-sri">valid for SRI</a>.</p>
     <dd data-md>
      <p>When instructed to "determine an order" while constructing the signature
 base, clients and servers both MUST choose the same order as the <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field③">Signature-Input</a></code>`</span> header they consume or produce, respectively.</p>
@@ -1271,7 +1271,7 @@ the client will expect the signature base to represent.</p>
    </div>
    <h5 class="heading settled" data-level="2.1.1.1" id="identity-digest-validation-for-sri"><span class="secno">2.1.1.1. </span><span class="content"><code>Identity-Digest</code> Validation for SRI</span><a class="self-link" href="#identity-digest-validation-for-sri"></a></h5>
    <div class="algorithm" data-algorithm="valid for SRI" data-algorithm-for="Identity-Digest">
-    <p>An <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑤">Identity-Digest</a></code>`</span> <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header" id="ref-for-concept-header">header</a> (<var>header</var>) is <dfn class="dfn-paneled" data-dfn-for="Identity-Digest" data-dfn-type="dfn" data-noexport id="identity-digest-valid-for-sri">valid for SRI</dfn> if the following steps return
+    <p>An <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑤">Identity-Digest</a></code>`</span> <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header" id="ref-for-concept-header">header</a> (<var>header</var>) is <dfn class="dfn-paneled" data-dfn-for="Identity-Digest" data-dfn-type="dfn" data-noexport id="identity-digest-valid-for-sri">valid for SRI</dfn> if the following steps return
 "<code>valid</code>":</p>
     <ol>
      <li data-md>
@@ -1448,7 +1448,7 @@ SRI</a> applied above.</p>
    </ol>
    <h3 class="heading settled" data-level="2.2" id="monkey-patch-fetch"><span class="secno">2.2. </span><span class="content">Patches to Fetch</span><a class="self-link" href="#monkey-patch-fetch"></a></h3>
    <p>Support for this feature would require changes to <a href="https://fetch.spec.whatwg.org/#main-fetch"><cite>Fetch</cite> § 4.1 Main fetch</a> to support
-enforcement of server-initiated integrity checks through <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑥">Identity-Digest</a></code>`</span>, <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-field" id="ref-for-name-the-signature-field②">Signature</a></code>`</span>, and <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑦">Signature-Input</a></code>`</span>, and to pass the right set of information
+enforcement of server-initiated integrity checks through <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑥">Identity-Digest</a></code>`</span>, <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-field" id="ref-for-name-the-signature-field②">Signature</a></code>`</span>, and <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field⑦">Signature-Input</a></code>`</span>, and to pass the right set of information
 into the version of <a href="https://w3c.github.io/webappsec-subresource-integrity/#does-response-match-metadatalist"><cite>SRI</cite> § 3.3.4 Do bytes match metadataList?</a> altered by this
 specification in order to enable signature-based checks that require information
 from the request (<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata" id="ref-for-concept-request-integrity-metadata④">integrity metadata</a> on the one hand, request headers
@@ -1461,7 +1461,7 @@ setting the <span>`<code><a data-link-type="http-header" href="https://www.rfc-e
    <ol class="algorithm" data-algorithm="monkey patching Main Fetch" start="21">
     <li>
       If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata" id="ref-for-concept-request-integrity-metadata⑥">integrity metadata</a> is not the empty string, 
-     <ins>or <var>internalResponse</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list" id="ref-for-concept-response-header-list">header list</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain③">contains</a> <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑦">Identity-Digest</a></code>`</span>,</ins>
+     <ins>or <var>internalResponse</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list" id="ref-for-concept-response-header-list">header list</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain③">contains</a> <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑦">Identity-Digest</a></code>`</span>,</ins>
       then: 
      <ol>
       <li> Let <var>processBodyError</var> be this step: run <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-finale" id="ref-for-fetch-finale">fetch response handover</a> given <var>fetchParams</var> and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-network-error" id="ref-for-concept-network-error①">network error</a>. 
@@ -1572,7 +1572,7 @@ If the result is "<code>failed</code>", return "<code>failed</code>".</p>
 following steps. They return "<code>verified</code>" or "<code>failed</code>": 
     <ol>
      <li data-md>
-      <p>Let <var>header</var> be the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list-get-structured-header" id="ref-for-concept-header-list-get-structured-header">getting</a> the <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑧">Identity-Digest</a></code>`</span> header as a "<a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-dictionary" id="ref-for-name-dictionary②"><code>dictionary</code></a>"
+      <p>Let <var>header</var> be the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list-get-structured-header" id="ref-for-concept-header-list-get-structured-header">getting</a> the <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑧">Identity-Digest</a></code>`</span> header as a "<a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-dictionary" id="ref-for-name-dictionary②"><code>dictionary</code></a>"
 from <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list" id="ref-for-concept-response-header-list①">header list</a>.</p>
      <li data-md>
       <p>If <var>header</var> is <code>null</code>, return "<code>verified</code>".</p>
@@ -1591,7 +1591,7 @@ from <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.wh
      <li data-md>
       <p>Return "<code>verified</code>".</p>
     </ol>
-    <p class="note" role="note"><span class="marker">Note:</span> This algorithm requires <em>all</em> valid digests delivered via <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑨">Identity-Digest</a></code>`</span> to match the response’s decoded body. Since the server
+    <p class="note" role="note"><span class="marker">Note:</span> This algorithm requires <em>all</em> valid digests delivered via <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field⑨">Identity-Digest</a></code>`</span> to match the response’s decoded body. Since the server
 controls both the body and the headers, it seems unnecessary to allow the
 flexibility of allowing the asserted digests to match more than one resource
 (as we do in client-initiated checks, which need to support servers' content
@@ -1778,7 +1778,7 @@ response’s body:</p>
 <pre class="language-console highlight">user@host:~/path$  echo -n <c- u>"{\"hello\": \"world\"}"</c-> <c- p>|</c-> openssl dgst -binary -sha256 <c- p>|</c-> base64
 X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=
 </pre>
-   <p>And send that digest along with the response via an <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field①⓪">Identity-Digest</a></code>`</span> header;</p>
+   <p>And send that digest along with the response via an <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field①⓪">Identity-Digest</a></code>`</span> header;</p>
 <pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no highlight-line" data-line="5"></span><span class="line highlight-line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
    <p>Next, the developer will pick an Ed25519 public/private key pair to use when
 signing the response. Assume that they (through amazing coincidence!) generate
@@ -1806,7 +1806,7 @@ PEM format above, but the following tiny Python script will do the work:</p>
     <c- n>byte_string</c-> <c- o>=</c-> <c- n>base64</c-><c- o>.</c-><c- n>b64encode</c-><c- p>(</c-><c- n>public_key</c-><c- o>.</c-><c- n>public_bytes_raw</c-><c- p>())</c->
     print<c- p>(</c-><c- n>byte_string</c-><c- o>.</c-><c- n>decode</c-><c- p>(</c-><c- u>"utf-8"</c-><c- p>))</c->
 </pre>
-   <p>With that encoding in hand, the developer can construct a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field①②">Signature-Input</a></code>`</span> header that specifies the <span>`<code><a data-link-type="http-header" href="https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field①①">Identity-Digest</a></code>`</span> header as a signed component,
+   <p>With that encoding in hand, the developer can construct a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field①②">Signature-Input</a></code>`</span> header that specifies the <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field①①">Identity-Digest</a></code>`</span> header as a signed component,
 and includes the base64-encoded public key as the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10⑦"><code>keyid</code></a> parameter
 (as discussed in [#profile]):</p>
 <pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no highlight-line" data-line="6"></span><span class="line highlight-line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
@@ -1914,9 +1914,9 @@ Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Mes
      <li><span class="dfn-paneled" id="08deeca5">content codings</span>
     </ul>
    <li>
-    <a data-link-type="biblio">[ID.pardue-http-identity-digest]</a> defines the following terms:
+    <a data-link-type="biblio">[ID.pardue-httpbis-identity-digest]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="a6a369ef">Identity-Digest</span>
+     <li><span class="dfn-paneled" id="94992e7d">Identity-Digest</span>
     </ul>
    <li>
     <a data-link-type="biblio">[INFRA]</a> defines the following terms:
@@ -2003,8 +2003,8 @@ Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Mes
    <dd>Yoav Weiss. <a href="https://w3c.github.io/hr-time/"><cite>High Resolution Time</cite></a>. URL: <a href="https://w3c.github.io/hr-time/">https://w3c.github.io/hr-time/</a>
    <dt id="biblio-html">[HTML]
    <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/"><cite>HTML Standard</cite></a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
-   <dt id="biblio-idpardue-http-identity-digest">[ID.pardue-http-identity-digest]
-   <dd>Lucas Pardue; Mike West. <a href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-http-identity-digest.html"><cite>HTTP Identity Digest</cite></a>. URL: <a href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-http-identity-digest.html">https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-http-identity-digest.html</a>
+   <dt id="biblio-idpardue-httpbis-identity-digest">[ID.pardue-httpbis-identity-digest]
+   <dd>Lucas Pardue; Mike West. <a href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html"><cite>HTTP Identity Digest</cite></a>. URL: <a href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html">https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html</a>
    <dt id="biblio-infra">[INFRA]
    <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/"><cite>Infra Standard</cite></a>. Living Standard. URL: <a href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
    <dt id="biblio-rfc2119">[RFC2119]
@@ -2286,12 +2286,12 @@ let dfnPanelData = {
 "8a608b90": {"dfnID":"8a608b90","dfnText":"value","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-value"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"}],"url":"https://fetch.spec.whatwg.org/#concept-header-value"},
 "8e6d52cb": {"dfnID":"8e6d52cb","dfnText":"@query-param","external":true,"refSections":[{"refs":[{"id":"ref-for-name-query-parameters"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-query-parameters"},
 "91d655c0": {"dfnID":"91d655c0","dfnText":"@path","external":true,"refSections":[{"refs":[{"id":"ref-for-name-path"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-path"},
+"94992e7d": {"dfnID":"94992e7d","dfnText":"Identity-Digest","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-identity-digest-field"},{"id":"ref-for-name-the-identity-digest-field\u2460"},{"id":"ref-for-name-the-identity-digest-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2462"},{"id":"ref-for-name-the-identity-digest-field\u2463"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2464"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2465"}],"title":"2.2. Patches to Fetch"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2466"}],"title":"2.2.1. Main Fetch"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2467"},{"id":"ref-for-name-the-identity-digest-field\u2468"}],"title":"2.3.1. Identity-Digest Validation"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2460\u24ea"},{"id":"ref-for-name-the-identity-digest-field\u2460\u2460"}],"title":"7. An End-to-End Example"}],"url":"https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field"},
 "99f492fd": {"dfnID":"99f492fd","dfnText":"CORS-safelisted request-header","external":true,"refSections":[{"refs":[{"id":"ref-for-cors-safelisted-request-header"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"https://fetch.spec.whatwg.org/#cors-safelisted-request-header"},
 "9c57c2af": {"dfnID":"9c57c2af","dfnText":"alg","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.8"},{"id":"ref-for-section-2.3-4.8\u2460"},{"id":"ref-for-section-2.3-4.8\u2461"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-section-2.3-4.8\u2462"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"},
 "a326add7": {"dfnID":"a326add7","dfnText":"contain (for map)","external":true,"refSections":[{"refs":[{"id":"ref-for-map-exists"},{"id":"ref-for-map-exists\u2460"},{"id":"ref-for-map-exists\u2461"},{"id":"ref-for-map-exists\u2462"},{"id":"ref-for-map-exists\u2463"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#map-exists"},
 "a3b18719": {"dfnID":"a3b18719","dfnText":"append (for set)","external":true,"refSections":[{"refs":[{"id":"ref-for-set-append"},{"id":"ref-for-set-append\u2460"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#set-append"},
 "a5ce345d": {"dfnID":"a5ce345d","dfnText":"Accept-Signature","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-accept-signature-field"}],"title":"2.2. Patches to Fetch"},{"refs":[{"id":"ref-for-name-the-accept-signature-field\u2460"},{"id":"ref-for-name-the-accept-signature-field\u2461"},{"id":"ref-for-name-the-accept-signature-field\u2462"},{"id":"ref-for-name-the-accept-signature-field\u2463"},{"id":"ref-for-name-the-accept-signature-field\u2464"}],"title":"2.2.2.1. Append Accept-Signature"},{"refs":[{"id":"ref-for-name-the-accept-signature-field\u2465"}],"title":"5.3. Rollback Attacks"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field"},
-"a6a369ef": {"dfnID":"a6a369ef","dfnText":"Identity-Digest","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-identity-digest-field"},{"id":"ref-for-name-the-identity-digest-field\u2460"},{"id":"ref-for-name-the-identity-digest-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2462"},{"id":"ref-for-name-the-identity-digest-field\u2463"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2464"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2465"}],"title":"2.2. Patches to Fetch"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2466"}],"title":"2.2.1. Main Fetch"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2467"},{"id":"ref-for-name-the-identity-digest-field\u2468"}],"title":"2.3.1. Identity-Digest Validation"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2460\u24ea"},{"id":"ref-for-name-the-identity-digest-field\u2460\u2460"}],"title":"7. An End-to-End Example"}],"url":"https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field"},
 "a6a8ec88": {"dfnID":"a6a8ec88","dfnText":"append","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-list-append"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"https://fetch.spec.whatwg.org/#concept-header-list-append"},
 "abstract-opdef-append-the-accept-signature-header": {"dfnID":"abstract-opdef-append-the-accept-signature-header","dfnText":"append the Accept-Signature header","external":false,"refSections":[{"refs":[{"id":"ref-for-abstract-opdef-append-the-accept-signature-header"}],"title":"2.2.2. HTTP-network-or-cache Fetch"}],"url":"#abstract-opdef-append-the-accept-signature-header"},
 "abstract-opdef-parse-metadata": {"dfnID":"abstract-opdef-parse-metadata","dfnText":"Parse metadata","external":false,"refSections":[{"refs":[{"id":"ref-for-abstract-opdef-parse-metadata"}],"title":"2.1.3. Do bytes and response match metadataList?"},{"refs":[{"id":"ref-for-abstract-opdef-parse-metadata\u2460"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"#abstract-opdef-parse-metadata"},
@@ -2772,11 +2772,11 @@ let refsData = {
 "https://infra.spec.whatwg.org/#strictly-split": {"displayText":"strictly split","export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"strictly split","type":"dfn","url":"https://infra.spec.whatwg.org/#strictly-split"},
 "https://infra.spec.whatwg.org/#string-concatenate": {"displayText":"concatenation","export":true,"for_":["string"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"concatenation","type":"dfn","url":"https://infra.spec.whatwg.org/#string-concatenate"},
 "https://infra.spec.whatwg.org/#string-is": {"displayText":"is","export":true,"for_":["string"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"is","type":"dfn","url":"https://infra.spec.whatwg.org/#string-is"},
+"https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field": {"displayText":"Identity-Digest","export":true,"for_":[],"level":"","normative":true,"shortname":"id.pardue-httpbis-identity-digest","spec":"id.pardue-httpbis-identity-digest","status":"anchor-block","text":"identity-digest","type":"http-header","url":"https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field"},
 "https://w3c.github.io/hr-time/#dfn-unix-epoch": {"displayText":"unix epoch","export":true,"for_":[],"level":"3","normative":true,"shortname":"hr-time","spec":"hr-time-3","status":"current","text":"unix epoch","type":"dfn","url":"https://w3c.github.io/hr-time/#dfn-unix-epoch"},
 "https://w3c.github.io/hr-time/#wall-clock-unsafe-current-time": {"displayText":"unsafe current time","export":true,"for_":["wall clock"],"level":"3","normative":true,"shortname":"hr-time","spec":"hr-time-3","status":"current","text":"unsafe current time","type":"dfn","url":"https://w3c.github.io/hr-time/#wall-clock-unsafe-current-time"},
 "https://w3c.github.io/webappsec-fetch-metadata/#abstract-opdef-append-the-fetch-metadata-headers-for-a-request": {"displayText":"append the Fetch metadata headers for a request","export":true,"for_":[],"level":"1","normative":true,"shortname":"fetch-metadata","spec":"fetch-metadata","status":"current","text":"append the Fetch metadata headers for a request","type":"abstract-op","url":"https://w3c.github.io/webappsec-fetch-metadata/#abstract-opdef-append-the-fetch-metadata-headers-for-a-request"},
 "https://w3c.github.io/webappsec-subresource-integrity/#valid-sri-hash-algorithm-token": {"displayText":"valid SRI hash algorithm token","export":true,"for_":[],"level":"","normative":true,"shortname":"sri","spec":"sri","status":"anchor-block","text":"valid sri hash algorithm token","type":"dfn","url":"https://w3c.github.io/webappsec-subresource-integrity/#valid-sri-hash-algorithm-token"},
-"https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field": {"displayText":"Identity-Digest","export":true,"for_":[],"level":"","normative":true,"shortname":"id.pardue-http-identity-digest","spec":"id.pardue-http-identity-digest","status":"anchor-block","text":"identity-digest","type":"http-header","url":"https://www.ietf.org/archive/id/draft-pardue-http-identity-digest-01.html#name-the-identity-digest-field"},
 "https://www.rfc-editor.org/rfc/rfc9110.html#name-content-codings": {"displayText":"content codings","export":true,"for_":[],"level":"","normative":true,"shortname":"http-semantics","spec":"http-semantics","status":"anchor-block","text":"content codings","type":"dfn","url":"https://www.rfc-editor.org/rfc/rfc9110.html#name-content-codings"},
 "https://www.rfc-editor.org/rfc/rfc9421.html#covered-components": {"displayText":"component identifier","export":true,"for_":[],"level":"","normative":true,"shortname":"rfc9421","spec":"rfc9421","status":"anchor-block","text":"component identifier","type":"dfn","url":"https://www.rfc-editor.org/rfc/rfc9421.html#covered-components"},
 "https://www.rfc-editor.org/rfc/rfc9421.html#http-field-structured": {"displayText":"sf","export":true,"for_":[],"level":"","normative":true,"shortname":"rfc9421","spec":"rfc9421","status":"anchor-block","text":"sf","type":"dfn","url":"https://www.rfc-editor.org/rfc/rfc9421.html#http-field-structured"},
