@@ -143,8 +143,8 @@ This document outlines the changes that would be necessary to [[Fetch]], and
         Content-Type: text/javascript; charset=UTF-8
         Access-Control-Allow-Origin: *
         Identity-Digest: sha-512=:[base64-encoded digest of `console.log("Hello, world!");`]:
-        Signature-Input: sig1=("identity-digest";sf); alg="Ed25519"; keyid="[base64-encoded public key]"; tag="sri"
-        Signature: sig1=:[base64-encoded result of Ed25519(`console.log("Hello, world!");`)]:
+        Signature-Input: sig1=("identity-digest";sf); keyid="[base64-encoded public key]"; tag="sri"
+        Signature: sig1=:[base64-encoded result of Ed25519(signature base)]:
 
         console.log("Hello, world!");
     </xmp>
@@ -328,13 +328,6 @@ guidelines from Section 1.4 of [[RFC9421]]:
     2.  Include the following [=signature parameters=] with their associated
         constraints:
 
-        *   <a>`alg`</a>, whose value MUST be the string `ed25519`
-
-            ISSUE(33): [Section 7.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6)
-            suggests dropping the <a>`alg`</a> parameter when the algorithm can
-            be determined unambigiously. Perhaps we should do that there rather
-            than requiring its explicit presence.
-
         *   <a>`keyid`</a>, whose value MUST be a string containing a
             [=forgiving-base64 encode|base64 encoding=] of the public key
             portion of the signature's verification key material.
@@ -343,6 +336,15 @@ guidelines from Section 1.4 of [[RFC9421]]:
             ISSUE(34): Perhaps something more specific to make room for
             variants in the future that have different constraints?
             `enforce-ed25519-provenance`? `ed25519-integrity`? Etc?
+
+    3.  **Not** include the <a>`alg`</a> [=signature parameter=].
+
+        Note: The algorithm can be determined unambigiously from the
+        <a>`type`</a>, as this profile only supports Ed25519.
+        [Section 7.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6)
+        suggests dropping the <a>`alg`</a> parameter in these cases, which
+        is the recommendation we're following here.
+
 
     The signature's input MAY include the following [=derived components=] as
     part of the list of [=component identifiers=], each of which MUST include
@@ -382,8 +384,7 @@ guidelines from Section 1.4 of [[RFC9421]]:
 
 :   **Determine Key/Algorithm Appropriateness**:
 ::  Since the only accepted algorithm is `ed25519`, it is appropriate for any
-    context in which this profile will be used, and we require it to be
-    specified as the <a>`alg`</a> parameter to the signature's input.
+    context in which this profile will be used.
 
 :   **Derivation Context**
 ::  The context for derivation of message components from an HTTP message and
@@ -412,7 +413,7 @@ guidelines from Section 1.4 of [[RFC9421]]:
 <div class="example" id="example-verification-requirements">
     Valid [:Signature-Input:] header values would therefore include:
 
-    *   `("identity-digest";sf);alg="ed25519";keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"`
+    *   `("identity-digest";sf);keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"`
 </div>
 
 <div class="note">
@@ -436,7 +437,7 @@ For posterity, this set of requirements has a few helpful implications:
     key makes it possible for validation to be enforced whether or not the
     resource was requested from a page requiring integrity.
 
-3.  Specifying the `alg` parameter as "`ed25519`" is a good place to start as
+3.  Supporting only the "`ed25519`" algorithm is a good place to start as
     the keys are small and the algorithm is broadly supported. Choosing one
     algorithm simplifies initial implementations, and reduces the set of choices
     we ask developers to make about crypto primitives.
@@ -878,8 +879,7 @@ following steps. They return "`verified`" or "`failed`":
 
     4.  If any of the following requirements for |params| are not met, [=continue=]:
 
-        1.  |params| [=map/contains=] <a>`alg`</a>, and its value
-            [=string/is=] the [=structured header/string=] "`ed25519`".
+        1.  |params| [=map/does not contain=] <a>`alg`</a>.
         2.  |params| [=map/contains=] <a>`keyid`</a>, and its value is
             a [=structured header/string=] which, when [=forgiving-base64 decoded=],
             returns a [=byte sequence=] whose [=byte sequence/length=] is 32.
@@ -1163,7 +1163,7 @@ Date: Tue, 20 Apr 2021 02:07:56 GMT
 Content-Type: application/json
 Content-Length: 18
 Identity-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+Signature-Input: signature=("identity-digest";sf);keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
 
 {"hello": "world"}
 </xmp>
@@ -1175,7 +1175,7 @@ Section 2.3 of [[RFC9421]]. We'll end up with:
 
 ```
 "identity-digest";sf: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-"@signature-params": ("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+"@signature-params": ("identity-digest";sf);keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
 ```
 
 That's the string we'll sign, placing the base64-encoded signature into a
@@ -1187,8 +1187,8 @@ Date: Tue, 20 Apr 2021 02:07:56 GMT
 Content-Type: application/json
 Identity-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
 Content-Length: 18
-Signature-Input: signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
-Signature: signature=:TUznBT2ikFq6VrtoZeC5znRtZugu1U8OHJWoBkOLDTJA2FglSR34QY9j+BwN79PT4H0p8aIosnv4rXSKfIZVDA==:
+Signature-Input: signature=("identity-digest";sf);keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+Signature: signature=:eTKYITprfJYJmsOZlRTmu0szHbt0yLxHYBU0oXDdkx8najLl59IPO0zUofe5T23RGuquHLdZx177tBX45CUcAg==:
 
 {"hello": "world"}
 </xmp>
