@@ -6,7 +6,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version ac5ea272d, updated Fri Dec 6 15:45:15 2024 -0800" name="generator">
   <link href="https://wicg.github.io/signature-based-sri/" rel="canonical">
-  <meta content="c149a0b0b68de6765a736a1d3ee0e659a46a1060" name="revision">
+  <meta content="a89a2196b19c8dcea3722cae044a3fb33c3bf816" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>
@@ -802,7 +802,7 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Signature-based Integrity</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-12-19">19 December 2024</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2024-12-20">20 December 2024</time></p>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -961,8 +961,8 @@ developers are <em>actually</em> composing.</p>
 <c- e>Content-Type</c-><c- o>:</c-> <c- l>text/javascript; charset=UTF-8</c->
 <c- e>Access-Control-Allow-Origin</c-><c- o>:</c-> <c- l>*</c->
 <c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-512=:[base64-encoded digest of `console.log("Hello, world!");`]:</c->
-<c- e>Signature-Input</c-><c- o>:</c-> <c- l>sig1=("identity-digest";sf); alg="Ed25519"; keyid="[base64-encoded public key]"; tag="sri"</c->
-<c- e>Signature</c-><c- o>:</c-> <c- l>sig1=:[base64-encoded result of Ed25519(`console.log("Hello, world!");`)]:</c->
+<c- e>Signature-Input</c-><c- o>:</c-> <c- l>sig1=("identity-digest";sf); keyid="[base64-encoded public key]"; tag="sri"</c->
+<c- e>Signature</c-><c- o>:</c-> <c- l>sig1=:[base64-encoded result of Ed25519(signature base)]:</c->
 
 console<c- p>.</c->log<c- p>(</c-><c- u>"Hello, world!"</c-><c- p>);</c->
 </pre>
@@ -1125,11 +1125,6 @@ decide what makes sense to ship at scale.</p>
 constraints:</p>
        <ul>
         <li data-md>
-         <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8"><code>alg</code></a>, whose value MUST be the string <code>ed25519</code></p>
-         <p class="issue" id="issue-42a91512"><a class="self-link" href="#issue-42a91512"></a> <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6">Section 7.3.6 of RFC9421</a> suggests dropping the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8①"><code>alg</code></a> parameter when the algorithm can
-be determined unambigiously. Perhaps we should do that there rather
-than requiring its explicit presence. <a href="https://github.com/wicg/signature-based-sri/issues/33">[Issue #33]</a></p>
-        <li data-md>
          <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10"><code>keyid</code></a>, whose value MUST be a string containing a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#forgiving-base64-encode" id="ref-for-forgiving-base64-encode">base64 encoding</a> of the public key
 portion of the signature’s verification key material.</p>
         <li data-md>
@@ -1137,6 +1132,10 @@ portion of the signature’s verification key material.</p>
          <p class="issue" id="issue-d790eab8"><a class="self-link" href="#issue-d790eab8"></a> Perhaps something more specific to make room for
 variants in the future that have different constraints? <code>enforce-ed25519-provenance</code>? <code>ed25519-integrity</code>? Etc? <a href="https://github.com/wicg/signature-based-sri/issues/34">[Issue #34]</a></p>
        </ul>
+      <li data-md>
+       <p><strong>Not</strong> include the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8"><code>alg</code></a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#signature-params" id="ref-for-signature-params①">signature parameter</a>.</p>
+       <p class="note" role="note"><span class="marker">Note:</span> The algorithm can be determined unambigiously from the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-type" id="ref-for-concept-document-type"><code>type</code></a>, as this profile only supports Ed25519. <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6">Section 7.3.6 of RFC9421</a> suggests dropping the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8①"><code>alg</code></a> parameter in these cases, which
+is the recommendation we’re following here.</p>
      </ol>
      <p>The signature’s input MAY include the following <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-derived-components" id="ref-for-name-derived-components">derived components</a> as
 part of the list of <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#covered-components" id="ref-for-covered-components①">component identifiers</a>, each of which MUST include
@@ -1161,7 +1160,7 @@ the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#se
       <li data-md>
        <p><a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-target-uri" id="ref-for-name-target-uri"><code>@target-uri</code></a></p>
      </ul>
-     <p>The signature’s input MAY include the following <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#signature-params" id="ref-for-signature-params①">signature parameters</a>,
+     <p>The signature’s input MAY include the following <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#signature-params" id="ref-for-signature-params②">signature parameters</a>,
 with their associated constraints:</p>
      <ul>
       <li data-md>
@@ -1190,8 +1189,7 @@ in <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-3.3.6">Section 3
     <dt data-md><strong>Determine Key/Algorithm Appropriateness</strong>:
     <dd data-md>
      <p>Since the only accepted algorithm is <code>ed25519</code>, it is appropriate for any
-context in which this profile will be used, and we require it to be
-specified as the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8②"><code>alg</code></a> parameter to the signature’s input.</p>
+context in which this profile will be used.</p>
     <dt data-md><strong>Derivation Context</strong>
     <dd data-md>
      <p>The context for derivation of message components from an HTTP message and
@@ -1220,7 +1218,7 @@ base, clients and servers both MUST choose the same order as the <span>`<code><a
     <a class="self-link" href="#example-verification-requirements"></a> Valid <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field④">Signature-Input</a></code>`</span> header values would therefore include: 
     <ul>
      <li data-md>
-      <p><code>("identity-digest";sf);alg="ed25519";keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</code></p>
+      <p><code>("identity-digest";sf);keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</code></p>
     </ul>
    </div>
    <div class="note" role="note">
@@ -1244,7 +1242,7 @@ resources are blocked if their signatures don’t properly validate.</p>
 key makes it possible for validation to be enforced whether or not the
 resource was requested from a page requiring integrity.</p>
      <li data-md>
-      <p>Specifying the <code>alg</code> parameter as "<code>ed25519</code>" is a good place to start as
+      <p>Supporting only the "<code>ed25519</code>" algorithm is a good place to start as
 the keys are small and the algorithm is broadly supported. Choosing one
 algorithm simplifies initial implementations, and reduces the set of choices
 we ask developers to make about crypto primitives.</p>
@@ -1630,16 +1628,16 @@ from <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.wh
         <p>If any of the following requirements for <var>params</var> are not met, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue④">continue</a>:</p>
         <ol>
          <li data-md>
-          <p><var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists①">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8③"><code>alg</code></a>, and its value <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-is" id="ref-for-string-is③">is</a> the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-string" id="ref-for-name-string">string</a> "<code>ed25519</code>".</p>
+          <p><var>params</var> <a data-link-type="dfn">does not contain</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8" id="ref-for-section-2.3-4.8②"><code>alg</code></a>.</p>
          <li data-md>
-          <p><var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists②">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10⑤"><code>keyid</code></a>, and its value is
-a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-string" id="ref-for-name-string①">string</a> which, when <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#forgiving-base64-decode" id="ref-for-forgiving-base64-decode①">forgiving-base64 decoded</a>,
+          <p><var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists①">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10⑤"><code>keyid</code></a>, and its value is
+a <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-string" id="ref-for-name-string">string</a> which, when <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#forgiving-base64-decode" id="ref-for-forgiving-base64-decode①">forgiving-base64 decoded</a>,
 returns a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence④">byte sequence</a> whose <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence-length" id="ref-for-byte-sequence-length③">length</a> is 32.</p>
          <li data-md>
-          <p><var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists③">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.12" id="ref-for-section-2.3-4.12②"><code>tag</code></a>, and its value <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-is" id="ref-for-string-is④">is</a> the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-string" id="ref-for-name-string②">string</a> "<code>sri</code>".</p>
+          <p><var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists②">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.12" id="ref-for-section-2.3-4.12②"><code>tag</code></a>, and its value <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string-is" id="ref-for-string-is③">is</a> the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9651#name-string" id="ref-for-name-string①">string</a> "<code>sri</code>".</p>
         </ol>
        <li data-md>
-        <p>If <var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists④">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.4" id="ref-for-section-2.3-4.4①"><code>expires</code></a>, and <var>params</var>["<code>expires</code>"]
+        <p>If <var>params</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists③">contains</a> <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.4" id="ref-for-section-2.3-4.4①"><code>expires</code></a>, and <var>params</var>["<code>expires</code>"]
 is greater than the number of seconds between the <a data-link-type="dfn" href="https://w3c.github.io/hr-time/#dfn-unix-epoch" id="ref-for-dfn-unix-epoch">Unix epoch</a> and the <a data-link-type="dfn" href="https://w3c.github.io/hr-time/#wall-clock-unsafe-current-time" id="ref-for-wall-clock-unsafe-current-time">unsafe current time</a>, return "<code>failed</code>".</p>
         <p class="issue" id="issue-e34631ac"><a class="self-link" href="#issue-e34631ac"></a> Should we try to leave some flexibility here for user agents
 to accept recently-expired signatures / deal with clock skew? <a href="https://github.com/wicg/signature-based-sri/issues/34">[Issue #34]</a></p>
@@ -1809,16 +1807,16 @@ PEM format above, but the following tiny Python script will do the work:</p>
    <p>With that encoding in hand, the developer can construct a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-input-field" id="ref-for-name-the-signature-input-field①②">Signature-Input</a></code>`</span> header that specifies the <span>`<code><a data-link-type="http-header" href="https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field" id="ref-for-name-the-identity-digest-field①①">Identity-Digest</a></code>`</span> header as a signed component,
 and includes the base64-encoded public key as the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.10" id="ref-for-section-2.3-4.10⑦"><code>keyid</code></a> parameter
 (as discussed in [#profile]):</p>
-<pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no highlight-line" data-line="6"></span><span class="line highlight-line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
+<pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no highlight-line" data-line="6"></span><span class="line highlight-line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
    <p>Now we have everything we need to construct the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-creating-the-signature-base" id="ref-for-name-creating-the-signature-base②">signature base</a>, following
 the steps described in Section 2.5 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>, and choosing the same order
 as the header’s ordering each time it instructs us to "determine an order" in
 Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Message Signatures">[RFC9421]</a>. We’ll end up with:</p>
 <pre>"identity-digest";sf: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-"@signature-params": ("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+"@signature-params": ("identity-digest";sf);keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
 </pre>
    <p>That’s the string we’ll sign, placing the base64-encoded signature into a <span>`<code><a data-link-type="http-header" href="https://www.rfc-editor.org/rfc/rfc9421.html#name-the-signature-field" id="ref-for-name-the-signature-field④">Signature</a></code>`</span> header on the response:</p>
-<pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);alg="ed25519";keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no highlight-line" data-line="7"></span><span class="line highlight-line"><c- e>Signature</c-><c- o>:</c-> <c- l>signature=:TUznBT2ikFq6VrtoZeC5znRtZugu1U8OHJWoBkOLDTJA2FglSR34QY9j+BwN79PT4H0p8aIosnv4rXSKfIZVDA==:</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
+<pre class="highlight line-numbered"><span class="line-no"></span><span class="line"><c- kr>HTTP</c-><c- o>/</c-><c- m>1.1</c-> <c- m>200</c-> <c- ne>OK</c-></span><span class="line-no"></span><span class="line"><c- e>Date</c-><c- o>:</c-> <c- l>Tue, 20 Apr 2021 02:07:56 GMT</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Type</c-><c- o>:</c-> <c- l>application/json</c-></span><span class="line-no"></span><span class="line"><c- e>Identity-Digest</c-><c- o>:</c-> <c- l>sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:</c-></span><span class="line-no"></span><span class="line"><c- e>Content-Length</c-><c- o>:</c-> <c- l>18</c-></span><span class="line-no"></span><span class="line"><c- e>Signature-Input</c-><c- o>:</c-> <c- l>signature=("identity-digest";sf);keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"</c-></span><span class="line-no highlight-line" data-line="7"></span><span class="line highlight-line"><c- e>Signature</c-><c- o>:</c-> <c- l>signature=:eTKYITprfJYJmsOZlRTmu0szHbt0yLxHYBU0oXDdkx8najLl59IPO0zUofe5T23RGuquHLdZx177tBX45CUcAg==:</c-></span><span class="line-no"></span><span class="line"></span><span class="line-no"></span><span class="line"><c- p>{</c-><c- f>"hello"</c-><c- p>:</c-> <c- u>"world"</c-><c- p>}</c-></span></pre>
    <p>Done!</p>
   </main>
   <div data-fill-with="conformance">
@@ -1866,6 +1864,11 @@ Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Mes
   </ul>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
+   <li>
+    <a data-link-type="biblio">[DOM]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="2aedacbb">type</span>
+    </ul>
    <li>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
@@ -2022,6 +2025,8 @@ Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Mes
   </dl>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
+   <dt id="biblio-dom">[DOM]
+   <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-pciv4-sri-gaps">[PCIv4-SRI-Gaps]
    <dd>Yoav Weiss; Ilya Grigorik. <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing"><cite>PCIv4: SRI gaps and opportunities</cite></a>. URL: <a href="https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing">https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing</a>
    <dt id="biblio-securing-web">[SECURING-WEB]
@@ -2031,9 +2036,6 @@ Section 2.3 of <a data-link-type="biblio" href="#biblio-rfc9421" title="HTTP Mes
   <div style="counter-reset:issue">
    <div class="issue"> TODO(mkwst): Write up this integration, which requires at least
 a grammar update in CSP. <a href="https://github.com/wicg/signature-based-sri/issues/36">[Issue #36]</a> <a class="issue-return" href="#issue-76053066" title="Jump to section">↵</a></div>
-   <div class="issue"> <a href="https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6">Section 7.3.6 of RFC9421</a> suggests dropping the <a data-link-type="dfn" href="https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"><code>alg</code></a> parameter when the algorithm can
-be determined unambigiously. Perhaps we should do that there rather
-than requiring its explicit presence. <a href="https://github.com/wicg/signature-based-sri/issues/33">[Issue #33]</a> <a class="issue-return" href="#issue-42a91512" title="Jump to section">↵</a></div>
    <div class="issue"> Perhaps something more specific to make room for
 variants in the future that have different constraints? <code>enforce-ed25519-provenance</code>? <code>ed25519-integrity</code>? Etc? <a href="https://github.com/wicg/signature-based-sri/issues/34">[Issue #34]</a> <a class="issue-return" href="#issue-d790eab8" title="Jump to section">↵</a></div>
    <div class="issue"> To support this change, we also need to clean up the processing in <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#cors-safelisted-request-header">CORS-safelisted request-header</a> to support this header, as discussed in <a href="https://github.com/wicg/signature-based-sri/issues/21">[Issue #21]</a> <a class="issue-return" href="#issue-297cef4f" title="Jump to section">↵</a></div>
@@ -2254,6 +2256,7 @@ let dfnPanelData = {
 "1f1e47cf": {"dfnID":"1f1e47cf","dfnText":"dictionary","external":true,"refSections":[{"refs":[{"id":"ref-for-name-dictionary"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-dictionary\u2460"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-name-dictionary\u2461"}],"title":"2.3.1. Identity-Digest Validation"},{"refs":[{"id":"ref-for-name-dictionary\u2462"},{"id":"ref-for-name-dictionary\u2463"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-dictionary"},
 "22053b65": {"dfnID":"22053b65","dfnText":"request (for fetch record)","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-fetch-record-request"},{"id":"ref-for-concept-fetch-record-request\u2460"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"https://fetch.spec.whatwg.org/#concept-fetch-record-request"},
 "2531df1b": {"dfnID":"2531df1b","dfnText":"req","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.4-2.2.1"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.4-2.2.1"},
+"2aedacbb": {"dfnID":"2aedacbb","dfnText":"type","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-document-type"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://dom.spec.whatwg.org/#concept-document-type"},
 "35b98f13": {"dfnID":"35b98f13","dfnText":"set a structured field value","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-list-set-structured-header"}],"title":"2.2.2. HTTP-network-or-cache Fetch"}],"url":"https://fetch.spec.whatwg.org/#concept-header-list-set-structured-header"},
 "36333997": {"dfnID":"36333997","dfnText":"length","external":true,"refSections":[{"refs":[{"id":"ref-for-byte-sequence-length"},{"id":"ref-for-byte-sequence-length\u2460"},{"id":"ref-for-byte-sequence-length\u2461"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-byte-sequence-length\u2462"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#byte-sequence-length"},
 "3dc5399b": {"dfnID":"3dc5399b","dfnText":"integrity","external":true,"refSections":[{"refs":[{"id":"ref-for-attr-script-integrity"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-attr-script-integrity\u2460"}],"title":"4.3. Key Discovery"}],"url":"https://html.spec.whatwg.org/multipage/scripting.html#attr-script-integrity"},
@@ -2268,7 +2271,7 @@ let dfnPanelData = {
 "5c66de35": {"dfnID":"5c66de35","dfnText":"get a structured field value","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-list-get-structured-header"}],"title":"2.3.1. Identity-Digest Validation"},{"refs":[{"id":"ref-for-concept-header-list-get-structured-header\u2460"},{"id":"ref-for-concept-header-list-get-structured-header\u2461"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://fetch.spec.whatwg.org/#concept-header-list-get-structured-header"},
 "622b92f5": {"dfnID":"622b92f5","dfnText":"signature base","external":true,"refSections":[{"refs":[{"id":"ref-for-name-creating-the-signature-base"},{"id":"ref-for-name-creating-the-signature-base\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-creating-the-signature-base\u2461"}],"title":"7. An End-to-End Example"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-creating-the-signature-base"},
 "649608b9": {"dfnID":"649608b9","dfnText":"list","external":true,"refSections":[{"refs":[{"id":"ref-for-list"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"}],"url":"https://infra.spec.whatwg.org/#list"},
-"6507a74c": {"dfnID":"6507a74c","dfnText":"signature parameters","external":true,"refSections":[{"refs":[{"id":"ref-for-signature-params"},{"id":"ref-for-signature-params\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"42b8a7590"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#signature-params"},
+"6507a74c": {"dfnID":"6507a74c","dfnText":"signature parameters","external":true,"refSections":[{"refs":[{"id":"ref-for-signature-params"},{"id":"ref-for-signature-params\u2460"},{"id":"ref-for-signature-params\u2461"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"42b8a7590"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#signature-params"},
 "65181da8": {"dfnID":"65181da8","dfnText":"secure context","external":true,"refSections":[{"refs":[{"id":"ref-for-secure-context"}],"title":"5.1. Secure Contexts"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"},
 "692595fe": {"dfnID":"692595fe","dfnText":"ordered set","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-set"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ordered-set"},
 "6cfa013d": {"dfnID":"6cfa013d","dfnText":"link","external":true,"refSections":[{"refs":[{"id":"ref-for-the-link-element"}],"title":"1.2. High-Level Overview"}],"url":"https://html.spec.whatwg.org/multipage/semantics.html#the-link-element"},
@@ -2279,7 +2282,7 @@ let dfnPanelData = {
 "7660bec4": {"dfnID":"7660bec4","dfnText":"parameters","external":true,"refSections":[{"refs":[{"id":"ref-for-name-parameters"},{"id":"ref-for-name-parameters\u2460"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-parameters"},
 "78d98836": {"dfnID":"78d98836","dfnText":"@request-target","external":true,"refSections":[{"refs":[{"id":"ref-for-name-request-target"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-request-target"},
 "7a3110fb": {"dfnID":"7a3110fb","dfnText":"valid SRI hash algorithm token","external":true,"refSections":[{"refs":[{"id":"ref-for-valid-sri-hash-algorithm-token"},{"id":"ref-for-valid-sri-hash-algorithm-token\u2460"}],"title":"2.1.2. Parse metadata."}],"url":"https://w3c.github.io/webappsec-subresource-integrity/#valid-sri-hash-algorithm-token"},
-"7a87d819": {"dfnID":"7a87d819","dfnText":"is","external":true,"refSections":[{"refs":[{"id":"ref-for-string-is"},{"id":"ref-for-string-is\u2460"}],"title":"2.1.4. Validate a signature over response using algorithm and public key"},{"refs":[{"id":"ref-for-string-is\u2461"},{"id":"ref-for-string-is\u2462"},{"id":"ref-for-string-is\u2463"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#string-is"},
+"7a87d819": {"dfnID":"7a87d819","dfnText":"is","external":true,"refSections":[{"refs":[{"id":"ref-for-string-is"},{"id":"ref-for-string-is\u2460"}],"title":"2.1.4. Validate a signature over response using algorithm and public key"},{"refs":[{"id":"ref-for-string-is\u2461"},{"id":"ref-for-string-is\u2462"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#string-is"},
 "7b0d918d": {"dfnID":"7b0d918d","dfnText":"break","external":true,"refSections":[{"refs":[{"id":"ref-for-iteration-break"},{"id":"ref-for-iteration-break\u2460"}],"title":"2.1.3. Do bytes and response match metadataList?"}],"url":"https://infra.spec.whatwg.org/#iteration-break"},
 "81a76425": {"dfnID":"81a76425","dfnText":"body","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-response-body"},{"id":"ref-for-concept-response-body\u2460"}],"title":"2.2.1. Main Fetch"}],"url":"https://fetch.spec.whatwg.org/#concept-response-body"},
 "84b454ff": {"dfnID":"84b454ff","dfnText":"ordered map","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-map"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#ordered-map"},
@@ -2288,8 +2291,8 @@ let dfnPanelData = {
 "91d655c0": {"dfnID":"91d655c0","dfnText":"@path","external":true,"refSections":[{"refs":[{"id":"ref-for-name-path"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-path"},
 "94992e7d": {"dfnID":"94992e7d","dfnText":"Identity-Digest","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-identity-digest-field"},{"id":"ref-for-name-the-identity-digest-field\u2460"},{"id":"ref-for-name-the-identity-digest-field\u2461"}],"title":"1.2. High-Level Overview"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2462"},{"id":"ref-for-name-the-identity-digest-field\u2463"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2464"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2465"}],"title":"2.2. Patches to Fetch"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2466"}],"title":"2.2.1. Main Fetch"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2467"},{"id":"ref-for-name-the-identity-digest-field\u2468"}],"title":"2.3.1. Identity-Digest Validation"},{"refs":[{"id":"ref-for-name-the-identity-digest-field\u2460\u24ea"},{"id":"ref-for-name-the-identity-digest-field\u2460\u2460"}],"title":"7. An End-to-End Example"}],"url":"https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html#name-the-identity-digest-field"},
 "99f492fd": {"dfnID":"99f492fd","dfnText":"CORS-safelisted request-header","external":true,"refSections":[{"refs":[{"id":"ref-for-cors-safelisted-request-header"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"https://fetch.spec.whatwg.org/#cors-safelisted-request-header"},
-"9c57c2af": {"dfnID":"9c57c2af","dfnText":"alg","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.8"},{"id":"ref-for-section-2.3-4.8\u2460"},{"id":"ref-for-section-2.3-4.8\u2461"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-section-2.3-4.8\u2462"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"},
-"a326add7": {"dfnID":"a326add7","dfnText":"contain (for map)","external":true,"refSections":[{"refs":[{"id":"ref-for-map-exists"},{"id":"ref-for-map-exists\u2460"},{"id":"ref-for-map-exists\u2461"},{"id":"ref-for-map-exists\u2462"},{"id":"ref-for-map-exists\u2463"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#map-exists"},
+"9c57c2af": {"dfnID":"9c57c2af","dfnText":"alg","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.8"},{"id":"ref-for-section-2.3-4.8\u2460"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"},{"refs":[{"id":"ref-for-section-2.3-4.8\u2461"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.8"},
+"a326add7": {"dfnID":"a326add7","dfnText":"contain (for map)","external":true,"refSections":[{"refs":[{"id":"ref-for-map-exists"},{"id":"ref-for-map-exists\u2460"},{"id":"ref-for-map-exists\u2461"},{"id":"ref-for-map-exists\u2462"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://infra.spec.whatwg.org/#map-exists"},
 "a3b18719": {"dfnID":"a3b18719","dfnText":"append (for set)","external":true,"refSections":[{"refs":[{"id":"ref-for-set-append"},{"id":"ref-for-set-append\u2460"}],"title":"2.1.2. Parse metadata."}],"url":"https://infra.spec.whatwg.org/#set-append"},
 "a5ce345d": {"dfnID":"a5ce345d","dfnText":"Accept-Signature","external":true,"refSections":[{"refs":[{"id":"ref-for-name-the-accept-signature-field"}],"title":"2.2. Patches to Fetch"},{"refs":[{"id":"ref-for-name-the-accept-signature-field\u2460"},{"id":"ref-for-name-the-accept-signature-field\u2461"},{"id":"ref-for-name-the-accept-signature-field\u2462"},{"id":"ref-for-name-the-accept-signature-field\u2463"},{"id":"ref-for-name-the-accept-signature-field\u2464"}],"title":"2.2.2.1. Append Accept-Signature"},{"refs":[{"id":"ref-for-name-the-accept-signature-field\u2465"}],"title":"5.3. Rollback Attacks"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-the-accept-signature-field"},
 "a6a8ec88": {"dfnID":"a6a8ec88","dfnText":"append","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header-list-append"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"https://fetch.spec.whatwg.org/#concept-header-list-append"},
@@ -2307,7 +2310,7 @@ let dfnPanelData = {
 "be5dbc8c": {"dfnID":"be5dbc8c","dfnText":"unix epoch","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-unix-epoch"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://w3c.github.io/hr-time/#dfn-unix-epoch"},
 "c32e03e5": {"dfnID":"c32e03e5","dfnText":"@query","external":true,"refSections":[{"refs":[{"id":"ref-for-name-query"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#name-query"},
 "c503ee23": {"dfnID":"c503ee23","dfnText":"append the Fetch metadata headers for a request","external":true,"refSections":[{"refs":[{"id":"ref-for-abstract-opdef-append-the-fetch-metadata-headers-for-a-request"}],"title":"2.2.2. HTTP-network-or-cache Fetch"}],"url":"https://w3c.github.io/webappsec-fetch-metadata/#abstract-opdef-append-the-fetch-metadata-headers-for-a-request"},
-"c9aec5e7": {"dfnID":"c9aec5e7","dfnText":"string","external":true,"refSections":[{"refs":[{"id":"ref-for-name-string"},{"id":"ref-for-name-string\u2460"},{"id":"ref-for-name-string\u2461"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-string"},
+"c9aec5e7": {"dfnID":"c9aec5e7","dfnText":"string","external":true,"refSections":[{"refs":[{"id":"ref-for-name-string"},{"id":"ref-for-name-string\u2460"}],"title":"2.3.2. Signature and Signature-Input Enforcement"}],"url":"https://www.rfc-editor.org/rfc/rfc9651#name-string"},
 "c9e7c11a": {"dfnID":"c9e7c11a","dfnText":"header","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-header"}],"title":"2.1.1.1. Identity-Digest Validation for SRI"}],"url":"https://fetch.spec.whatwg.org/#concept-header"},
 "d453bbbc": {"dfnID":"d453bbbc","dfnText":"created","external":true,"refSections":[{"refs":[{"id":"ref-for-section-2.3-4.2"}],"title":"2.1.1. The SRI HTTP Message Signature Profile"}],"url":"https://www.rfc-editor.org/rfc/rfc9421.html#section-2.3-4.2"},
 "d5434eef": {"dfnID":"d5434eef","dfnText":"contains","external":true,"refSections":[{"refs":[{"id":"ref-for-header-list-contains"}],"title":"2.2.2.1. Append Accept-Signature"}],"url":"https://fetch.spec.whatwg.org/#header-list-contains"},
@@ -2728,6 +2731,7 @@ let refsData = {
 "#valid-sri-signature-algorithm-token": {"displayText":"valid sri signature algorithm token","export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"valid sri signature algorithm token","type":"dfn","url":"#valid-sri-signature-algorithm-token"},
 "#valid-sri-signature-algorithm-token-set": {"displayText":"valid sri signature algorithm token set","export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"valid sri signature algorithm token set","type":"dfn","url":"#valid-sri-signature-algorithm-token-set"},
 "#verification-requirements-for-sri": {"displayText":"verification requirements for sri","export":true,"for_":[],"level":"","normative":true,"shortname":"signature-based-sri","spec":"signature-based-sri","status":"local","text":"verification requirements for sri","type":"dfn","url":"#verification-requirements-for-sri"},
+"https://dom.spec.whatwg.org/#concept-document-type": {"displayText":"type","export":true,"for_":["Document"],"level":"1","normative":true,"shortname":"dom","spec":"dom","status":"current","text":"type","type":"dfn","url":"https://dom.spec.whatwg.org/#concept-document-type"},
 "https://fetch.spec.whatwg.org/#byte-sequence-as-a-body": {"displayText":"as a body","export":true,"for_":["byte sequence"],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"as a body","type":"dfn","url":"https://fetch.spec.whatwg.org/#byte-sequence-as-a-body"},
 "https://fetch.spec.whatwg.org/#concept-fetch-record-request": {"displayText":"request","export":true,"for_":["fetch record"],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"request","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-fetch-record-request"},
 "https://fetch.spec.whatwg.org/#concept-header": {"displayText":"header","export":true,"for_":[],"level":"1","normative":true,"shortname":"fetch","spec":"fetch","status":"current","text":"header","type":"dfn","url":"https://fetch.spec.whatwg.org/#concept-header"},
