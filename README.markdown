@@ -73,7 +73,7 @@ Content-Type: text/javascript; charset=UTF-8
 Access-Control-Allow-Origin: *
 Identity-Digest: sha-512=:[base64-encoded digest of `console.log("Hello, world!");`]:
 Signature-Input: sig1=("identity-digest";sf); alg="Ed25519"; keyid="[base64-encoded public key]"; tag="sri"
-Signature: sig1=:[base64-encoded result of Ed25519(`console.log("Hello, world!");`, [private key])]:
+Signature: sig1=:[base64-encoded result of Ed25519([response metadata], [private key])]:
 
 console.log("Hello, world!");
 ```
