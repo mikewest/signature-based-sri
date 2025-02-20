@@ -8,10 +8,10 @@ Repository: wicg/signature-based-sri
 URL: https://wicg.github.io/signature-based-sri/
 Editor: Mike West, Google LLC., mkwst@google.com
 Abstract: 
-    A monkey-patch spec that enhances SRI with signature-based
-    integrity checks. These are conceptually similar to the
-    content-based checks currently defined, but have different
-    properties that seem interesting to explore.
+  A monkey-patch spec that enhances SRI with signature-based
+  integrity checks. These are conceptually similar to the
+  content-based checks currently defined, but have different
+  properties that seem interesting to explore.
 Complain About: accidental-2119 yes, missing-example-ids yes
 Markup Shorthands: markdown yes, css no
 Toggle Diffs: true
@@ -73,28 +73,28 @@ spec:html; type:element; text:link
 </pre>
 <pre class="biblio">
 {
-  "PCIv4-SRI-Gaps": {
-    "authors": [ "Yoav Weiss", "Ilya Grigorik" ],
-    "href": "https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing",
-    "title": "PCIv4: SRI gaps and opportunities"
-  },
-  "ID.pardue-httpbis-identity-digest": {
-    "authors": [ "Lucas Pardue", "Mike West" ],
-    "href": "https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html",
-    "title": "HTTP Unencoded Digest"
-  }
+"PCIv4-SRI-Gaps": {
+  "authors": [ "Yoav Weiss", "Ilya Grigorik" ],
+  "href": "https://docs.google.com/document/d/1RcUpbpWPxXTyW0Qwczs9GCTLPD3-LcbbhL4ooBUevTM/edit?usp=sharing",
+  "title": "PCIv4: SRI gaps and opportunities"
+},
+"ID.pardue-httpbis-identity-digest": {
+  "authors": [ "Lucas Pardue", "Mike West" ],
+  "href": "https://lpardue.github.io/draft-pardue-http-identity-digest/draft-pardue-httpbis-identity-digest.html",
+  "title": "HTTP Unencoded Digest"
+}
 }
 </pre>
 <style>
-  .line-no {
-    display: none;
-  }
-  .line {
-    min-height: 1.5em;
-  }
-  .highlight-line {
-    font-weight: bold;
-  }
+.line-no {
+  display: none;
+}
+.line {
+  min-height: 1.5em;
+}
+.highlight-line {
+  font-weight: bold;
+}
 </style>
 
 Introduction {#intro}
@@ -122,37 +122,37 @@ This document outlines the changes that would be necessary to [[Fetch]], and
 [[SRI]] in order to support the simplest version of a signature-based check:
 
 <div class="example" id="basic-example">
-    Pages will embed an Ed25519 public key assertion into `integrity`
-    attributes:
+  Pages will embed an Ed25519 public key assertion into `integrity`
+  attributes:
 
-    <xmp highlight="html">
-      <script src="https://my.cdn/script.js"
-              crossorigin="anonymous"
-              integrity="ed25519-[base64-encoded-public-key]"
-              ...></script>
-    </xmp>
+  <xmp highlight="html">
+    <script src="https://my.cdn/script.js"
+            crossorigin="anonymous"
+            integrity="ed25519-[base64-encoded-public-key]"
+            ...></script>
+  </xmp>
 
-    Servers will deliver a signature over the resource content using the
-    corresponding private key along with the resource as an HTTP message
-    signature [[RFC9421]]:
+  Servers will deliver a signature over the resource content using the
+  corresponding private key along with the resource as an HTTP message
+  signature [[RFC9421]]:
 
-    <xmp highlight="http">
-        HTTP/1.1 200 OK
-        Accept-Ranges: none
-        Vary: Accept-Encoding
-        Content-Type: text/javascript; charset=UTF-8
-        Access-Control-Allow-Origin: *
-        Unencoded-Digest: sha-512=:[base64-encoded digest of `console.log("Hello, world!");`]:
-        Signature-Input: sig1=("unencoded-digest";sf); keyid="[base64-encoded public key]"; tag="sri"
-        Signature: sig1=:[base64-encoded result of Ed25519(signature base)]:
+  <xmp highlight="http">
+      HTTP/1.1 200 OK
+      Accept-Ranges: none
+      Vary: Accept-Encoding
+      Content-Type: text/javascript; charset=UTF-8
+      Access-Control-Allow-Origin: *
+      Unencoded-Digest: sha-512=:[base64-encoded digest of `console.log("Hello, world!");`]:
+      Signature-Input: sig1=("unencoded-digest";sf); keyid="[base64-encoded public key]"; tag="sri"
+      Signature: sig1=:[base64-encoded result of Ed25519(signature base)]:
 
-        console.log("Hello, world!");
-    </xmp>
+      console.log("Hello, world!");
+  </xmp>
 
-    The user agent will validate the signature using the expected public key
-    before executing the response.
+  The user agent will validate the signature using the expected public key
+  before executing the response.
 
-    That's it!
+  That's it!
 </div>
 
 The goal here is to flesh out the proposal for discussion, recognizing that it
@@ -287,7 +287,7 @@ At a high level, we'll make the following changes to SRI:
     in a given element. This would enable developers to specify both a hash and
     signature expectation for a resource, ensuring both that known resources
     load, and that they're accepted by a trusted party.
-    
+  
 4.  Finally, we'll adjust the matching algorithm to correctly handle signatures
     by passing the public key in to the comparison operation.
 
@@ -314,60 +314,60 @@ guidelines from Section 1.4 of [[RFC9421]]:
 :   **Components and Parameters**:
 ::  The signature's input MUST:
 
-    1.  Include the following [=component identifiers=] with their associated
-        constraints:
+  1.  Include the following [=component identifiers=] with their associated
+      constraints:
 
-        *   `unencoded-digest`, which MUST include the <a>`sf`</a> parameter and
-            no other parameters.
-        
-        Note: We'll extend the set of allowed headers over time. The limitation
-        to `unencoded-digest` is artificial, and aimed towards making a prototype
-        of this approach as simple as possible to implement and evaluate as we
-        decide what makes sense to ship at scale.
+      *   `unencoded-digest`, which MUST include the <a>`sf`</a> parameter and
+          no other parameters.
+      
+      Note: We'll extend the set of allowed headers over time. The limitation
+      to `unencoded-digest` is artificial, and aimed towards making a prototype
+      of this approach as simple as possible to implement and evaluate as we
+      decide what makes sense to ship at scale.
 
-    2.  Include the following [=signature parameters=] with their associated
-        constraints:
+  2.  Include the following [=signature parameters=] with their associated
+      constraints:
 
-        *   <a>`keyid`</a>, whose value MUST be a string containing a
-            [=forgiving-base64 encode|base64 encoding=] of the public key
-            portion of the signature's verification key material.
-        *   <a>`tag`</a>, whose value MUST be the string `sri`
-            
-            ISSUE(34): Perhaps something more specific to make room for
-            variants in the future that have different constraints?
-            `enforce-ed25519-provenance`? `ed25519-integrity`? Etc?
+      *   <a>`keyid`</a>, whose value MUST be a string containing a
+          [=forgiving-base64 encode|base64 encoding=] of the public key
+          portion of the signature's verification key material.
+      *   <a>`tag`</a>, whose value MUST be the string `sri`
+          
+          ISSUE(34): Perhaps something more specific to make room for
+          variants in the future that have different constraints?
+          `enforce-ed25519-provenance`? `ed25519-integrity`? Etc?
 
-    3.  **Not** include the <a>`alg`</a> [=signature parameter=].
+  3.  **Not** include the <a>`alg`</a> [=signature parameter=].
 
-        Note: The algorithm can be determined unambigiously from the
-        <a>`type`</a>, as this profile only supports Ed25519.
-        [Section 7.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6)
-        suggests dropping the <a>`alg`</a> parameter in these cases, which
-        is the recommendation we're following here.
+      Note: The algorithm can be determined unambigiously from the
+      <a>`type`</a>, as this profile only supports Ed25519.
+      [Section 7.3.6 of RFC9421](https://www.rfc-editor.org/rfc/rfc9421.html#section-7.3.6)
+      suggests dropping the <a>`alg`</a> parameter in these cases, which
+      is the recommendation we're following here.
 
 
-    The signature's input MAY include the following [=derived components=] as
-    part of the list of [=component identifiers=], each of which MUST include
-    the <a>`req`</a> parameter and no other paramters:
+  The signature's input MAY include the following [=derived components=] as
+  part of the list of [=component identifiers=], each of which MUST include
+  the <a>`req`</a> parameter and no other paramters:
 
-    *   <a dfn>`@authority`</a>
-    *   <a dfn>`@method`</a>
-    *   <a dfn>`@path`</a>
-    *   <a dfn>`@query-param`</a>
-    *   <a dfn>`@query`</a>
-    *   <a dfn>`@request-target`</a>
-    *   <a dfn>`@scheme`</a>
-    *   <a dfn>`@status`</a>
-    *   <a dfn>`@target-uri`</a>
+  *   <a dfn>`@authority`</a>
+  *   <a dfn>`@method`</a>
+  *   <a dfn>`@path`</a>
+  *   <a dfn>`@query-param`</a>
+  *   <a dfn>`@query`</a>
+  *   <a dfn>`@request-target`</a>
+  *   <a dfn>`@scheme`</a>
+  *   <a dfn>`@status`</a>
+  *   <a dfn>`@target-uri`</a>
 
-    The signature's input MAY include the following [=signature parameters=],
-    with their associated constraints:
+  The signature's input MAY include the following [=signature parameters=],
+  with their associated constraints:
 
-    *   <a>`created`</a>, an integer whose value MUST represent a time in the past.
-    *   <a>`expires`</a>, an integer whose value MUST represent a time in the future.
-    *   `nonce`, which is a string whose value SHOULD be generated in a fashion
-        which guarantees uniqueness.
-    
+  *   <a>`created`</a>, an integer whose value MUST represent a time in the past.
+  *   <a>`expires`</a>, an integer whose value MUST represent a time in the future.
+  *   `nonce`, which is a string whose value SHOULD be generated in a fashion
+      which guarantees uniqueness.
+  
 :   **Structured Field Types**:
 ::  *   The `unencoded-digest` component references the [:Unencoded-Digest:]
         header defined in [[ID.pardue-httpbis-identity-digest]]. It is a
@@ -411,9 +411,11 @@ guidelines from Section 1.4 of [[RFC9421]]:
 
 
 <div class="example" id="example-verification-requirements">
-    Valid [:Signature-Input:] header values would therefore include:
 
-    *   `("unencoded-digest";sf);keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"`
+  Valid [:Signature-Input:] header values would therefore include:
+
+  *   `("unencoded-digest";sf);keyid="MCowBQYDK2VwAyEAJrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"`
+
 </div>
 
 <div class="note">
@@ -480,19 +482,19 @@ An [:Unencoded-Digest:] [=header=] (|header|) is
 
 3.  [=map/iterate|For each=] |key| → |value| of |parsed|:
 
-    1.  If |value| is not a [=byte sequence=], return "`invalid`".
+  1.  If |value| is not a [=byte sequence=], return "`invalid`".
 
-    2.  If |key| is not [=list/contain|contained within=] the [=/list=]
-        « "sha-256", "sha-384", "sha-512" », return "`invalid`".
+  2.  If |key| is not [=list/contain|contained within=] the [=/list=]
+      « "sha-256", "sha-384", "sha-512" », return "`invalid`".
 
-    3.  If |key| is "`sha-256`", and |value|'s [=byte sequence/length=] is
-        not 32, return "`invalid`".
+  3.  If |key| is "`sha-256`", and |value|'s [=byte sequence/length=] is
+      not 32, return "`invalid`".
 
-    4.  If |key| is "`sha-384`", and |value|'s [=byte sequence/length=] is
-        not 48, return "`invalid`".
+  4.  If |key| is "`sha-384`", and |value|'s [=byte sequence/length=] is
+      not 48, return "`invalid`".
 
-    5.  If |key| is "`sha-512`", and |value|'s [=byte sequence/length=] is
-        not 64, return "`invalid`".
+  5.  If |key| is "`sha-512`", and |value|'s [=byte sequence/length=] is
+      not 64, return "`invalid`".
 
 4.  Return "`valid`".
 
@@ -508,7 +510,7 @@ First, we'll define valid signature algorithms:
 
 *   <ins>A string is a <dfn>valid SRI signature algorithm token</dfn> if its
     [=ASCII lowercase=] is [=set/contained=] in the
-    [=valid SRI signature algorithm token set=].
+    [=valid SRI signature algorithm token set=].</ins>
 
 Then, we'll adjust SRI's <dfn abstract-op>Parse |metadata|</dfn>. algorithm as
 follows:
@@ -518,7 +520,7 @@ expressions whose hash functions are understood by the user agent, and one set
 of signature expressions which are likewise understood:
 
 1.  Let |result| be <del>the empty set</del><ins>the [=ordered map=]
-      «[ "hashes" → « », "signatures" → « » ]».</ins>
+    «[ "hashes" → « », "signatures" → « » ]».</ins>
 2.  For each |item| returned by <a lt="strictly split">splitting</a>
     |metadata| on spaces:
     1.  Let |expression-and-options| be the result of
@@ -531,7 +533,7 @@ of signature expressions which are likewise understood:
     6.  If |algorithm-and-value|[1] <a for=list>exists</a>, set
         |base64-value| to |algorithm-and-value|[1].
     7.  <del>If |algorithm| is not a [=valid SRI hash algorithm token=], then [=iteration/continue=].</del>
-    8.  Let <del>|metadata|</del><ins>|data|</ins> be the ordered map  «["alg" → |algorithm|, "val" → |base64-value|]».</del>
+    8.  Let <del>|metadata|</del><ins>|data|</ins> be the ordered map  «["alg" → |algorithm|, "val" → |base64-value|]».
     9.  <del><a for=list>Append</a> |metadata| to |result|.</del>
     11. <ins>If |algorithm| is a [=valid SRI hash algorithm token=], then [=set/append=] |data| to |result|["`hashes`"].</ins>
     12. <ins>Otherwise, if |algorithm| is a [=valid SRI signature algorithm token=], then [=set/append=] |data| to |result|["`signatures`"].</ins>
@@ -559,23 +561,23 @@ To <dfn abstract-op>perform client-initiated integrity checks</dfn> for a given
 
 1.  Let |parsedMetadata| be the result of executing [$Parse metadata$] on |request|'s [=request/integrity metadata=].
 2.  If both |parsedMetadata|["`hashes`"] and |parsedMetadata|["`signatures`"] are [=set/empty=] set, return "`passed`".
-3.  Let |hash-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`hashes`"].</a>.
-4.  Let |signature-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`signatures`"].</ins>
-5.  Let |hash-match| be `true` if |hash-metadata| is [=list/empty=], and `false` otherwise.</ins>
-6.  Let |signature-match| be `true` if |signature-metadata| is [=list/empty=], and `false` otherwise.</ins>
-7.  For each |item| in |hash-metadata|</ins>:
+3.  Let |hash-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`hashes`"].
+4.  Let |signature-metadata| be the result of executing [[SRI#get-the-strongest-metadata]] on |parsedMetadata|["`signatures`"].
+5.  Let |hash-match| be `true` if |hash-metadata| is [=list/empty=], and `false` otherwise.
+6.  Let |signature-match| be `true` if |signature-metadata| is [=list/empty=], and `false` otherwise.
+7.  For each |item| in |hash-metadata|:
     1.  Let |algorithm| be the |item|["`alg`"].
     2.  Let |expectedValue| be the |item|["`val`"].
     3.  Let |actualValue| be the result of [[SRI#apply-algorithm-to-response]] on |algorithm| and |bytes|.
     4.  If |actualValue| is a case-sensitive match for
-        |expectedValue|, set |hash-match| to `true` and [=iteration/break=].</ins>
-8.  For each |item| in |signature-metadata|:</ins>
-    1.  Let |algorithm| be the |item|["`alg`"].</ins>
-    2.  Let |public key| be the |item|["`val`"].</ins>
+        |expectedValue|, set |hash-match| to `true` and [=iteration/break=].
+8.  For each |item| in |signature-metadata|:
+    1.  Let |algorithm| be the |item|["`alg`"].
+    2.  Let |public key| be the |item|["`val`"].
     3.  Let |result| be the result of [$validating an integrity signature$]
-        over |request| and |response| using |algorithm| and |public key|.</ins>
-    4.  If |result| is "`valid`", set |signature-match| to `true` and [=iteration/break=].</ins>
-9.  Return "`passed`" if both |hash-match| and |signature-match| are `true`. Otherwise return "`failed`".</ins>
+        over |request| and |response| using |algorithm| and |public key|.
+    4.  If |result| is "`valid`", set |signature-match| to `true` and [=iteration/break=].
+9.  Return "`passed`" if both |hash-match| and |signature-match| are `true`. Otherwise return "`failed`".
 
 <h4 id="validation" algorithm>Validate a signature over |response| using |algorithm| and |public key|</h4>
 
@@ -719,7 +721,7 @@ user agents will attach [:Accept-Signature:] headers to the request to inform se
 about the client's expectations. The header's value will match the grammar defined in
 [[RFC9421]], and contain the expected public key(s) as <a>`keyid`</a> parameters.
 
-<div class="example">
+<div class="example" id="example-accept-signature">
 A request generated from the following HTML element:
 
 ```html
