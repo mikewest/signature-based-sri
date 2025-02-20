@@ -216,11 +216,7 @@ developers are aiming for.
     [=request/integrity metadata=] on a given element, matching that metadata
     against a page's active policies, and relying upon SRI to enforce the
     constraints the metadata declares. The same should be possible for
-    signatures (and should fall out of CSP's specification without much
-    additional work).
-    
-    ISSUE(36): TODO(mkwst): Write up this integration, which requires at least
-    a grammar update in CSP.
+    signatures. The work necessary is described in [[#monkey-patch-csp]] below.
 
 Implementing the mechanism in this document therefore requires:
 
@@ -262,7 +258,8 @@ Monkey Patches {#monkey-patches}
 ================================
 
 Extending SRI to support signatures will require changes to three
-specifications, along with some additional infrastructure.
+specifications ([[SRI]], [[Fetch]], and [[CSP]]), along with some additional
+infrastructure.
 
 Patches to SRI {#monkey-patch-sri}
 ----------------------------------
@@ -396,7 +393,7 @@ guidelines from Section 1.4 of [[RFC9421]]:
 ::  No error reporting is required.
     
     Clients MUST represent verification failures as [=network errors=],
-    consistent with [[FETCH]]'s handling of other server-specified constraints
+    consistent with [[Fetch]]'s handling of other server-specified constraints
     on the usage of response data.
 
 :   **Security Considerations**
@@ -779,7 +776,7 @@ To <dfn abstract-op>append the `Accept-Signature` header</dfn> for a [=request=]
 
 7.  For each |signature| in |parsed|["`signatures`"]:   
 
-    1.  Let |value| be the [=string/concatenation=] of « \`<code>sig</code>\`, counter, \`<code>=("unencoded-digest";sf);keyid="</code>\`, |signature|["`val`"], \`<code>";type="sri"</code>\` ».
+    1.  Let |value| be the [=string/concatenation=] of « \`<code>sig</code>\`, |counter|, \`<code>=("unencoded-digest";sf);keyid="</code>\`, |signature|["`val`"], \`<code>";type="sri"</code>\` ».
     2.  [=header list/Append=] (\`<code>Accept-Signature</code>\`, |value|) to |request|'s [=request/header list=].
 
 
@@ -788,6 +785,89 @@ To <dfn abstract-op>append the `Accept-Signature` header</dfn> for a [=request=]
 ISSUE(21): To support this change, we also need to clean up the processing in
 [=CORS-safelisted request-header=] to support this header, as discussed in 
 
+
+Patches to CSP {#monkey-patch-csp}
+--------------
+
+We'll adjust CSP to support matching signature-based assertions in
+[=integrity metadata=] alongside the existing support for hashes (as described
+in [[CSP#external-hash]]).
+
+### Grammar ### {#csp-grammar}
+
+We'll add the following ABNF rules [[RFC5234]] to support Ed25519 public keys,
+and add this new rule to the existing <a grammar>`source-expression`</a> rule:
+
+<pre dfn-type="grammar" link-type="grammar">
+  <a>source-expression</a>        = <a>scheme-source</a> / <a>host-source</a> / <a>keyword-source</a>
+                                    / <a>nonce-source</a> / <a>hash-source</a> <ins>/ <a>public-key-source</a></ins>
+
+
+  ; Public keys: 'ed25519-[digest goes here]'
+  <dfn>public-key-source</dfn>    = "'" <a>public-key-algorithm</a> "-" <a>base64-value</a> "'"
+  <dfn>public-key-algorithm</dfn> = "ed25519"
+</pre>
+
+
+### Matching Integrity Metadata ### {#csp-integrity-check}
+
+The [[CSP#match-integrity-metadata-to-source-list]] algorithm must be adjusted
+to match the new integrity metadata structure that [$Parse metadata$] now
+produces.
+
+<div algorithm="matching integrity metadata to CSP">
+
+  To <dfn>match integrity metadata to a source list</dfn> given
+  [=request/integrity metadata=] (|metadata|) and a [=source list=] (|list|),
+  execute the following steps, which return "`Matches`" if each relevant item
+  in the provided integrity metadata matches one or more source expressions in
+  the source list, and "`Does not match`" otherwise:
+
+  1.  Assert: |source list| is not null.
+
+  2.  Let |parsed| be the result of executing [$Parse metadata$] on |metadata|.
+
+  3.  Let |allowed hashes| be the set of [=source expressions=] in |source list|
+      that match the <a grammar>`hash-source`</a> grammar.
+
+  4.  Let |allowed public keys| be the set of [=source expressions=] in
+      |source list| that match the <a grammar>`public-key-source`</a> grammar.
+
+  5.  If |parsed|["hashes"] and |parsed|["signatures"] are both empty, return
+      "`Does not match`".
+
+  6.  For each |hash| in |parsed|["hashes"]:
+
+      1.  Let |expected source| be a [=source expression=] formed from the
+          [=concatenation=] of «|hash|["alg"], "`-`", |hash|["val"]».
+
+      2.  If |allowed hashes| does not [=set/contain=] |expected source|,
+          return "`Does not match`"
+
+      Note: All hashes in the request's [=request/integrity metadata=] must
+      be present in the [=source list=], as SRI will allow a resource to execute
+      if it matches any such hash. `<script integrity="sha256-[good digest goes here]
+      sha256-[bad digest goes here]">` would otherwise create an opportunity to
+      bypass the relevant policy.
+
+  6.  For each |public key| in |parsed|["signatures"]:
+
+      1.  Let |expected source| be a [=source expression=] formed from the
+          [=concatenation=] of «|public key|["alg"], "`-`",
+          |public key|["val"]».
+
+      2.  If |allowed public keys| does not [=set/contain=] |expected source|,
+          return "`Does not match`"
+
+      Note: As above, we require all relevant keys to be allowed by the
+      [=source list=].
+
+  7.  Return "`Matches`".
+
+  Note: Here, we verify only whether the |integrity metadata| is a non-empty
+  subset of the <a grammar>hash-source</a> sources in |source list|. We rely on
+  the browser's enforcement of Subresource Integrity [[!SRI]] to block
+  non-matching resources upon response.
 
 
 Server-Initiated Integrity Checks {#server-initiated}
