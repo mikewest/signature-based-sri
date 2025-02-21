@@ -179,10 +179,18 @@ With these properties in mind, signature-based integrity checks aim to protect
 against attackers who might be able to manipulate the content of resources that
 a site depends upon, but who cannot gain access to the signing key.
 
-High-Level Overview {#overview}
--------------------------------
+Overview and Threat Model {#threat-model}
+-------------------------
 
-The mechanism described in the remainder of this document can be broken down
+<span id="overview"><!-- This section was previously linkable as #overview. --></span>
+
+This proposal aims to defend against attackers who have the ability to deliver
+arbitrary responses to requests to a given server. For example, attackers may
+compromise a specific frontend server, CDN, or other third-party dependency
+(perhaps bypassing TLS entirely!), gaining control over the code a given origin
+delivers to clients.
+
+The defenses described in the remainder of this document can be broken down
 into a few independent parts, layered on top of one another to achieve the goals
 developers are aiming for.
 
@@ -253,6 +261,13 @@ we're only executing script correctly signed with a key we expect:
     refusing to execute any mismatched responses.
 
 5.  We're done, executing probably-safe JavaScript to our heart's content.
+
+All of the above rests on the critical assumption  that authors can generate,
+maintain, and use signing keys that attackers cannot obtain. This is not a small
+assumption (see [[#deployment-key-management]] and [[#deployment-key-rotation]]
+below), but it's one we make elsewhere in the platform, and seems like a
+reasonable bar to ask developers to strive towards.
+
 
 Monkey Patches {#monkey-patches}
 ================================
@@ -1121,36 +1136,92 @@ interesting resource. This, of course, creates more key-management problems,
 but it might be a reasonable tradeoff.
 
 
-Rollback Attacks {#security-rollback}
--------------------------------------
+Substitution Attacks {#security-substitution}
+--------------------
 
-The simple signature checks described in this document *only* provide proof of
-provenance, ensuring that a given resource was at one point signed by someone
-in posession of the relevant private key. It does not say anything about whether
-that entity intended to deliver a given resource to you *now*. In other words,
-these checks do not prevent rollback/downgrade attacks in which old, known-bad
-versions of a resource might be delivered, along with their known signatures.
+Signature checks described here can prevent attackers from delivering
+*arbitrary* content in response to requests, but they remain capable of using
+any code a developer has signed with a given key. Two categories of attack are
+worth considering in a bit more detail:
 
-This might not be a problem, depending on developers' use cases. If it becomes
-a problem, it seems possible to add mitigations in the future. These could take
-various forms. For example:
+### Content Replacement ### {#security-replacement}
 
-1.  We could allow developers to require an "`expires`" parameter in the
-    [:Signature-Input:] field, and adjust our [=verification requirements for SRI=]
-    to enforce against it. Similarly, we could enforce a maximum age based on
-    the inclusion of a "`created`" parameter.
+In the simplest case allowed, the signature delivered with a response covers
+only the [:Unencoded-Digest:] header, and therefore the response body. Integrity
+checks on the response only verify consistency between the headers and the body,
+which creates an opportunity for an attacker to replace both with some other
+piece of content an author has signed.
 
-2.  We could require additional components of the request to be included in the
-    signature ("`content-type`", "`@path;req`", "`@method;req`", etc) in order
-    to reduce the scope of potential resource substitution.
+Authors can defend themselves against this attack by ensuring that the signature
+covers additional metadata. In particular, including the <a>`@path`</a> derived
+component as part of the [:Signature-Input:] header will ensure that a response
+for `/foo.js` cannot be used in a response to `/bar.js`:
 
-3.  We could allow developers to send a challenge along with the request (as
+
+```http
+# This signature is valid only in response to a request for `/foo.js`:
+Signature-Input: sig=("unencoded-digest";sf "@path";req);expires=4102444800;keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+Signature: sig=:+ZKRNLfo/O18fxXir85++07TYvkgDFVm29Oz3OExGwWvxy86FOuy0HyQW9xeliv/I7Q8fckzU8Cvbp63kbHpAg==:
+```
+
+Other derived components can bind a response even more tightly to a request.
+<a>`@authority`</a>, <a>`@method`</a>, <a>`@query`</a>, <a>`@status`</a>, etc
+may all be useful depending on the scenario.
+
+Note: We do not require any of these derived components to be present in a
+signature today, as they seem somewhat likely to complicate deployments in
+common scenarios. As we gain implementation and deployment experience, we
+might learn that these complications are easier to overcome than expected,
+at which point revisiting the [=validation requirements for SRI=] might well
+be reasonable.
+
+### Rollback Attacks ### {#security-rollback}
+
+Even when signing additional metadata like <a>`@path`</a> to prevent
+{{#security-replacement}}, there's still room for attackers to deliver an older
+version of a given response (perhaps one containing a vulnerability that was
+later patched). These rollback or downgrade attacks remain possible as long as
+signatures cover only content and location.
+
+Developers can limit the efficacy of this kind of attack by specifying an
+<a>`expires`</a> parameter in the [:Signature-Input:] header when signing
+responses. This ensures that resources remain valid only for a finite period
+of time:
+
+```http
+# This resource's signature will fail validation after Jan 1st, 2100.
+# Take _that_, attackers!
+Signature-Input: sig=("unencoded-digest";sf);expires=4102444800;keyid="JrQLj5P/89iXES9+vFgrIy29clF9CC/oPPsw3c5D0bs=";tag="sri"
+Signature: sig=:2UoEGKEQnN9LULvI05/+kuPSEYsnr2oW7qCqhY1NLvqZXq5uWwpvm4xJNoxdLxVuI1/1bs0aRxnrkLeLI7+eCA==:
+```
+
+Expiration alone may be good enough. If we decide that additional protections would be
+worth building, two come to mind:
+
+1.  We could allow site authors to require an <a>`expires`</a> parameter in
+    responses' [:Signature-Input:] on a request-by-request basis, or adjust the
+    [=verification requirements for SRI=] to require the attribute on all signed
+    resources.
+
+2.  We could allow developers to send a challenge along with the request (as
     an [:Accept-Signature:] parameter), and require that it be incorporated into
     the [:Signature-Input:]'s "`nonce`" parameter.
 
-We'd want to evaluate the tradeoffs in these and other approaches (the last, for
-example, makes offline signing difficult), of course, but they seem quite plausibly
-valuable as future enhancements.
+    NOTE: This could take one of several forms, ranging from page-specified
+    metadata as an option on a page's asserted [=integrity metadata=] to a new
+    request header that delivered a nonce the browser generates. If we end up
+    wanting this functionality, there's a bit of discussion to be had about the
+    shape and spelling (see <WICG/signature-based-sri#41>).
+
+### Redirection ### {#security-redirection}
+
+When both {{#security-replacement}} and {{#security-rollback}} are handled
+reasonably by authors, attackers' capabilities are greatly dimished. They
+remain capable of pushing requests around via redirect responses, however, so
+long as they land on a response that's correctly signed.
+
+ISSUE: TODO. Write something about signing `location` and `@status` on the one
+hand, and whether to require signed redirect responses on the other.
 
 
 Privacy Considerations {#privacy}
