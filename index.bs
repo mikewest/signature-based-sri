@@ -326,7 +326,9 @@ guidelines from Section 1.4 of [[RFC9421]]:
 :   **Components and Parameters**:
 ::  The signature's input MUST:
 
-  1.  Include the following [=component identifiers=] with their associated
+  1.  Be included as part of an HTTP response.
+
+  2.  Include the following [=component identifiers=] with their associated
       constraints:
 
       *   `unencoded-digest`, which MUST include the <a>`sf`</a> parameter and
@@ -337,7 +339,7 @@ guidelines from Section 1.4 of [[RFC9421]]:
       of this approach as simple as possible to implement and evaluate as we
       decide what makes sense to ship at scale.
 
-  2.  Include the following [=signature parameters=] with their associated
+  3.  Include the following [=signature parameters=] with their associated
       constraints:
 
       *   <a>`keyid`</a>, whose value MUST be a string containing a
@@ -349,7 +351,7 @@ guidelines from Section 1.4 of [[RFC9421]]:
           variants in the future that have different constraints?
           `enforce-ed25519-provenance`? `ed25519-integrity`? Etc?
 
-  3.  **Not** include the <a>`alg`</a> [=signature parameter=].
+  4.  **Not** include the <a>`alg`</a> [=signature parameter=].
 
       Note: The algorithm can be determined unambigiously from the
       <a>`type`</a>, as this profile only supports Ed25519.
@@ -358,27 +360,36 @@ guidelines from Section 1.4 of [[RFC9421]]:
       is the recommendation we're following here.
 
 
-  The signature's input MAY include the following [=derived components=] as
-  part of the list of [=component identifiers=], each of which MUST include
-  the <a>`req`</a> parameter and no other paramters:
+  The signature's input MAY:
 
-  *   <a dfn>`@authority`</a>
-  *   <a dfn>`@method`</a>
-  *   <a dfn>`@path`</a>
-  *   <a dfn>`@query-param`</a>
-  *   <a dfn>`@query`</a>
-  *   <a dfn>`@request-target`</a>
-  *   <a dfn>`@scheme`</a>
-  *   <a dfn>`@status`</a>
-  *   <a dfn>`@target-uri`</a>
+  1.  Include the following [=derived components=] as part of the list of
+      [=component identifiers=], each of which MUST include the <a>`req`</a>
+      parameter and no other paramters (as they are pulled from the request,
+      not the response):
 
-  The signature's input MAY include the following [=signature parameters=],
-  with their associated constraints:
+      *   <a dfn>`@authority`</a>
+      *   <a dfn>`@method`</a>
+      *   <a dfn>`@path`</a>
+      *   <a dfn>`@query-param`</a>
+      *   <a dfn>`@query`</a>
+      *   <a dfn>`@request-target`</a>
+      *   <a dfn>`@scheme`</a>
+      *   <a dfn>`@target-uri`</a>
 
-  *   <a>`created`</a>, an integer whose value MUST represent a time in the past.
-  *   <a>`expires`</a>, an integer whose value MUST represent a time in the future.
-  *   `nonce`, which is a string whose value SHOULD be generated in a fashion
-      which guarantees uniqueness.
+  2.  Include the <a dfn>`@status`</a> [=derived component=] as part of the list
+      of [=component identifiers=], without any parameters (as it is pulled from
+      the response, not the request).
+
+  3.  Include the following [=signature parameters=], with their associated
+      constraints:
+
+      *   <a>`created`</a>, an integer whose value MUST represent a time in the
+          past, relative to the time at which the client verifies the response.
+      *   <a>`expires`</a>, an integer whose value MUST represent a time in the
+          future, relative to the time at which the client verifies the
+          response.
+      *   `nonce`, which is a string whose value SHOULD be generated in a
+          fashion which guarantees uniqueness.
   
 :   **Structured Field Types**:
 ::  *   The `unencoded-digest` component references the [:Unencoded-Digest:]
@@ -1178,7 +1189,7 @@ be reasonable.
 ### Rollback Attacks ### {#security-rollback}
 
 Even when signing additional metadata like <a>`@path`</a> to prevent
-{{#security-replacement}}, there's still room for attackers to deliver an older
+[[#security-replacement]], there's still room for attackers to deliver an older
 version of a given response (perhaps one containing a vulnerability that was
 later patched). These rollback or downgrade attacks remain possible as long as
 signatures cover only content and location.
@@ -1215,7 +1226,7 @@ worth building, two come to mind:
 
 ### Redirection ### {#security-redirection}
 
-When both {{#security-replacement}} and {{#security-rollback}} are handled
+When both [[#security-replacement]] and [[#security-rollback]] are handled
 reasonably by authors, attackers' capabilities are greatly dimished. They
 remain capable of pushing requests around via redirect responses, however, so
 long as they land on a response that's correctly signed.
