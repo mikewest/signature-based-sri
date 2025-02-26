@@ -56,7 +56,7 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9421.html; spec: RFC9421
         text: @query; url: name-query
         text: @query-param; url: name-query-parameters
         text: @status; url: name-status-code
-    type: http-header; 
+    type: http-header
         text: Accept-Signature; url: name-the-accept-signature-field
         text: Signature-Input; url: name-the-signature-input-field
         text: Signature; url: name-the-signature-field
@@ -66,6 +66,8 @@ urlPrefix: https://www.rfc-editor.org/rfc/rfc9651.html; spec: STRUCTURED-FIELDS
 urlPrefix: https://www.rfc-editor.org/rfc/rfc9110.html; spec: HTTP-SEMANTICS
     type: dfn
         text: content codings; url: name-content-codings
+    type: http-header
+        text: location; url: name-location
 </pre>
 <pre class="link-defaults">
 spec:html; type:element; text:script
@@ -1227,12 +1229,31 @@ worth building, two come to mind:
 ### Redirection ### {#security-redirection}
 
 When both [[#security-replacement]] and [[#security-rollback]] are handled
-reasonably by authors, attackers' capabilities are greatly dimished. They
-remain capable of pushing requests around via redirect responses, however, so
-long as they land on a response that's correctly signed.
+reasonably by authors, attackers' capabilities are limited. They will be unable
+to directly replace a response with malicious content, but would remain capable
+of pushing users to any other currently-signed resource through redirect
+responses. This could enable substitution of one script for another, putting a
+page into a vulnerable state in the worst case.
 
-ISSUE: TODO. Write something about signing `location` and `@status` on the one
-hand, and whether to require signed redirect responses on the other.
+We can deal with this problem in a few ways:
+
+1.  Developers can use distinct keys for distinct categories of resource. If
+    `good.js` is signed with key #1, and `bad.js` is signed with key #2, then
+    integrity checks will prevent attackers from redirecting requests from the
+    one to the other. This is effective, but relies on developers making good
+    decisions about which keys to use where, and is somewhat fiddley from a
+    deployment perspective. Still, it is quite effective.
+
+2.  We can incorporate redirect responses into the integrity checks, requiring
+    that the entire chain be signed with the expected key(s). Redirect responses
+    would be required to sign the <a>`@status`</a> derived component and the
+    [:Location:] header. This signature would be checked against the request's
+    [=integrity metadata=], and rejected with a network error if verification
+    fails.
+    
+    ISSUE(WICG/signature-based-sri#45): Adjust the profile accordingly (or
+    create a redirect-variant of the profile, which might be simpler), along
+    with the Fetch integration.
 
 
 Privacy Considerations {#privacy}
